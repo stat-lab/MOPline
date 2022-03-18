@@ -1,23 +1,22 @@
-# MOPline
-Detection and genotyping of structural variants
+# MOPline, structural variant detection and genotyping software
 ## Table of Contents
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Composition of Required Directories](#composition)
-- [Human and Non-human Data](#human)
-- [General Usage](general)
-	- [\[Step-0\] Run SV detection tools](#step-0)
-		- [Notes on SV calling and input bam](#note)
-	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step-1)
-	- [\[Step-2\] Add alignment statistics to SV sites](#step-2)
-	- [\[Step-3\] Merge vcf files from multiple samples \(joint-call\)](#step-3)
-	- [\[Step-4\] Genotype and SMC](#genotype)
-	- [\[Step-5\] Annotate](#annotate)
-	- [\[Step-6\] Filter](#filter)
+- [Human and Non-human Data](#hdata)
+- [General Usage](#gusage)
+	- [\[Step-0\] Run SV detection tools](#step0)
+		- [Notes on SV calling and input bam](#notes)
+	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
+	- [\[Step-2\] Add alignment statistics to SV sites](#step2)
+	- [\[Step-3\] Merge vcf files from multiple samples \(joint-call\)](#step3)
+	- [\[Step-4\] Genotype and SMC](#step4)
+	- [\[Step-5\] Annotate](#step5)
+	- [\[Step-6\] Filter](#step6)
 - [Quick Start with Sample Data](#quick)
-	- [A: Human SV datasets of 6 samples](#A)
-	- [B: Yeast WGS bam files of 10 samples](#B)
+	- [A: Human SV datasets of 6 samples](#hsample)
+	- [B: Yeast WGS bam files of 10 samples](#ysample)
 
 ## Introduction
 
@@ -50,17 +49,17 @@ DELLY, Lumpy, SoftSV are added to 6tools_1
 **Sample data**
 [Sample datasets](http://jenger.riken.jp/en) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
 
-## Composition of required directories (sample directory and tool directory)
+## <a name="composition"></a>Composition of required directories (sample directory and tool directory)
 
 MOPline assumes a directory structure of sample_directory/tool_directory under the working directory, where the sample directory has the sample name or sample ID, Under the sample directory, there are the tool directories with the names of algorithms, such as Manta and inGAP, which is case-sensitive. Under each sample directory, there are also should be bam and its index files. For convenience, when running against a sample (sample name: Sample123), the working directory should contain a Sample123 directory, under which the Sample123.bam and Sample123.bam.bai or their symbolic links should exists. When running with the 7tool preset, seven tool directories (CNVnator, GRIDSS, inGAP, Manta, MATCHCLIP, MELT, and Wham) must exist under the Sample123 directory. In the tool directories, the runs of the corresponding tools are performed.
 
-## Human and Non-human Data
+## <a name="hdata"></a>Human and Non-human Data
 
 By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) generated based on the human build 37 reference (GRCh37 or GRCh37d5). When using the data based on the human build 38 reference, run several MOPline scripts using the option ‘-build 38’. For non-human species, run several MOPline scripts using the option ‘-nh 1’ and, in some cases, also using other options specifying some reference-specific annotation files for gap, repeat, and gene regions.
 
-## General Usage
+## <a name="gusage"></a>General Usage
 
-### [Step-0] Run SV detection tools
+### <a name="step0"></a>[Step-0] Run SV detection tools
 
 The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline- compatible vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
 
@@ -82,7 +81,7 @@ In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl scri
 
 For convenience, we have provided scripts to run the selected algorithms in the ‘run_SVcallers’ folder. A run the script with the ‘-h’ option informs us the required arguments and options. We also provide a script for sequential execution of multiple algorithms for a single sample (run_single.pl) and batch scripts for multiple samples using Slurm and LSF job managers (run_batch_slurm.pl, run_batch_LSF.pl). To run these three scripts, specify a configure file that describes the parameters for each algorithm, using a template configure file (config.txt) (an example config file is also provided in the sample data [Sample_data_output/yeast_run]). A tool directory with the name of the algorithm specified in the configure file is automatically created in the sample directories under the working directory, and the algorithm is executed under the tool directory.
 
-### Notes on SV calling and input bam
+### <a name="notes"></a>Notes on SV calling and input bam
 
 **[inGAP-sv]**  inGAP requires sam files and reference fasta files split by chromosome as input files. inGAP is highly sensitive to PCR-duplicates in input sam files. When a sam file containing 10% PCR-duplicates is used, inGAP often generates more than twice as many calls compared with sam without PCR-duplicates.
 **[GRIDSS]**  In GRIDSS, accidental errors can occur, primarily due to the java heap memory size allocations. To solve this problem, it is often set the java maximum heap size (export JAVA_TOOL_OPTIONS="-XX:+UseSerialGC -Xmx15g -Xms15g") and the GRIDSS options, ‘15g’ for both, --jvmheap and --otherjvmheap. It is advisable to link the reference fasta and bwa files in the GRIDGSS working directory. GRIDSS is very sensitive to reads with low-quality terminal regions, so it is recommended to trim off low-quality regions of reads before alignment if may fractions of reads contain low-quality regions.
@@ -103,7 +102,7 @@ samtools sort -@ 4 <out.fm.bam> -o [out.sr.bam]
 ```
 samtools sort -@ 4 <out.fm.bam> | samtools markdup -ur - [out.rm.sr.bam]
 ```
-### [Step-1] Select overlap calls (high-confidence calls) from SV call sets
+### <a name="step1"></a>[Step-1] Select overlap calls (high-confidence calls) from SV call sets
 
 Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
 ```
@@ -122,7 +121,7 @@ make_merge_SV_vcf_script.pl -t <algorithm list, comma-separated> -tc <tool-confi
 (use -h for detailed explanation)
 If the -tc option is not specified in the above command, the tool configuration file (Data/SVtool_pairs_config.txt) is automatically selected. This file specifies the favorable pairs of tools and minimum RSSs of overlap call selection for each of 14 algorithms we have chosen. If additional algorithms are used, the SVtool_pairs_config.txt file can be modified to specify the preferred pairs minimum RSSs for each newly added algorithm for each SV type and size range.
 
-### [Step-2] Add alignment statistics to SV sites
+### <a name="step2"></a>[Step-2] Add alignment statistics to SV sites
 
 In this step, alignment statistics such as DPR, SR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample, recording the read depth and the number of soft-clipped ends for each 50-bp window.
 
@@ -155,7 +154,7 @@ The above command updates a ${sample_name}.Merge.ALL.vcf file in the vcf_directo
 
 For batch jobs, we provide a add_GT_DPR_vcf_single.pl script to submit a single vcf file job using a job manager such as Slurm and LSF.
 
-### [Step-3] Merge vcf files from multiple samples (joint-call)
+### <a name="step3"></a>[Step-3] Merge vcf files from multiple samples (joint-call)
 
 Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 ```
@@ -171,7 +170,7 @@ It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in $
 
 The above command outputs ${out_prefix}.vcf under ${out_dir} directory.
 
-### [Step-4] Genotype and SMC
+### <a name="step4"></a>[Step-4] Genotype and SMC
 
 In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/ simpleRepeat.txt.gz, Data/ genomicSuperDups.txt.gz) and are automatically selected. The command using the genotype_SV_SMC_7.4.pl script is as follows:
 ```
@@ -189,7 +188,7 @@ The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to
 
 This step takes longer to perform as the sample size increases and the genome size increases. For human samples larger than 1,500, it is recommended that this step is performed for each chromosome, which can be done using the -c option (default: ALL).
 
-### [Step-5] Annotate
+### <a name="step5"></a>[Step-5] Annotate
 
 This step adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from the Ensembl site (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
 ```
@@ -198,7 +197,7 @@ mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 (-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)
 This command generates two output vcf files, ${out_prefix}.annot.vcf and ${out_prefix}.AS.annot.vcf. The latter contains annotations for each sample in the FORMAT AN subfield.
 
-### [Step-6] Filter
+### <a name="step6"></a>[Step-6] Filter
 
 This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human that indicate regions where large SVs (> 10 Kb) are always indeterminately called in short read WGS data. By default, the bed file is automatically selected for human. If you do not prefer to use this filtering, specify any letter (e.g., -ex 0) for the -ex option. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field.
 ```
@@ -207,11 +206,11 @@ mopline filter -v <input vcf> > [output vcf]
 (-build 38 for human build 38, -nh 1 -g <gap_bed> -sd <segmental duplication file> for non-human species)
 
 
-## Quick Start with Sample Data
+## <a name="qstart"></a>Quick Start with Sample Data
 
 The sample data provided (http://jenger.riken.jp/en) includes two sample datasets: human and yeast (Saccharomyces cerevisia) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1KG CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files.
 
-### A Using Human SV datasets of 6 samples
+### <a name="hsample"></a>A: Using Human SV datasets of 6 samples
 
 This sample SV data was generated using the 7tools preset (MOPline-7t) with 6 human WGS data (bam files of 30×, 150 bp paired-end sequencing data aligned against the GRCh37 reference), and only SVs corresponding to chromosome 17 were extracted. Each sample directory contains 7 tool directories, and each tool directory contains an SV vcf file generated with the conversion scripts shown in Table 1. Each sample directory contains a Cov directory, which contains a coverage file of chromosome 17 that records alignment statistics from the bam file.
 ```
@@ -256,7 +255,7 @@ This will generate two annotated vcf files in the working directory, MOPline.ann
 mopline filter -v MOPline.AS.annot.vcf > MOPline.AS.annot.filt.vcf
 ```
 
-### B Using Yeast WGS bam files of 10 samples
+### <a name="ysample"></a>B: Using Yeast WGS bam files of 10 samples
 
 This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C S. cerevisiae reference for 10 yeast strains. The dataset includes the S288C reference fasta file, S. cerevisiae gene annotation gff3 file (ftp://ftp.ensembl.org/), STR repeat file (https://genome.ucsc.edu), and TY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the MELT documentation (https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
 ```
