@@ -1,4 +1,5 @@
-# MOPline, structural variant detection and genotyping software
+# MOPline
+Detection and Genotyping of Structural Variants
 ## Table of Contents
 
 - [Introduction](#introduction)
