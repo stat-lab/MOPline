@@ -4,7 +4,7 @@ Detection and genotyping of structural variants
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
-- [Composition of Required Directories](#composition of required directories)
+- [Composition of Required Directories](#composition)
 - [Human and Non-human Data](#human)
 - [General Usage](general)
 	- [\[Step-0\] Run SV detection tools](#step-0)
