@@ -168,9 +168,7 @@ Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix>
 ```
 (-build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)  
-**sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory.  
-If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as ${sample_directory_name},${sample_name}.  
-It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in ${sample_directory}/${merge_dir}/.  
+**sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory. If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as ${sample_directory_name},${sample_name}. It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in ${sample_directory}/${merge_dir}/.  
 **merge_dir:** Name of the directory containing the input vcf files under the sample directories [default: Merge_7tools]  
 **out_dir:** Name of the directory where the output vcf file will be generated [default: the same name as merge_dir]  
 **out_prefix:** Prefix name of the output vcf file
