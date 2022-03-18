@@ -16,8 +16,8 @@ Detection and genotyping of structural variants
 	- [\[Step-5\] Annotate](#annotate)
 	- [\[Step-6\] Filter](#filter)
 - [Quick Start with Sample Data](#quick)
-	- [A: Human SV datasets of 6 samples](#A:)
-	- [B: Yeast WGS bam files of 10 samples](#B:)
+	- [A: Human SV datasets of 6 samples](#A)
+	- [B: Yeast WGS bam files of 10 samples](#B)
 
 ## Introduction
 
@@ -211,7 +211,7 @@ mopline filter -v <input vcf> > [output vcf]
 
 The sample data provided (http://jenger.riken.jp/en) includes two sample datasets: human and yeast (Saccharomyces cerevisia) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1KG CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files.
 
-### A: Using Human SV datasets of 6 samples
+### A Using Human SV datasets of 6 samples
 
 This sample SV data was generated using the 7tools preset (MOPline-7t) with 6 human WGS data (bam files of 30×, 150 bp paired-end sequencing data aligned against the GRCh37 reference), and only SVs corresponding to chromosome 17 were extracted. Each sample directory contains 7 tool directories, and each tool directory contains an SV vcf file generated with the conversion scripts shown in Table 1. Each sample directory contains a Cov directory, which contains a coverage file of chromosome 17 that records alignment statistics from the bam file.
 ```
@@ -256,7 +256,7 @@ This will generate two annotated vcf files in the working directory, MOPline.ann
 mopline filter -v MOPline.AS.annot.vcf > MOPline.AS.annot.filt.vcf
 ```
 
-### B: Using Yeast WGS bam files of 10 samples
+### B Using Yeast WGS bam files of 10 samples
 
 This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C S. cerevisiae reference for 10 yeast strains. The dataset includes the S288C reference fasta file, S. cerevisiae gene annotation gff3 file (ftp://ftp.ensembl.org/), STR repeat file (https://genome.ucsc.edu), and TY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the MELT documentation (https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
 ```
