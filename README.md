@@ -25,29 +25,29 @@ MOPline accurately and sensitively detects structural variations (SVs) in whole 
 
 ## Requirements
 
-perl 5 or later versions
-[samtools](https://github.com/samtools/samtools)
-[vcftools](https://vcftools.github.io/index.html)
+perl 5 or later versions  
+[samtools](https://github.com/samtools/samtools)  
+[vcftools](https://vcftools.github.io/index.html)  
 java 1.8 or later (for GRIDSS and MELT)
 
-**SV detection tools (algorithms)**
-The tools required depend on the tool presets used in MOPline or the tool sets customized by the user. The presets customized in this MOPline package are follows:
-**Preset: 7tools (MOPline-7t)**
-[CNVnator](https://github.com/abyzovlab/CNVnator)
-[GRIDSS](https://github.com/PapenfussLab/grids)
-[inGAP](https://sourceforge.net/projects/ingap/files/ingap)
-[Manta](https://github.com/Illumina/manta)
-[MATCHCLIP](https://github.com/yhwu/matchclips2)
-[MELT](https://melt.igs.umaryland.edu)
-[Wham](https://github.com/zeeev/wham)
-**Preset: 6tools_1 (MOPline-6t-1)**
-GRIDSS is excluded from 7tools
-**Preset: 6tools_2 (MOPline-6t-2)**
-MELT is excluded from 7tools
-**Preset: 9tools (MOPline-9t)**
+#### SV detection tools (algorithms)  
+The tools required depend on the tool presets used in MOPline or the tool sets customized by the user. The presets customized in this MOPline package are follows:  
+**Preset: 7tools (MOPline-7t)**  
+[CNVnator](https://github.com/abyzovlab/CNVnator)  
+[GRIDSS](https://github.com/PapenfussLab/grids)  
+[inGAP](https://sourceforge.net/projects/ingap/files/ingap)  
+[Manta](https://github.com/Illumina/manta)  
+[MATCHCLIP](https://github.com/yhwu/matchclips2)  
+[MELT](https://melt.igs.umaryland.edu)  
+[Wham](https://github.com/zeeev/wham)  
+**Preset: 6tools_1 (MOPline-6t-1)**  
+GRIDSS is excluded from 7tools  
+**Preset: 6tools_2 (MOPline-6t-2)**  
+MELT is excluded from 7tools  
+**Preset: 9tools (MOPline-9t)**  
 DELLY, Lumpy, SoftSV are added to 6tools_1
 
-**Sample data**
+#### Sample data
 [Sample datasets](http://jenger.riken.jp/en) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
 
 ## <a name="composition"></a>Composition of required directories (sample directory and tool directory)
