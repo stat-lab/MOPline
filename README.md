@@ -125,7 +125,7 @@ When using a custom algorithm set instead of the preset, users can create their 
 ```
 make_merge_SV_vcf_script.pl -t <algorithm list, comma-separated> -tc <tool-config file> -p <prefix name of output script>
 ```
-(use -h for detailed explanation)
+(use -h for detailed explanation)  
 If the -tc option is not specified in the above command, the tool configuration file (Data/SVtool_pairs_config.txt) is automatically selected. This file specifies the favorable pairs of tools and minimum RSSs of overlap call selection for each of 14 algorithms we have chosen. If additional algorithms are used, the SVtool_pairs_config.txt file can be modified to specify the preferred pairs minimum RSSs for each newly added algorithm for each SV type and size range.
 
 ### <a name="step2"></a>[Step-2] Add alignment statistics to SV sites
@@ -138,8 +138,8 @@ Create a coverage file with read depth and the number of soft-clipped ends for e
 ```
 mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_threads>
 ```
-(-nh 1 if sample is a non-human species)
-**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is ${sample_name}.bam and exists in the ${sample_name} directory.
+(-nh 1 if sample is a non-human species)  
+**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is ${sample_name}.bam and exists in the ${sample_name} directory.  
 **read_length:** Mean read length in the bam file
 
 The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (${sample_name}.chr*.cov.gz).
@@ -152,9 +152,9 @@ Using the coverage files you created, add alignment statistics to each SV site i
 ```
 mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
 ```
-(-build 38 for human build38, -nh 1 -ri <ref.index> -gap <gap_bed> for non-human species)
-**sample_list:** A sample list file showing sample names per line. A sample directoy with the same names as the specified sample list must exist under the working directory.
-**tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]
+(-build 38 for human build38, -nh 1 -ri <ref.index> -gap <gap_bed> for non-human species)  
+**sample_list:** A sample list file showing sample names per line. A sample directoy with the same names as the specified sample list must exist under the working directory.  
+**tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
 
 The above command updates a ${sample_name}.Merge.ALL.vcf file in the vcf_directory and rename the original vcf file as ${sample_name}.Merge.ALL.noAdd.vcf. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
@@ -167,12 +167,12 @@ Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 ```
 mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix>
 ```
-(-build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)
-**sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory.
-If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as ${sample_directory_name},${sample_name}.
-It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in ${sample_directory}/${merge_dir}/.
-**merge_dir:** Name of the directory containing the input vcf files under the sample directories [default: Merge_7tools]
-**out_dir:** Name of the directory where the output vcf file will be generated [default: the same name as merge_dir]
+(-build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)  
+**sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory.  
+If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as ${sample_directory_name},${sample_name}.  
+It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in ${sample_directory}/${merge_dir}/.  
+**merge_dir:** Name of the directory containing the input vcf files under the sample directories [default: Merge_7tools]  
+**out_dir:** Name of the directory where the output vcf file will be generated [default: the same name as merge_dir]  
 **out_prefix:** Prefix name of the output vcf file
 
 The above command outputs ${out_prefix}.vcf under ${out_dir} directory.
@@ -183,12 +183,12 @@ In this step, all SV alleles are genotyped based on multinominal logistic regres
 ```
 mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_threads>
 ```
-(-build 38 for human build 38, -nh 1 -sr <STR_file> -sd <SD_file> for non-human species)
-**input_vcf:** An input vcf file from Step-3
-**tool_set:** Algorithm preset name or a list file showing algorithm names per line [default: 7tools]
-**out_dir:** Name of the directory where the output vcf file will be generated
-**out_prefix:** Prefix name of the output vcf file
-**STR_file:** A simple/short tandem repeat file from UCSC or TRF finder output (only for non-human species, can be unspecified)
+(-build 38 for human build 38, -nh 1 -sr <STR_file> -sd <SD_file> for non-human species)  
+**input_vcf:** An input vcf file from Step-3  
+**tool_set:** Algorithm preset name or a list file showing algorithm names per line [default: 7tools]  
+**out_dir:** Name of the directory where the output vcf file will be generated  
+**out_prefix:** Prefix name of the output vcf file  
+**STR_file:** A simple/short tandem repeat file from UCSC or TRF finder output (only for non-human species, can be unspecified)  
 **SD_file:** A segmental duplication file from UCSC (only for non-human species, can be unspecified)
 
 The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to the FORMAT/SAMPLE fields of the output vcf file. The MC tag represents the level of SMC; the lower the MC value, the higher the confidence level. The genotyping step requires a parameter file indicating the minimum SRR for each SV type and algorithm. MOPline provides a default parameter file for 14 pre-selected algorithms, which is automatically selected during this step. If additional algorithms are to be used that are not listed in this parameter file, the user can edit the parameter file by adding parameters of those algorithms (if not edited, all algorithms not present in the parameter file will have a minimum RSS of 3).
@@ -201,7 +201,7 @@ This step adds gene name/ID and gene region that overlap the SV to the INFO file
 ```
 mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 ```
-(-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)
+(-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
 This command generates two output vcf files, ${out_prefix}.annot.vcf and ${out_prefix}.AS.annot.vcf. The latter contains annotations for each sample in the FORMAT AN subfield.
 
 ### <a name="step6"></a>[Step-6] Filter
@@ -215,7 +215,7 @@ mopline filter -v <input vcf> > [output vcf]
 
 ## <a name="qstart"></a>Quick Start with Sample Data
 
-The sample data provided (http://jenger.riken.jp/en) includes two sample datasets: human and yeast (Saccharomyces cerevisia) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1KG CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files.
+The sample data provided (http://jenger.riken.jp/en) includes two sample datasets: human and yeast (*Saccharomyces cerevisia*) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1000 Genomes CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files.
 
 ### <a name="hsample"></a>A: Using Human SV datasets of 6 samples
 
@@ -264,7 +264,7 @@ mopline filter -v MOPline.AS.annot.vcf > MOPline.AS.annot.filt.vcf
 
 ### <a name="ysample"></a>B: Using Yeast WGS bam files of 10 samples
 
-This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C S. cerevisiae reference for 10 yeast strains. The dataset includes the S288C reference fasta file, S. cerevisiae gene annotation gff3 file (ftp://ftp.ensembl.org/), STR repeat file (https://genome.ucsc.edu), and TY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the MELT documentation (https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
+This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C *S. cerevisiae* reference for 10 yeast strains. The dataset includes the S288C reference fasta file, *S. cerevisiae* gene annotation gff3 file (ftp://ftp.ensembl.org/), [STR repeat file](https://genome.ucsc.edu), andTY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the [MELT documentation](https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
 ```
 export PATH=$PATH:${MOPline-install-path}/scripts/run_SVcallers
 mkdir yeast_run
