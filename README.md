@@ -26,6 +26,8 @@ MOPline accurately and sensitively detects structural variations (SVs) in whole 
 ## Requirements
 
 perl 5 or later versions  
+R 3.0 or later  
+	Required library: nnet  
 [samtools](https://github.com/samtools/samtools)  
 [vcftools](https://vcftools.github.io/index.html)  
 java 1.8 or later (for GRIDSS and MELT)
@@ -195,7 +197,7 @@ This step takes longer to perform as the sample size increases and the genome si
 
 ### <a name="step5"></a>[Step-5] Annotate
 
-This step adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from the Ensembl site (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
+Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from the Ensembl site (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
 ```
 mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 ```
@@ -227,20 +229,20 @@ export PATH=$PATH:${MOPline-install-directory-path}
 ```
 mopline merge_7tools -s sample_list.txt -rl 150 -d Merge_7tools
 ```
-This command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
+The command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
 
 #### [Step-2] Add alignment statistics to SV sites
 Step 2-(1) ‘Create coverage files’ is omitted for this sample data because the Cov directory in each sample director already contains coverage files.
 ```
 mopline add_cov -s sample_list.txt -ts 7tools -vd Merge_7tools -n 4 
 ```
-This command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
+The command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
 
 #### [Step-3] Merge vcf files from multiple samples
 ```
 mopline joint_call -s sample_list.txt -id Merge_7tools -od JointCall -p MOPline
 ```
-This command generates a MOPline.All-samples.vcf in the JointCall directory.
+The command generates a MOPline.All-samples.vcf in the JointCall directory.
 
 #### [Step-4] Genotype and SMC
 ```
@@ -279,23 +281,23 @@ create_bam_link.pl -b bam_list.txt -bd ../Yeast_10samples
 ```
 mopline merge_7tools -s bam_list.txt -rl 101 -d Merge_7tools -nh 1 -r S288C.fa.fai
 ```
-This command generates a vcf files named ${sample}.Merge.ALL.vcf in the Merge_7tools directory generated in each sample directory. For non-human species, a reference index file should be specified with the -r option.
+The command generates a vcf files named ${sample}.Merge.ALL.vcf in the Merge_7tools directory generated in each sample directory. For non-human species, a reference index file should be specified with the -r option.
 
 #### [Step-2] Add alignment statistics to SV sites
 ```
 mopline create_cov -b bam_list.txt -r S288C.fa -rl 101 -n 4 -nh 1
 ```
-This command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome. A reference fasta file must be specified with the -r option.
+The command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome. A reference fasta file must be specified with the -r option.
 ```
 mopline add_cov -s bam_list.txt -ts 7tools -vd Merge_7tools -n 4 -nh 1 -r S288C.fa.fai
 ```
-This command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given in the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files. For non-human species, a reference index file should be specified with the -r option.
+The command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given in the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files. For non-human species, a reference index file should be specified with the -r option.
 
 #### [Step-3] Merge vcf files from multiple samples
 ```
 mopline joint_call -s bam_list.txt -id Merge_7tools -od JointCall -p MOPline -nh 1
 ```
-This command generates a MOPline.All-samples.vcf in the JointCall directory.
+This generates a MOPline.All-samples.vcf in the JointCall directory.
 
 #### [Step-4] Genotype and SMC
 ```
