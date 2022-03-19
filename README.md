@@ -198,7 +198,7 @@ This step takes longer to perform as the sample size increases and the genome si
 
 ### <a name="step5"></a>[Step-5] Annotate
 
-Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from Ensembl (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
+Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from Ensembl [ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens], is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
 ```
 mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 ```
@@ -216,7 +216,7 @@ mopline filter -v <input vcf> > [output vcf]
 
 ## <a name="qstart"></a>Quick Start with Sample Data
 
-The sample data provided (http://jenger.riken.jp/en) includes two sample datasets: human and yeast (*Saccharomyces cerevisia*) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1000 Genomes CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates > "Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files".
+The sample data provided [http://jenger.riken.jp/en] includes two sample datasets: human and yeast (*Saccharomyces cerevisia*) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1000 Genomes CEU population [ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data]. The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files.
 
 ### <a name="hsample"></a>A: Using Human SV datasets of 6 samples
 
@@ -265,7 +265,7 @@ mopline filter -v MOPline.AS.annot.vcf > MOPline.AS.annot.filt.vcf
 
 ### <a name="ysample"></a>B: Using Yeast WGS bam files of 10 samples
 
-This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C *S. cerevisiae* reference for 10 yeast strains. The dataset includes the S288C reference fasta file, *S. cerevisiae* gene annotation gff3 file (ftp://ftp.ensembl.org/), STR repeat file (https://genome.ucsc.edu), andTY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the [MELT documentation](https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
+This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C *S. cerevisiae* reference for 10 yeast strains. The dataset includes the S288C reference fasta file, *S. cerevisiae* gene annotation gff3 file [ftp://ftp.ensembl.org/], STR repeat file [https://genome.ucsc.edu], andTY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the [MELT documentation](https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
 ```
 export PATH=$PATH:${MOPline-install-path}/scripts/run_SVcallers
 mkdir yeast_run
