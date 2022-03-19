@@ -27,7 +27,7 @@ MOPline accurately and sensitively detects structural variations (SVs) in whole 
 
 perl 5 or later versions  
 R 3.0 or later  
-	Required library: nnet  
+	- Required library: [nnet](https://cran.r-project.org/web/packages/nnet)  
 [samtools](https://github.com/samtools/samtools)  
 [vcftools](https://vcftools.github.io/index.html)  
 java 1.8 or later (for GRIDSS and MELT)
@@ -81,7 +81,7 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 |SoftSV   |convert_SoftSV_vcf.pl deletions_small.txt insertion_small.txt tandems_small.txt<br> inversions_small.txt deletions.txt tandems.txt inversions.txt > SoftSV.AB.vcf
 |Wham     |convert_Wham_vcf.pl AB.vcf > Wham.AB.vcf                                       |
 
-In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome (gap.bed for human is located in the Data folder in the package, but this file can be omitted for non-human).
+In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtain at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
 
 For convenience, we have provided scripts to run the selected algorithms in the ‘run_SVcallers’ folder. A run the script with the ‘-h’ option informs us the required arguments and options. We also provide a script for sequential execution of multiple algorithms for a single sample (run_single.pl) and batch scripts for multiple samples using Slurm and LSF job managers (run_batch_slurm.pl, run_batch_LSF.pl). To run these three scripts, specify a configure file that describes the parameters for each algorithm, using a template configure file (config.txt) (an example config file is also provided in the sample data [Sample_data_output/yeast_run]). A tool directory with the name of the algorithm specified in the configure file is automatically created in the sample directories under the working directory, and the algorithm is executed under the tool directory.
 
@@ -173,13 +173,14 @@ mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix
 **sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory. If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as ${sample_directory_name},${sample_name}. It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in ${sample_directory}/${merge_dir}/.  
 **merge_dir:** Name of the directory containing the input vcf files under the sample directories [default: Merge_7tools]  
 **out_dir:** Name of the directory where the output vcf file will be generated [default: the same name as merge_dir]  
-**out_prefix:** Prefix name of the output vcf file
+**out_prefix:** Prefix name of the output vcf file  
+**gap_bed:** A bed file of reference gap regions. For human, the file is automatically selected from the MOPline package. For non-human species, obtain from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) or create manually.
 
 The above command outputs ${out_prefix}.vcf under ${out_dir} directory.
 
 ### <a name="step4"></a>[Step-4] Genotype and SMC
 
-In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/ simpleRepeat.txt.gz, Data/ genomicSuperDups.txt.gz) and are automatically selected. The command using the genotype_SV_SMC_7.4.pl script is as follows:
+In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/simpleRepeat.txt.gz, Data/genomicSuperDups.txt.gz) and are automatically selected. The command using the genotype_SV_SMC_7.4.pl script is as follows:
 ```
 mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_threads>
 ```
@@ -188,8 +189,8 @@ mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_
 **tool_set:** Algorithm preset name or a list file showing algorithm names per line [default: 7tools]  
 **out_dir:** Name of the directory where the output vcf file will be generated  
 **out_prefix:** Prefix name of the output vcf file  
-**STR_file:** A simple/short tandem repeat file from UCSC or TRF finder output (only for non-human species, can be unspecified)  
-**SD_file:** A segmental duplication file from UCSC (only for non-human species, can be unspecified)
+**STR_file:** A simple/short tandem repeat file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) or [Tandem Repeats Finder](https://tandem.bu.edu/trf/trf.html) output (only for non-human species, can be unspecified)  
+**SD_file:** A segmental duplication file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) (only for non-human species, can be unspecified)
 
 The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to the FORMAT/SAMPLE fields of the output vcf file. The MC tag represents the level of SMC; the lower the MC value, the higher the confidence level. The genotyping step requires a parameter file indicating the minimum SRR for each SV type and algorithm. MOPline provides a default parameter file for 14 pre-selected algorithms, which is automatically selected during this step. If additional algorithms are to be used that are not listed in this parameter file, the user can edit the parameter file by adding parameters of those algorithms (if not edited, all algorithms not present in the parameter file will have a minimum RSS of 3).
 
@@ -197,7 +198,7 @@ This step takes longer to perform as the sample size increases and the genome si
 
 ### <a name="step5"></a>[Step-5] Annotate
 
-Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from the Ensembl site (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
+Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from [Ensembl](ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
 ```
 mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 ```
@@ -264,7 +265,7 @@ mopline filter -v MOPline.AS.annot.vcf > MOPline.AS.annot.filt.vcf
 
 ### <a name="ysample"></a>B: Using Yeast WGS bam files of 10 samples
 
-This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C *S. cerevisiae* reference for 10 yeast strains. The dataset includes the S288C reference fasta file, *S. cerevisiae* gene annotation gff3 file (ftp://ftp.ensembl.org/), [STR repeat file](https://genome.ucsc.edu), andTY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the [MELT documentation](https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
+This sample data contains yeast bam alignment files of 30×, 101 bp paired-end WGS data aligned using bwa mem against the S288C *S. cerevisiae* reference for 10 yeast strains. The dataset includes the S288C reference fasta file, *S. cerevisiae* gene annotation gff3 file (ftp://ftp.ensembl.org/), STR repeat file (https://genome.ucsc.edu), andTY1/TY3 retroelement reference files for MELT. The TY1/TY3 MELT reference files were generated according to the [MELT documentation](https://melt.igs.umaryland.edu/manual.php). This tutorial begins with SV calling using the 7tools preset. The commands for all steps have “-nh 1” since the yeast is a non-human species.
 ```
 export PATH=$PATH:${MOPline-install-path}/scripts/run_SVcallers
 mkdir yeast_run
