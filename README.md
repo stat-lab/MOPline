@@ -38,7 +38,7 @@ java 1.8 or later (for GRIDSS and MELT)
 ```
 git clone https://github.com/stat-lab/MOPline
 ```
-Download [Data](http://jenger.riken.jp/en/data/MOPline_data.tar.gz) required for MOPline execution, place the file in "MOPline" directory, and extract the MOPline_data.tar.gz file, which should "Data" folder in the MOPline folder.
+Download [Data](http://jenger.riken.jp/en/data/MOPline_data.tar.gz) required for MOPline execution, place the file in "MOPline" directory, and extract the MOPline_data.tar.gz file, which should generate "Data" folder in the MOPline folder. Do not change the "Data" folder name and the directory structure in the MOPline folder.
 
 #### SV detection tools (algorithms)  
 The tools required depend on the tool presets used in MOPline or the tool sets customized by the user.  
