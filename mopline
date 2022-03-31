@@ -1,0 +1,115 @@
+#!/usr/bin/perl -w
+use strict;
+use FindBin qw($Bin);
+use File::Basename;
+use Getopt::Long;
+use Pod::Usage;
+
+my $command = shift @ARGV;
+
+my $args = join (' ', @ARGV);
+
+@ARGV = ();
+
+print STDERR "command: $command Args: $args\n";
+
+my $help;
+
+my $script_dir = "$Bin/scripts";
+$script_dir = "$ENV{MOPLINE_DIR}/scripts" if (exists $ENV{MOPLINE_DIR});
+
+my $script = '';
+
+if ($command =~ /merge_7tools/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.7tools.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.7tools.pl";
+    }
+}
+elsif ($command =~ /merge_6tools_1/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.6tools_1.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.6tools_1.pl";
+    }
+}
+elsif ($command =~ /merge_6tools_2/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.6tools_2.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.6tools_2.pl";
+    }
+}
+elsif ($command =~ /merge_9tools/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.9tools.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.9tools.pl";
+    }
+}
+elsif ($command =~ /merge_11tools/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.11tools.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.11tools.pl";
+    }
+}
+elsif ($command eq 'add_cov'){
+    $script = "$script_dir/add_GT_DPR_vcf.pl";
+}
+elsif ($command eq 'joint_call'){
+    $script = "$script_dir/merge_SV_calls_ALLsamples.pl";
+}
+elsif ($command eq 'smc'){
+    $script = "$script_dir/genotype_SV_SMC_7.4.pl";
+}
+elsif ($command eq 'filter'){
+    $script = "$script_dir/filter_MOPline.pl";
+}
+elsif ($command eq 'annotate'){
+    $script = "$script_dir/annotate.pl";
+}
+elsif ($command eq 'create_cov'){
+    $script = "$script_dir/create_coverage_file_bam.pl";
+}
+elsif (($command eq '--help') or ($command eq '-help') or ($command eq '-h')){
+    pod2usage(-verbose => 0);
+}
+else{
+    die "the 1st argument of MOP: $command, which is not defined in MOPline.\n";
+}
+
+=head1 SYNOPSIS
+
+  mopline [command] <options for each command>
+
+  commands:
+   merge_7tools           Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, and MELT, followed by MOP-based selection of overlap calls (high coverage version: > 25x)
+   merge_7tools_lc        Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, and MELT, followed by MOP-based selection of overlap calls (low coverage version: 15x~25x)
+   merge_6tools_1 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, and MELT, followed by MOP-based selection of overlap calls
+   merge_6tools_2 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, and GRIDSS2, followed by MOP-based selection of overlap calls
+   merge_9tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, and SoftSV, followed by MOP-based selection of overlap calls
+   merge_11tools (_lc)    Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, SoftSV, DELLY, and Mobster, followed by MOP-based selection of overlap calls
+   add_cov                Add read coverage and clipped alignment read number at 50-bp window size to input SV vcf. These alignment information must be created with 'create_cov' command before this command run.
+                          This command also add genotype data from multiple tools used for original SV calling to input SV vcf.
+   joint_call             For vcf files from multiple samples, perform joint call with multiple vcfs to create a single vcf file. Before this, 'add_cov' command must be done foe each vcf file.
+   smc                    Perform SMC for a joint-called SV vcf file. For samples with the reference genotype at an SV site, conversion to non-reference genotype is made when there is evidence to support the presence of SV.
+   filter                 Filter SVs mainly based on DPR and SR values, which had been added to the input vcf file with the 'add_cov' command
+   annotate               Add the annotation of the genes that overlap SVs to a vcf file. The annotation includes gene ID, gene name, and gene region overlapping the SV.
+   create_cov             Create coverage files for each sample, which record read coverage and clipped read number at 50-bp window size in bam file
+   help                   Output help message
+   
+=cut
+
+my $command2 = "$script $args";
+
+print STDERR "mopline $command: $command2\n";
+
+system ($command2);
+
