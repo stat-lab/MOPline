@@ -56,7 +56,7 @@ The presets customized in this MOPline package are follows:
 ```
 git clone https://github.com/stat-lab/MOPline
 ```
-The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping, and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
+The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
 
 #### Sample data
 [Sample datasets](http://jenger.riken.jp/en/data/Sample_data.tar.gz) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
