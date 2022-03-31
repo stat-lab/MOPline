@@ -38,7 +38,7 @@ java 1.8 or later (for GRIDSS and MELT)
 ```
 git clone https://github.com/stat-lab/MOPline
 ```
-Download [Data](http://jenger.riken.jp/en/data/MOPline_data.tar.gz) required for MOPline execution, which includes parameter files, multinomial logistic regression-based model files for genotyping, and annotated data file for the human build 37/38 reference. Place the MOPline_data.tar.gz file in "MOPline" directory and extract the file, which should generate "Data" folder in the MOPline folder. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
+The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping, and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
 
 #### SV detection tools (algorithms)  
 The tools required depend on the tool presets used in MOPline or the tool sets customized by the user.  
