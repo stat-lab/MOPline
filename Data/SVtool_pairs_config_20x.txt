@@ -1,0 +1,121 @@
+# 1st column: ${tool_name}:${min_RSS}	2nd column: comma-separated list of a pair of tools to select overlap SV calls
+# ANY: any of paired tools in the category
+# SINGLE: SV call selection with the single tool indicated at the 1st column
+
+<DEL-SS>
+Manta:3		Lumpy:5,SoftSV:7
+Lumpy:5		Manta:3,SoftSV:7
+SoftSV:7	Manta:3,Lumpy:5
+inGAP:4		Pindel:3
+Pindel:3	inGAP:4
+
+<DEL-S>		
+Manta:3		inGAP:6,MATCHCLIP:4,GRIDSS:6,Wham:4
+inGAP:6		Manta:3,GRIDSS:6,MATCHCLIP:4,Wham:4,Lumpy:6,SoftSV:4,Pindel:3
+GRIDSS:6	inGAP:6,MATCHCLIP:4,Manta:3,Wham:4,SoftSV:4
+MATCHCLIP:4	inGAP:6,Manta:3,GRIDSS:6,Wham:4,Lumpy:6,SoftSV:4,DELLY:4,Pindel:3
+Wham:4		inGAP:6,Manta:3,GRIDSS:6,MATCHCLIP:4,Lumpy:6,SoftSV:4,DELLY:4
+Lumpy:6		inGAP:6,MATCHCLIP:4,Wham:4,SoftSV:4
+SoftSV:4	inGAP:6,GRIDSS:6,MATCHCLIP:4,Wham:4,Lumpy:6
+DELLY:4		MATCHCLIP:3,Wham:4
+Pindel:3	inGAP:6,MATCHCLIP:4
+MetaSV:4	SINGLE
+
+<DEL-M>
+CNVnator:3	ANY
+Manta:3		inGAP:4,MATCHCLIP:3,Wham:3,SoftSV:3,MetaSV:3
+inGAP:4		Manta:3,GRIDSS:6,MATCHCLIP:3,SoftSV:3,DELLY:3,MetaSV:3
+GRIDSS:6	inGAP:4,MATCHCLIP:3,Wham:3,SoftSV:3,MetaSV:3
+MATCHCLIP:3	Manta:3,inGAP:4,GRIDSS:6,Wham:3,Lumpy:5,SoftSV:3,DELLY:3,MetaSV:3
+Wham:3		Manta:3,inGAP:4,GRIDSS:6,MATCHCLIP:3,Lumpy:5,SoftSV:3,DELLY:3,MetaSV:3
+Lumpy:5		MATCHCLIP:3,Wham:3,SoftSV:3
+SoftSV:3	Manta:3,inGAP:4,GRIDSS:6,MATCHCLIP:3,Wham:3,Lumpy:5,DELLY:3,MetaSV:3
+DELLY:3		inGAP:4,MATCHCLIP:3,Wham:3,SoftSV:3
+MetaSV:3	Manta:3,inGAP:4,GRIDSS:6,MATCHCLIP:3,Wham:3,SoftSV:3
+CNVnator:7	SINGLE
+MetaSV:7	SINGLE
+
+<DEL-L>
+CNVnator:3	ANY
+Manta:3		inGAP:5,MATCHCLIP:3,Wham:3,forestSV:6
+inGAP:5		Manta:3,GRIDSS:6,MATCHCLIP:3,Wham:3
+GRIDSS:6	inGAP:5,MATCHCLIP:3,Wham:3,forestSV:6
+MATCHCLIP:3	Manta:3,inGAP:5,GRIDSS:6,Wham:3,SoftSV:4,DELLY:4
+Wham:3		Manta:3,inGAP:5,GRIDSS:6,MATCHCLIP:3,Lumpy:3,forestSV:6
+Lumpy:3		Wham:3,forestSV:6
+SoftSV:4	MATCHCLIP:3,forestSV:6
+DELLY:4		MATCHCLIP:3,forestSV:6
+forestSV:6	Manta:3,GRIDSS:6,Wham:3,Lumpy:3,SoftSV:4,DELLY:4,MetaSV:3
+MetaSV:3	Wham:3,forestSV:6
+CNVnator:8	SINGLE
+Wham:6		SINGLE
+MATCHCLIP:4	SINGLE
+inGAP:12	SINGLE
+
+<DUP-S>
+Manta:3		MATCHCLIP:3,Wham:3,SoftSV:6
+MATCHCLIP:3	Manta:3,Wham:3
+Wham:3		Manta:3,MATCHCLIP:3,GRIDSS:4,Lumpy:4,SoftSV:6,Pindel:4,MetaSV:3
+GRIDSS:4	Wham:3
+Lumpy:4		Wham:3
+SoftSV:6	Manta:3,Wham:3
+Pindel:4	Wham:3
+MetaSV:3	Wham:3
+MATCHCLIP:7	SINGLE
+GRIDSS:7	SINGLE
+
+<DUP-M>
+CNVnator:3	ANY
+inGAP:3		Manta:3,GRIDSS:6,forestSV:4,MetaSV:4
+Manta:3		inGAP:3,forestSV:4
+GRIDSS:6	inGAP:3,forestSV:4
+Lumpy:6		forestSV:4
+SoftSV:3	forestSV:4
+forestSV:4	inGAP:3,Manta:3,GRIDSS:6,Lumpy:6,SoftSV:3
+MetaSV:4	inGAP:3
+CNVnator:6	SINGLE
+
+<DUP-L>
+CNVnator:2	Manta:3,GRIDSS:3,MATCHCLIP:3
+Manta:3		CNVnator:2,Wham:3
+GRIDSS:3	CNVnator:2
+MATCHCLIP:3	CNVnator:2
+Wham:3		Manta:3
+CNVnator:5	SINGLE
+inGAP:4		SINGLE
+forestSV:6	SINGLE
+
+<INV-S>
+Manta:14	inGAP:8,Wham:12
+inGAP:8		Manta:14,Wham:12,Lumpy:3
+Wham:12		Manta:14,inGAP:8
+Lumpy:3		inGAP:8,Pindel:5
+SoftSV:10	DELLY:8
+DELLY:6		SoftSV:10
+Pindel:5	Lumpy:3
+
+<INV-M>
+Manta:3		inGAP:3,Wham:5,SoftSV:3,DELLY:5 
+inGAP:3		Manta:3,Wham:5,Lumpy:3,SoftSV:3
+Wham:5		Manta:3,inGAP:3,SoftSV:3,DELLY:5 
+Lumpy:3		inGAP:3,Pindel:5,MetaSV:3
+SoftSV:3	Manta:3,inGAP:3,Wham:5,DELLY:5,Pindel:5,MetaSV:3
+DELLY:5 	Manta:3,Wham:5,SoftSV:3
+Pindel:5	Lumpy:3,SoftSV:3
+MetaSV:3	Lumpy:3,SoftSV:3
+
+<INV-L>
+Manta:3		inGAP:4,GRIDSS:7,Wham:5
+inGAP:4		Manta:3,Wham:5,DELLY:8
+Wham:5		Manta:3,inGAP:4,DELLY:8
+GRIDSS:7	Manta:3
+DELLY:8		inGAP:4,Wham:5
+
+<INS>
+Manta:3		inGAP:10,Wham:3
+inGAP:10	Manta:3,Wham:3
+Wham:3		Manta:3,inGAP:10
+Manta:20	SINGLE
+inGAP:18	SINGLE
+MELT:3		SINGLE
+Mobster:4	SINGLE
