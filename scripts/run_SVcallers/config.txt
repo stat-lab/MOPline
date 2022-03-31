@@ -1,0 +1,65 @@
+# <Tool> that is not run should be comment-out with '#' at the line head.
+# All file paths must be absolute path.
+
+<general>
+ref = ;			[-r]	# reference fasta file path
+target = 'ALL'		[-c]	# target chromosome(s), commma-separated
+non_human = 0;		[-nh]	# specify 1 if samples is non-human species
+run_svcaller_dir = ;		# run_SVcallers directory path of MOPline package unless this directory is set in $PATH
+
+
+<CNVnator>
+cnvnator_command = ... /cmvnator;	[run_CNVnator.pl -cp]		# file path of cnvnator command cnvnator
+root_dir = ... /root;			[run_CNVnator.pl -rd]		# ROOT package install directory
+ref_dir = ;				[run_CNVnator.pl -r]		# reference directory containing chr-separated fasta files, necessary for non-human species
+build = 37;				[run_CNVnator.pl -build]	# specify 38 if bam files are based on human build38 reference
+gap_bed = ;				[run_CNVnator.pl -g]		# gap bed file indicating gap regions in reference fasta if any
+
+<GRIDSS>
+gridss_jar = ... /gridss-2.10.2/gridss-2.10.2-gridss-jar-with-dependencies.jar;	[run_GRIDSS2.pl -gj]	#GRIDSS jar file path
+gridss_sh = ... /gridss-2.10.2/scripts/gridss.sh;				[run_GRIDSS2.pl -gs]	#GRIDSS sh script file path
+black_list = ;				[run_GRIDSS2.pl -bl]		# black list bed file if any
+java_path = ;				[run_GRIDSS2.pl -jp]		# directory path containing java executable (1.8 or later) unless the corrsponding version of java is set in $PATH
+r_path = ;				[run_GRIDSS2.pl -rp]		# directory path containing R executable (4.0 or later) unless the corrsponding version of R is set in $PATH
+threads = 3;				[run_GRIDSS2.pl -n]		# number of threads
+
+<inGAP>
+ingap_jar = ... /inGAP_3_1_1/inGAP.jar;	[run_inGAP.pl -ij]		# inGAP-sv jar path
+
+<Manta>
+manta_path = ... /manta-1.6.0.centos6_x86_64/bin/configManta.py;	[run_Manta.pl -cp]		# file path of Manta configManta.py script
+build = 37;				[run_Manta.pl -build]	# specify 38 if bam files are based on human build38 reference
+threads = 3;				[run_Manta.pl -n]		# number of threads
+
+<MATCHCLIP>
+matchclip_path = ... /matchclips2/matchclips;	[run_MATCHCLIP.pl -cp]	# file path of MATCHCLIP executable, matchclips
+threads = 4;				[run_MATCHCLIP.pl -n]		# number of threads
+
+<MELT>
+melt_jar = ... /MELTv2.2.2/MELT.jar;	[run_MELT.pl -mj]		# MELT jar path
+melt_lib = ... /MELTv2.2.2/me_refs/1KGP_Hg37;			[run_MELT.pl -ml]			# MELT mobile element reference data directory containing *_MELT.zip files
+melt_target = ALU,LINE1,SVA,HERVK;	[run_MELT.pl -mt]		# comma-separated list of MELT mobile element or other sequence target
+melt_gene = ... /MELTv2.2.2/add_bed_files/Hg37/hg37.genes.bed;	[run_MELT.pl -mg]			# MELT gene annotation file
+java_path = ;				[run_MELT.pl -jp]		# directory path containing java executable (1.8 or later) unless the corrsponding version of java is set in $PATH
+bowtie_path = ;				[run_MELT.pl -bp]		# directory path containing bowtie2 executable unless bowtie2 is set in $PATH
+threads = 4;				[run_MELT.pl -n]		# number of threads
+
+<Wham>
+wham_path = ... /wham/bin/whamg;	[run_Wham.pl -cp]		# file path of Wham executable whamg
+samtool_path = ;			[run_Wham.pl -sp]		# directory path containing samtools executable unless samtools is set in $PATH
+picard_jar = ;				[run_Wham.pl -pj]		# picard jar path, to use AddOrReplaceReadGroups function, if the input bam has no RG tag
+threads = 1;				[run_Wham.pl -cp]		# number of threads
+
+#<DELLY>
+delly_path = ... /delly-0.8.7/delly;	[run_DELLY.pl -cp]		# file path of DELLY executable
+bcftools_path = ;			[run_DELLY.pl -bp]		# directory path containing bcftools executable unless bcftools is set in $PATH
+exclude_tsv = ;				[run_DELLY.pl -ex]		# tsv file indicating exclude regions if any
+
+#<Lumpy>
+lumpy_path = ... /lumpy-sv/bin/lumpy;	[run_Lumpy.pl -cp]		# file path of Lumpy executable
+lumpy_scripts = ... /lumpy-sv/scripts;	[run_Lumpy.pl -ls]		# Lumpy scripts directory
+samtools_path = ;			[run_Lumpy.pl -sp]		# directory path containing samtools exucutable unless samtools is set in $PATH
+
+#<SoftSV>
+softsv_path = ... /SoftSV_1.4.2/SoftSV;	[run_SoftSV.pl -cp]		# file path of SoftSV executable
+bamtools_lib = ;			[run_SoftSV.pl -bl]		# directory path containing bamtools libraries unless bamtools libraries are set in $LD_LIBRARY_PATH
