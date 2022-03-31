@@ -4,6 +4,7 @@ Detection and Genotyping of Structural Variants
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
+- [Install](#install)
 - [Composition of Required Directories](#composition)
 - [Human and Non-human Data](#hdata)
 - [General Usage](#gusage)
@@ -32,6 +33,13 @@ R 3.0 or later
 [vcftools](https://vcftools.github.io/index.html)  
 java 1.8 or later (for GRIDSS and MELT)
 
+## Install
+
+```
+git clone https://github.com/stat-lab/MOPline
+```
+Download [Data](http://jenger.riken.jp/en/data/) required for MOPline execution, place the file in "MOPline" directory, and extract the Data file, which should "Data" folder in the MOPline folder.
+
 #### SV detection tools (algorithms)  
 The tools required depend on the tool presets used in MOPline or the tool sets customized by the user.  
 The presets customized in this MOPline package are follows:  
@@ -51,7 +59,7 @@ The presets customized in this MOPline package are follows:
 	- DELLY, Lumpy, SoftSV are added to 6tools_1
 
 #### Sample data
-[Sample datasets](http://jenger.riken.jp/en) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
+[Sample datasets](http://jenger.riken.jp/en/data/) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
 
 ## <a name="composition"></a>Composition of required directories (sample directory and tool directory)
 
