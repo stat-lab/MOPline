@@ -33,13 +33,6 @@ R 3.0 or later
 [vcftools](https://vcftools.github.io/index.html)  
 java 1.8 or later (for GRIDSS and MELT)
 
-## Install
-
-```
-git clone https://github.com/stat-lab/MOPline
-```
-The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping, and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
-
 #### SV detection tools (algorithms)  
 The tools required depend on the tool presets used in MOPline or the tool sets customized by the user.  
 The presets customized in this MOPline package are follows:  
@@ -57,6 +50,13 @@ The presets customized in this MOPline package are follows:
 	- MELT is excluded from 7tools  
 - **Preset: 9tools (MOPline-9t)**  
 	- DELLY, Lumpy, SoftSV are added to 6tools_1
+
+## Install
+
+```
+git clone https://github.com/stat-lab/MOPline
+```
+The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping, and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
 
 #### Sample data
 [Sample datasets](http://jenger.riken.jp/en/data/Sample_data.tar.gz) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
