@@ -73,7 +73,7 @@ By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) 
 
 ### <a name="step0"></a>[Step-0] Run SV detection tools
 
-The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline- compatible vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
+The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline-specific vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
 
 **Table 1.** Conversion scripts for 10 SV detection algorithms
 |Algorithm|Command using a conversion script (for a sample name, AB)                      |
@@ -91,7 +91,7 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 
 In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtained at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
 
-For convenience, we have provided scripts to run the selected algorithms in the ‘run_SVcallers’ folder. A run the script with the ‘-h’ option informs us the required arguments and options. We also provide a script for sequential execution of multiple algorithms for a single sample (run_single.pl) and batch scripts for multiple samples using Slurm and LSF job managers (run_batch_slurm.pl, run_batch_LSF.pl). To run these three scripts, specify a configure file that describes the parameters for each algorithm, using a template configure file (config.txt) (an example config file is also provided in the sample data [Sample_data_output/yeast_run]). A tool directory with the name of the algorithm specified in the configure file is automatically created in the sample directories under the working directory, and the algorithm is executed under the tool directory.
+For convenience, we have provided scripts to run the selected algorithms in the ‘run_SVcallers’ folder. A run the script with the ‘-h’ option informs us the required arguments and options. We also provide a script for sequential execution of multiple algorithms for a single sample (run_single.pl) and batch scripts for multiple samples using Slurm and LSF job managers (run_batch_slurm.pl, run_batch_LSF.pl). To run these three scripts, specify a configure file that describes the parameters for each algorithm, using a template configure file (MOPline/scripts/run_SVcallers/config.txt) (an example config file is also provided in the sample data [Sample_data_output/yeast_run]). A tool directory with the name of the algorithm specified in the configure file is automatically created in the sample directories under the working directory, and the algorithm is executed under the tool directory.
 
 ### <a name="notes"></a>Notes on SV calling and input bam
 
@@ -121,7 +121,7 @@ samtools sort -@ 4 <out.fm.bam> | samtools markdup -ur - [out.rm.sr.bam]
 ```
 ### <a name="step1"></a>[Step-1] Select overlap calls (high-confidence calls) from SV call sets
 
-Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
+Once the MOPline-specific vcf files for each algorith and for each sample are created, selection of overlapping SV calls is first performed. Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
 ```
 mopline merge_7tools -s <sample-list-file or a sample name> -rl <read length> 
 ```
