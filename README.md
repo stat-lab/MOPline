@@ -71,7 +71,9 @@ By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) 
 
 ## <a name="gusage"></a>General Usage
 
-### <a name="step0"></a>[Step-0] Run SV detection tools
+### <a name="step0"></a>[Step-0] Preparation of input files
+
+### <a name="run_sv"></a>(1) Run SV detection tools
 
 The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline-specific vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
 
@@ -119,6 +121,21 @@ samtools sort -@ 4 <out.fm.bam> -o [out.sr.bam]
 ```
 samtools sort -@ 4 <out.fm.bam> | samtools markdup -ur - [out.rm.sr.bam]
 ```
+### <a name="create_cov"></a>(2) Create coverage files with each sample bam file
+
+In Step-2, MOPline uses coverage files recording read depth and the number of soft-clipped ends for each 50-bp window for each sample.  
+Create a coverage file using the create_coverage_file_bam.pl script as follows:
+```
+mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_threads>
+```
+(-nh 1 if sample is a non-human species)  
+**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is ${sample_name}.bam and exists in the ${sample_name} directory.  
+**read_length:** Mean read length in the bam file
+
+The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (${sample_name}.chr*.cov.gz).
+
+For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can be used to submit a single bam file job using a job manager such as Slurm and LSF.
+
 ### <a name="step1"></a>[Step-1] Select overlap calls (high-confidence calls) from SV call sets
 
 Once the MOPline-specific vcf files for each algorith and for each sample are created, selection of overlapping SV calls is first performed. Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
@@ -141,22 +158,6 @@ If the -tc option is not specified in the above command, the tool configuration 
 ### <a name="step2"></a>[Step-2] Add alignment statistics to SV sites
 
 In this step, alignment statistics such as DPR, SR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample, recording the read depth and the number of soft-clipped ends for each 50-bp window.
-
-### (1)	Create coverage files with each sample bam file
-
-Create a coverage file with read depth and the number of soft-clipped ends for each 50-bp window using the create_coverage_file_bam.pl script as follows:
-```
-mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_threads>
-```
-(-nh 1 if sample is a non-human species)  
-**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is ${sample_name}.bam and exists in the ${sample_name} directory.  
-**read_length:** Mean read length in the bam file
-
-The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (${sample_name}.chr*.cov.gz).
-
-For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can be used to submit a single bam file job using a job manager such as Slurm and LSF.
-
-### (2) Add alignment statistics to vcf files
 
 Using the coverage files you created, add alignment statistics to each SV site in the ${sample_name}.Merge.ALL.vcf file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
 ```
