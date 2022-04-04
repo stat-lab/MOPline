@@ -8,7 +8,7 @@ Detection and Genotyping of Structural Variants
 - [Composition of Required Directories](#composition)
 - [Human and Non-human Data](#hdata)
 - [General Usage](#gusage)
-	- [\[Step-0\] Run SV detection tools](#step0)
+	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
 		- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
@@ -73,7 +73,7 @@ By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) 
 
 ## <a name="gusage"></a>General Usage
 
-### <a name="step0"></a>[Step-0] Preparation of input files
+### <a name="step0"></a>[Step-0]  Preparation of input files
 
 ### <a name="run_sv"></a>(1) Run SV detection tools
 
@@ -138,7 +138,7 @@ The above command creates a Cov directory under the sample directory, which cont
 
 For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can be used to submit a single bam file job using a job manager such as Slurm and LSF.
 
-### <a name="step1"></a>[Step-1] Select overlap calls (high-confidence calls) from SV call sets
+### <a name="step1"></a>[Step-1]  Select overlap calls (high-confidence calls) from SV call sets
 
 Once the MOPline-specific vcf files for each algorith and for each sample are created, selection of overlapping SV calls is first performed. Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
 ```
@@ -157,7 +157,7 @@ make_merge_SV_vcf_script.pl -t <algorithm list, comma-separated> -tc <tool-confi
 (use -h for detailed explanation)  
 If the -tc option is not specified in the above command, the tool configuration file (Data/SVtool_pairs_config.txt) is automatically selected. This file specifies the favorable pairs of tools and minimum RSSs of overlap call selection for each of 14 algorithms we have chosen. If additional algorithms are used, the SVtool_pairs_config.txt file can be modified to specify the preferred pairs minimum RSSs for each newly added algorithm for each SV type and size range.
 
-### <a name="step2"></a>[Step-2] Add alignment statistics to SV sites
+### <a name="step2"></a>[Step-2]  Add alignment statistics to SV sites
 
 In this step, alignment statistics such as DPR, SR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample, recording the read depth and the number of soft-clipped ends for each 50-bp window.
 
@@ -174,7 +174,7 @@ The above command updates a ${sample_name}.Merge.ALL.vcf file in the vcf_directo
 
 For batch jobs, we provide a add_GT_DPR_vcf_single.pl script to submit a single vcf file job using a job manager such as Slurm and LSF.
 
-### <a name="step3"></a>[Step-3] Merge vcf files from multiple samples (joint-call)
+### <a name="step3"></a>[Step-3]  Merge vcf files from multiple samples (joint-call)
 
 Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 ```
@@ -189,7 +189,7 @@ mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix
 
 The above command outputs ${out_prefix}.vcf under ${out_dir} directory.
 
-### <a name="step4"></a>[Step-4] Genotype and SMC
+### <a name="step4"></a>[Step-4]  Genotype and SMC
 
 In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/simpleRepeat.txt.gz, Data/genomicSuperDups.txt.gz) and are automatically selected. The command using the genotype_SV_SMC_7.4.pl script is as follows:
 ```
@@ -207,7 +207,7 @@ The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to
 
 This step takes longer to perform as the sample size increases and the genome size increases. For human samples larger than 1,500, it is recommended that this step is performed for each chromosome, which can be done using the -c option (default: ALL).
 
-### <a name="step5"></a>[Step-5] Annotate
+### <a name="step5"></a>[Step-5]  Annotate
 
 Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from Ensembl (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens9), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. The annotate command can be done as follows:
 ```
@@ -216,7 +216,7 @@ mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 (-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
 This command generates two output vcf files, ${out_prefix}.annot.vcf and ${out_prefix}.AS.annot.vcf. The latter contains annotations for each sample in the FORMAT AN subfield.
 
-### <a name="step6"></a>[Step-6] Filter
+### <a name="step6"></a>[Step-6]  Filter
 
 This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human that indicate regions where large SVs (> 10 Kb) are always indeterminately called in short read WGS data. By default, the bed file is automatically selected for human. If you do not prefer to use this filtering, specify any letter (e.g., -ex 0) for the -ex option. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field.
 ```
