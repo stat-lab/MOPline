@@ -10,6 +10,8 @@ Detection and Genotyping of Structural Variants
 - [General Usage](#gusage)
 	- [\[Step-0\] Run SV detection tools](#step0)
 		- [Notes on SV calling and input bam](#notes)
+		- [(1) Run SV detection tools](#run_sv)
+		- [(2) Create covergae files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
 	- [\[Step-2\] Add alignment statistics to SV sites](#step2)
 	- [\[Step-3\] Merge vcf files from multiple samples \(joint-call\)](#step3)
