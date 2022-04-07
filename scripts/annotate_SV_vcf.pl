@@ -250,6 +250,7 @@ print STDERR "Total genes: ", scalar keys %annot, "\n";
 
 my @header;
 my %total_hit_genes;
+my %total_hit_genes_cds;
 my $total_hit_genes2 = 0;
 my $flag_1st = 0;
 
@@ -530,6 +531,7 @@ print STDERR "Missing ORF $gid\n" if (!exists $ORF{$gid});
 			elsif (($pos2 <= $gstart) and ($end2 >= $gend)){
 				$hit_region = 'AE';
 				${$SVANN{$gid}}{1} = $gname;
+				$total_hit_genes_cds{$gid} ++;
 			}
 			else{
 				if (exists $CDS{$gid}){
@@ -538,6 +540,7 @@ print STDERR "Missing ORF $gid\n" if (!exists $ORF{$gid});
 						if ((($pos2 <= $cstart) and ($end2 >= $cend)) or (($pos2 >= $cstart) and ($pos2 <= $cend)) or (($end2 >= $cstart) and ($end2 <= $cend))){
 							$hit_region = 'E';
 							${$SVANN{$gid}}{2} = $gname;
+							$total_hit_genes_cds{$gid} ++;
 							last;
 						}
 					}
@@ -548,6 +551,7 @@ print STDERR "Missing ORF $gid\n" if (!exists $ORF{$gid});
 						if ((($pos2 <= $estart) and ($end2 >= $eend)) or (($pos2 >= $estart) and ($pos2 <= $eend)) or (($end2 >= $estart) and ($end2 <= $eend))){
 							$hit_region = 'E';
 							${$SVANN{$gid}}{2.1} = $gname;
+							$total_hit_genes_cds{$gid} ++;
 							last;
 						}
 					}
@@ -632,4 +636,5 @@ close (FILE);
 close (OUT1);
 close (OUT2);
 
-print STDERR "Total hit genes: ", scalar keys %total_hit_genes, "\n";
+print STDERR "Total SV-overlapping genes: ", scalar keys %total_hit_genes, "\n";
+print STDERR "Total SV-exon overlapping genes:", scalar keys %total_hit_genes_cds, "\n";
