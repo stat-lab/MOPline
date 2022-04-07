@@ -105,7 +105,7 @@ GetOptions(
     'dis_smc2|ds' => \$disable_SMC_2nd,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
-
+pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
