@@ -249,7 +249,7 @@ close (FILE);
 print STDERR "Total genes: ", scalar keys %annot, "\n";
 
 my @header;
-my $total_hit_genes = 0;
+my %total_hit_genes;
 my $total_hit_genes2 = 0;
 my $flag_1st = 0;
 
@@ -353,7 +353,7 @@ while (my $line = <FILE>){
 			}
 		}
 		if ($hit_gene ne ''){
-			$total_hit_genes ++;
+			$total_hit_genes{$hit_gene} ++;
 			$ANN{$hit_gene} = $gname;
 		}
 		if ($hit_gene2 ne ''){
@@ -632,4 +632,4 @@ close (FILE);
 close (OUT1);
 close (OUT2);
 
-print STDERR "Total hit genes: $total_hit_genes\n";
+print STDERR "Total hit genes: ", scalar keys %total_hit_genes, "\n";
