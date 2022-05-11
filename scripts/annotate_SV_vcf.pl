@@ -279,11 +279,14 @@ while (my $line = <FILE>){
 	$type = 'INS' if ($type eq 'ALU') or ($type eq 'LINE1') or ($type eq 'L1') or ($type eq 'SVA') or ($type eq 'HERVK') or ($type eq 'VEI') or ($type eq 'NUMT');
 	$type = 'DUP' if ($type eq 'CNV') and ($line =~ /DUP/);
 	$type = 'DEL' if ($type eq 'CNV') and ($line =~ /DEL/);
-	next if ($type !~ /DEL|DUP|INS|INV|TRA/);
+	$type = 'CNV' if ($line[4] =~ /CNV:STR/);
+	next if ($type !~ /DEL|DUP|INS|INV|TRA|CNV/);
 	my $len = 0;
 	my $len2 = 0;
+	my $end = 0;
+	my $end2 = 0;
 	my $count = 0;
-	if (($type ne 'INS') and ($line[8] =~ /VP:VL/)){
+	if (($type ne 'INS') and ($type ne 'CNV') and ($line[8] =~ /VP:VL/)){
 		$len2 = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
 		foreach (@line){
 			$count ++;
@@ -298,18 +301,25 @@ while (my $line = <FILE>){
 			}
 		}
 	}
-	my $end = 0;
-	my $end2 = 0;
-	$end = $pos + $len - 1;
-	$end2 = $pos2 + $len2 - 1;
 	if ($type eq 'INS'){
 		$len = 1;
 		$len2 = 1;
 		$end = $pos2;
 		$end2 = $pos2;
 	}
+	elsif ($type eq 'CNV'){
+		$end = $1 if ($line[7] =~ /STREND=(\d+)/);
+		$len = $end - $pos + 1;
+		$end2 = $end;
+		$len2 = $len;
+	}
+	else{
+		$end = $pos + $len - 1;
+		$end2 = $pos2 + $len2 - 1;
+	}
 	$line[7] =~ s/;$// if ($line[7] =~ /;$/);
 	$line2[8] .= ':AN';
+print STDERR "$type $pos $end $end2 $len $len2\n" if ($chr eq '1') and ($pos == 66159);
 	foreach my $gstart (sort {$a <=> $b} keys %{$gene{$chr}}){
 		my $hit_gene = '';
 		my $hit_gene2 = '';
@@ -394,7 +404,7 @@ while (my $line = <FILE>){
 	if (scalar keys %ANN > 0){
 		my %SVANN;
 		$count = 0;
-		if ($line[8] =~ /VP:VL/){
+		if ((@line >= 9) and ($line[8] =~ /VP:VL/)){
 			foreach (@line){
 				$count ++;
 				next if ($count <= 9);
@@ -630,7 +640,7 @@ print STDERR "Missing ORF $gid\n" if (!exists $ORF{$gid});
 		$line2[7] .= ';SVANN=' . $svann_str if ($svann_str ne '');
 	}
 	print OUT1 join ("\t", @line), "\n";
-	print OUT2 join ("\t", @line2), "\n";
+	print OUT2 join ("\t", @line2), "\n" if (@line >= 9);
 }
 close (FILE);
 close (OUT1);
