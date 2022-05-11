@@ -134,6 +134,7 @@ while (my $line = <FILE>){
 		$bam = "$bam_path/$bam" if ($bam_path ne '');
 		system ("ln -s $bam");
 		system ("ln -s $bam.bai");
+		$bam = $bam_base;
 	}
 	print STDERR "Sample: $ID\n";
 	foreach my $tool_name (@tools){
