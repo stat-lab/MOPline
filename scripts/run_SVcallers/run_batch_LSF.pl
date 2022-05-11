@@ -159,7 +159,8 @@ while (my $line = <FILE>){
 		else{
 			$opt_str = "-b $bam -p $ID -r $ref " . $opt_str;
 		}
-		$bsub_opt .= " -n $thread" if ($thread > 1);
+		my $bsub_opt2 = $bsub_opt;
+		$bsub_opt2 .= " -n $thread";
 		my $error_log = "$ID.error.log";
 		my $out_log = "$ID.out.log";
 		my $command = "$run_script $opt_str";
@@ -171,7 +172,7 @@ while (my $line = <FILE>){
 		print OUT "LSF command: $bsub_opt\n";
 		close (OUT);
 		if ($bsub_flag == 1){
-			my $jobid = `$bsub_opt -o $out_log -e $error_log run.sh`;
+			my $jobid = `$bsub_opt2 -o $out_log -e $error_log run.sh`;
 			$jobid = $1 if ($jobid =~ /(\d+)/);
 	        print STDERR "$tool_name:$jobid\n";
 	    }

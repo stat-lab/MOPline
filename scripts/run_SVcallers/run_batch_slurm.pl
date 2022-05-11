@@ -170,7 +170,8 @@ while (my $line = <FILE>){
 		else{
 			$opt_str = "-b $bam -p $ID -r $ref " . $opt_str;
 		}
-		$sbatch_opt .= " -c $thread" if ($thread > 1);
+		my $sbatch_opt2 = $sbatch_opt;
+		$sbatch_opt2 .= " -c $thread";
 		my $error_log = "$ID.error.log";
 		my $out_log = "$ID.out.log";
 		my $command = "$run_script $opt_str";
@@ -182,13 +183,13 @@ while (my $line = <FILE>){
 		print OUT "slurm command: $sbatch_opt\n";
 		close (OUT);
 		if ($sbatch_flag == 1){
-			my $jobid = `$sbatch_opt -o $out_log -e $error_log run.sh`;
+			my $jobid = `$sbatch_opt2 -o $out_log -e $error_log run.sh`;
 			$jobid = $1 if ($jobid =~ /(\d+)/);
 			
       print STDERR "$tool_name:$jobid\n";
     }
     else{
-    	print STDERR "No sbatch command: $sbatch_opt\n";
+    	print STDERR "No sbatch command: $sbatch_opt2\n";
     }
     chdir '..';
 	}

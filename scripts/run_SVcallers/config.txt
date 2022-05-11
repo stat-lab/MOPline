@@ -48,7 +48,7 @@ threads = 4;				[run_MELT.pl -n]		# number of threads
 wham_path = ... /wham/bin/whamg;	[run_Wham.pl -cp]		# file path of Wham executable whamg
 samtool_path = ;			[run_Wham.pl -sp]		# directory path containing samtools executable unless samtools is set in $PATH
 picard_jar = ;				[run_Wham.pl -pj]		# picard jar path, to use AddOrReplaceReadGroups function, if the input bam has no RG tag
-threads = 1;				[run_Wham.pl -cp]		# number of threads
+threads = 1;				[run_Wham.pl -n]		# number of threads
 
 #<DELLY>
 delly_path = ... /delly-0.8.7/delly;	[run_DELLY.pl -cp]		# file path of DELLY executable
