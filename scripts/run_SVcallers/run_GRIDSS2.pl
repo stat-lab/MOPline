@@ -62,7 +62,8 @@ GetOptions(
 
 $ENV{PATH} = "$java_dir:" . $ENV{PATH} if ($java_dir ne '');
 $ENV{PATH} = "$R_dir:" . $ENV{PATH} if ($R_dir ne '');
-$ENV{JAVA_TOOL_OPTIONS} = '-XX:+UseSerialGC -Xmx15g -Xms15g';
+my $java_opt = '-XX:+UseSerialGC -Xmx' . $heap_size . ' -Xms' . $heap_size;
+$ENV{JAVA_TOOL_OPTIONS} = $java_opt;
 
 my $java_pass = `which java`;
 chomp $java_pass;
