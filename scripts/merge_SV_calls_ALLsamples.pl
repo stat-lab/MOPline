@@ -164,6 +164,10 @@ while (my $line = <FILE>){
 		(my $gr_sdir, $ID) = split (/,/, $gid);
 		$sample_dir = $gr_sdir;
 	}
+	if (!-d $sample_dir){
+		$sample_dir = $1 if ($sample_dir =~ /(.+?)\./);
+		$ID = $1 if ($ID =~ /(.+?)\./);
+	}
 	my $vcf_name = "$ID.Merge.ALL.vcf";
 	my $vcf = "$sample_dir/$merge_dir/$vcf_name";
 	if ($group ne ''){
