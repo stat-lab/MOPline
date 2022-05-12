@@ -88,11 +88,11 @@ else{
         chomp $line;
         next if ($line =~ /^#|^$/);
         my @line = split (/\s+/, $line);
-        my $sample = $line[0];
+        my $sample = basename ($line[0]);
         $sample = $1 if ($sample =~ /(.+?)\./);
         my $bam_base = '';
         if ($line[0] =~ /\.bam$|\.cram$/){
-            $bam_base = $line[0];
+            $bam_base = basename ($line[0]);
         }
         else{
             $bam_base = "$sample.bam";
@@ -134,7 +134,8 @@ foreach my $bam (@bam_files){
     $sample_name = basename ($bam);
     $sample_name = $1 if ($sample_name =~ /(.+?)\./);
     $sample_name = $out_prefix if ($sample_name eq '');
-
+#    system ("rm -r $cov_dir") if (-d $cov_dir) and ($sample_dir eq '');
+#    system ("rm -r $sample_dir/$cov_dir") if (-d "$sample_dir/$cov_dir") and ($sample_dir ne '');
     system ("mkdir $cov_dir") if (!-d $cov_dir) and ($sample_dir eq '');
     system ("mkdir $sample_dir/$cov_dir") if (!-d "$sample_dir/$cov_dir") and ($sample_dir ne '');
     foreach my $chr (@chr_list){

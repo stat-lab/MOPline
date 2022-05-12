@@ -48,7 +48,7 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  add_GT_DPR_vcf_thread.pl -s <sample_list> -vd <vcf_directory> -ts <tool_set> -n <num_threads> (-ri <reference_index> -gap <gap_bed> -nh 1 if sample is a non-human species)
+  add_GT_DPR_vcf.pl -s <sample_list> -vd <vcf_directory> -ts <tool_set> -n <num_threads> (-ri <reference_index> -gap <gap_bed> -nh 1 if sample is a non-human species)
   (Add genotype and alignment information (GT/DR/DS/SR tags) to the genotype field of MOP-merged vcf files with cov files that were generated with add_GT_DPR_vcf_thread.pl, using multiple threads)
 
   Options:
@@ -96,7 +96,7 @@ while (my $line = <FILE>){
     chomp $line;
     next if ($line =~ /^#|^$/);
     my @line = split (/\s+/, $line);
-    my $ID = $line[0];
+    my $ID = basename ($line[0]);
     $ID = $1 if ($ID =~ /(.+?)\./);
     my $merged_vcf = "$ID/$vcf_dir/$ID.Merge.ALL.vcf";
     my $merged_vcf2 = "$ID/$vcf_dir/$ID.Merge.ALL.noAdd.vcf";
