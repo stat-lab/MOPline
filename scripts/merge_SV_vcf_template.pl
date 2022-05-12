@@ -54,7 +54,7 @@ chomp $work_dir;
 
 my $all_tools = 'STR';
 
-if (-s $sample_list){
+if ((-s $sample_list) and (!-d $sample_list)){
     open (FILE, $sample_list) or die "$sample_list is not found: $!\n";
     while (my $line = <FILE>){
         chomp $line;
@@ -77,14 +77,22 @@ else{
 
 foreach my $ID (@ID_list){
     print STDERR "\n## ID: $ID ##\n";
-    system ("mkdir $ID/$merge_dir") if (!-d "$ID/$merge_dir");
-    system ("rm -f $ID/$merge_dir/*.vcf");
+    my $IDdir = $ID;
+    if (-d $ID){
+        system ("mkdir $ID/$merge_dir") if (!-d "$ID/$merge_dir");
+        system ("rm -f $ID/$merge_dir/*.vcf");
+    }
+    else{
+        $IDdir = '.';
+        system ("mkdir $merge_dir") if (!-d $merge_dir);
+        system ("rm -f $merge_dir/*.vcf");
+    }
 ##    
     my $inGAP_ins_mr1 = 10;
     my $inGAP_ins_mr2 = 18;
     my $inGAP_del_mr1 = 12;
     
-    my $inGAP_vcf = "$ID/inGAP/inGAP.$ID.vcf";
+    my $inGAP_vcf = "$IDdir/inGAP/inGAP.$ID.vcf";
     
     my $ins_num = `grep 'SVTYPE=INS' $inGAP_vcf | wc -l`;
     chomp $ins_num;
@@ -114,54 +122,54 @@ foreach my $ID (@ID_list){
 #INS-start
     my $ins_tools = 'STR';
         
-    system ("$script_dir/merge_SV_calls_multi_tools.pl -st INS -rl $read_length -s $ID -d $ID -t $ins_tools -nh $non_human > $ID/$merge_dir/Merge.INS.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools.pl -st INS -rl $read_length -s $ID -d $IDdir -t $ins_tools -nh $non_human > $IDdir/$merge_dir/Merge.INS.simple.vcf");
 
     my $ins_set = 'STR';
    
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INS -ins $ins_set -v $ID/$merge_dir/Merge.INS.simple.vcf > $ID/$merge_dir/MOP.Merge.INS.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INS -ins $ins_set -v $IDdir/$merge_dir/Merge.INS.simple.vcf > $IDdir/$merge_dir/MOP.Merge.INS.vcf");
 #DEL-start
     my $del_tools = 'STR';
         
-    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DEL -rl $read_length -s $ID -d $ID -t $del_tools -nh $non_human > $ID/$merge_dir/Merge.DEL.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DEL -rl $read_length -s $ID -d $IDdir -t $del_tools -nh $non_human > $IDdir/$merge_dir/Merge.DEL.simple.vcf");
     
     my $del_set_SS = 'STR';
     my $del_set_S = 'STR';
     my $del_set_M = 'STR';
     my $del_set_L = 'STR';
     
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DEL -del_s $del_set_S -del_m $del_set_M -del_l $del_set_L -v $ID/$merge_dir/Merge.DEL.simple.vcf > $ID/$merge_dir/MOP.Merge.DEL.vcf") if ($del_set_SS eq 'STR') or ($del_set_SS eq '');
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DEL -del_ss $del_set_SS -del_s $del_set_S -del_m $del_set_M -del_l $del_set_L -v $ID/$merge_dir/Merge.DEL.simple.vcf > $ID/$merge_dir/MOP.Merge.DEL.vcf") if ($del_set_SS ne 'STR') and ($del_set_SS ne '');
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DEL -del_s $del_set_S -del_m $del_set_M -del_l $del_set_L -v $IDdir/$merge_dir/Merge.DEL.simple.vcf > $IDdir/$merge_dir/MOP.Merge.DEL.vcf") if ($del_set_SS eq 'STR') or ($del_set_SS eq '');
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DEL -del_ss $del_set_SS -del_s $del_set_S -del_m $del_set_M -del_l $del_set_L -v $IDdir/$merge_dir/Merge.DEL.simple.vcf > $IDdir/$merge_dir/MOP.Merge.DEL.vcf") if ($del_set_SS ne 'STR') and ($del_set_SS ne '');
 #DUP-start    
     my $dup_tools = 'STR';
         
-    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DUP -rl $read_length -s $ID -d $ID -t $dup_tools -nh $non_human > $ID/$merge_dir/Merge.DUP.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DUP -rl $read_length -s $ID -d $IDdir -t $dup_tools -nh $non_human > $IDdir/$merge_dir/Merge.DUP.simple.vcf");
     
     my $dup_set_S = 'STR';
     my $dup_set_M = 'STR';
     my $dup_set_L = 'STR';
     
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DUP -dup_s $dup_set_S -dup_m $dup_set_M -dup_l $dup_set_L -v $ID/$merge_dir/Merge.DUP.simple.vcf > $ID/$merge_dir/MOP.Merge.DUP.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DUP -dup_s $dup_set_S -dup_m $dup_set_M -dup_l $dup_set_L -v $IDdir/$merge_dir/Merge.DUP.simple.vcf > $IDdir/$merge_dir/MOP.Merge.DUP.vcf");
 #INV-start        
     my $inv_tools = 'STR';
         
-    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st INV -rl $read_length -s $ID -d $ID -t $inv_tools -nh $non_human > $ID/$merge_dir/Merge.INV.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st INV -rl $read_length -s $ID -d $IDdir -t $inv_tools -nh $non_human > $IDdir/$merge_dir/Merge.INV.simple.vcf");
     
     my $inv_set_S = 'STR';
     my $inv_set_M = 'STR';
     my $inv_set_L = 'STR';
     
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INV -inv_s $inv_set_S -inv_m $inv_set_M -inv_l $inv_set_L -v $ID/$merge_dir/Merge.INV.simple.vcf > $ID/$merge_dir/MOP.Merge.INV.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INV -inv_s $inv_set_S -inv_m $inv_set_M -inv_l $inv_set_L -v $IDdir/$merge_dir/Merge.INV.simple.vcf > $IDdir/$merge_dir/MOP.Merge.INV.vcf");
 #Merge-start    
-    my $out_vcf = "$ID/$merge_dir/$ID.Merge.ALL.vcf";
-    $out_vcf = "$ID/$merge_dir/$group.$ID.Merge.ALL.vcf" if ($group ne '');
+    my $out_vcf = "$IDdir/$merge_dir/$ID.Merge.ALL.vcf";
+    $out_vcf = "$IDdir/$merge_dir/$group.$ID.Merge.ALL.vcf" if ($group ne '');
 
     my $merge_command = "$script_dir/merge_SV_calls_ALLtype.pl -rl $read_length -v ";
-    $merge_command .= "$ID/$merge_dir/MOP.Merge.DEL.vcf " if (-s "$ID/$merge_dir/MOP.Merge.DEL.vcf");
-    $merge_command .= "$ID/$merge_dir/MOP.Merge.DUP.vcf " if (-s "$ID/$merge_dir/MOP.Merge.DUP.vcf");
-    $merge_command .= "$ID/$merge_dir/MOP.Merge.INS.vcf " if (-s "$ID/$merge_dir/MOP.Merge.INS.vcf");
-    $merge_command .= "$ID/$merge_dir/MOP.Merge.INV.vcf " if (-s "$ID/$merge_dir/MOP.Merge.INV.vcf");
+    $merge_command .= "$IDdir/$merge_dir/MOP.Merge.DEL.vcf " if (-s "$IDdir/$merge_dir/MOP.Merge.DEL.vcf");
+    $merge_command .= "$IDdir/$merge_dir/MOP.Merge.DUP.vcf " if (-s "$IDdir/$merge_dir/MOP.Merge.DUP.vcf");
+    $merge_command .= "$IDdir/$merge_dir/MOP.Merge.INS.vcf " if (-s "$IDdir/$merge_dir/MOP.Merge.INS.vcf");
+    $merge_command .= "$IDdir/$merge_dir/MOP.Merge.INV.vcf " if (-s "$IDdir/$merge_dir/MOP.Merge.INV.vcf");
     $merge_command .= "> $out_vcf";
     system ("$merge_command");
-    system ("rm $ID/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf") if (-f "$ID/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf");
+    system ("rm $IDdir/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf") if (-f "$IDdir/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf");
 }
  

@@ -73,7 +73,7 @@ if ($non_human == 1){
     $genome_size = int ($size / 3100000000 * 100 + 0.5) / 100;
 }
 
-if (-s $sample_list){
+if ((-s $sample_list) and (!-d $sample_list)){
     open (FILE, $sample_list) or die "$sample_list is not found: $!\n";
     while (my $line = <FILE>){
         chomp $line;
@@ -96,18 +96,26 @@ else{
 
 foreach my $ID (@ID_list){
     print STDERR "\n## ID: $ID ##\n";
-    system ("mkdir $ID/$merge_dir") if (!-d "$ID/$merge_dir");
-    system ("rm -f $ID/$merge_dir/*.vcf");
+    my $IDdir = $ID;
+    if (-d $ID){
+        system ("mkdir $ID/$merge_dir") if (!-d "$ID/$merge_dir");
+        system ("rm -f $ID/$merge_dir/*.vcf");
+    }
+    else{
+        $IDdir = '.';
+        system ("mkdir $merge_dir") if (!-d $merge_dir);
+        system ("rm -f $merge_dir/*.vcf");
+    }
 
     my $ins_tools = 'inGAP Manta Wham MELT';
         
-    system ("$script_dir/merge_SV_calls_multi_tools.pl -st INS -rl $read_length -s $ID -d $ID -t $ins_tools -nh $non_human > $ID/$merge_dir/Merge.INS.4tools.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools.pl -st INS -rl $read_length -s $ID -d $IDdir -t $ins_tools -nh $non_human > $IDdir/$merge_dir/Merge.INS.4tools.simple.vcf");
     
     my $inGAP_ins_mr1 = 10;
     my $inGAP_ins_mr2 = 18;
     my $inGAP_del_mr1 = 12;
     
-    my $inGAP_vcf = "$ID/inGAP/inGAP.$ID.vcf";
+    my $inGAP_vcf = "$IDdir/inGAP/inGAP.$ID.vcf";
     
     my $ins_num = `grep 'SVTYPE=INS' $inGAP_vcf | wc -l`;
     chomp $ins_num;
@@ -153,44 +161,44 @@ foreach my $ID (@ID_list){
     
     my $ins_set = "Manta:3=inGAP:$inGAP_ins_mr1 Wham:3=inGAP:$inGAP_ins_mr1 Manta:3=Wham:3 inGAP:$inGAP_ins_mr2 Manta:28 MELT:4";
    
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INS -ins $ins_set -v $ID/$merge_dir/Merge.INS.4tools.simple.vcf > $ID/$merge_dir/MOP.Merge.INS.4tools.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INS -ins $ins_set -v $IDdir/$merge_dir/Merge.INS.4tools.simple.vcf > $IDdir/$merge_dir/MOP.Merge.INS.4tools.vcf");
     
     my $del_tools = 'CNVnator inGAP Manta MATCHCLIP Wham GRIDSS';
         
-    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DEL -rl $read_length -s $ID -d $ID -t $del_tools -nh $non_human > $ID/$merge_dir/Merge.DEL.6tools.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DEL -rl $read_length -s $ID -d $IDdir -t $del_tools -nh $non_human > $IDdir/$merge_dir/Merge.DEL.6tools.simple.vcf");
     
     my $del_set_S = 'Manta:3=inGAP:7 Wham:5=Manta:3 Wham:5=inGAP:7 MATCHCLIP:4=inGAP:7 MATCHCLIP:4=Manta:3 MATCHCLIP:4=Wham:5 GRIDSS:6=inGAP:7 GRIDSS:6=Manta:3 GRIDSS:6=MATCHCLIP:4 GRIDSS:6=Wham:5';
     my $del_set_M = 'CNVnator:3=# MATCHCLIP:3=Wham:3 MATCHCLIP:3=inGAP:5 Manta:3=Wham:3 Manta:3=inGAP:5 Manta:3=MATCHCLIP:3 Wham:3=inGAP:5 GRIDSS:6=inGAP:5 GRIDSS:6=MATCHCLIP:3 GRIDSS:6=Wham:3 CNVnator:7'; # inGAP:8 Wham:12';
     my $del_set_L = "CNVnator:3=# Manta:3=Wham:3 MATCHCLIP:3=Wham:3 MATCHCLIP:3=Manta:3 MATCHCLIP:3=inGAP:5 Manta:3=inGAP:5 Wham:3=inGAP:5 GRIDSS:6=inGAP:5 GRIDSS:6=Wham:3 GRIDSS:6=MATCHCLIP:3 CNVnator:8 inGAP:$inGAP_del_mr1 Wham:6 MATCHCLIP:4";
     
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DEL -del_s $del_set_S -del_m $del_set_M -del_l $del_set_L -v $ID/$merge_dir/Merge.DEL.6tools.simple.vcf > $ID/$merge_dir/MOP.Merge.DEL.6tools.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DEL -del_s $del_set_S -del_m $del_set_M -del_l $del_set_L -v $IDdir/$merge_dir/Merge.DEL.6tools.simple.vcf > $IDdir/$merge_dir/MOP.Merge.DEL.6tools.vcf");
     
     my $dup_tools = 'CNVnator inGAP Manta MATCHCLIP Wham GRIDSS';
         
-    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DUP -rl $read_length -s $ID -d $ID -t $dup_tools -nh $non_human > $ID/$merge_dir/Merge.DUP.6tools.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st DUP -rl $read_length -s $ID -d $IDdir -t $dup_tools -nh $non_human > $IDdir/$merge_dir/Merge.DUP.6tools.simple.vcf");
     
     my $dup_set_S = 'MATCHCLIP:3=Manta:4 MATCHCLIP:3=Wham:4 Wham:4=Manta:4 GRIDSS:5=Wham:4 MATCHCLIP:7 GRIDSS:7';
     my $dup_set_M = 'CNVnator:3=# inGAP:3=Manta:3 inGAP:5=GRIDSS:6 CNVnator:6';
     my $dup_set_L = 'CNVnator:2=Manta:3 Manta:3=Wham:3 CNVnator:2=MATCHCLIP:3 CNVnator:2=GRIDSS:3 CNVnator:5 inGAP:4';
     
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DUP -dup_s $dup_set_S -dup_m $dup_set_M -dup_l $dup_set_L -v $ID/$merge_dir/Merge.DUP.6tools.simple.vcf > $ID/$merge_dir/MOP.Merge.DUP.6tools.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t DUP -dup_s $dup_set_S -dup_m $dup_set_M -dup_l $dup_set_L -v $IDdir/$merge_dir/Merge.DUP.6tools.simple.vcf > $IDdir/$merge_dir/MOP.Merge.DUP.6tools.vcf");
         
     my $inv_tools = 'inGAP Manta Wham GRIDSS';
         
-    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st INV -rl $read_length -s $ID -d $ID -t $inv_tools -nh $non_human > $ID/$merge_dir/Merge.INV.4tools.simple.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_eachSize.pl -st INV -rl $read_length -s $ID -d $IDdir -t $inv_tools -nh $non_human > $IDdir/$merge_dir/Merge.INV.4tools.simple.vcf");
     
     my $inv_set_S = 'inGAP:10=Manta:20 Wham:18=inGAP:10 Manta:20=Wham:18';
     my $inv_set_M = 'inGAP:3=Manta:3 Wham:5=inGAP:3 Manta:3=Wham:5';
     my $inv_set_L = 'inGAP:5=Manta:3 Wham:5=inGAP:5 Manta:3=Wham:5 GRIDSS:7=Manta:3';
     
-    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INV -inv_s $inv_set_S -inv_m $inv_set_M -inv_l $inv_set_L -v $ID/$merge_dir/Merge.INV.4tools.simple.vcf > $ID/$merge_dir/MOP.Merge.INV.4tools.vcf");
+    system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INV -inv_s $inv_set_S -inv_m $inv_set_M -inv_l $inv_set_L -v $IDdir/$merge_dir/Merge.INV.4tools.simple.vcf > $IDdir/$merge_dir/MOP.Merge.INV.4tools.vcf");
     
-    my $out_vcf = "$ID/$merge_dir/$ID.Merge.ALL.vcf";
-    $out_vcf = "$ID/$merge_dir/$group.$ID.Merge.ALL.vcf" if ($group ne '');
+    my $out_vcf = "$IDdir/$merge_dir/$ID.Merge.ALL.vcf";
+    $out_vcf = "$IDdir/$merge_dir/$group.$ID.Merge.ALL.vcf" if ($group ne '');
 
-    system ("$script_dir/merge_SV_calls_ALLtype.pl -rl $read_length -v $ID/$merge_dir/MOP.Merge.DEL.6tools.vcf $ID/$merge_dir/MOP.Merge.INS.4tools.vcf $ID/$merge_dir/MOP.Merge.DUP.6tools.vcf $ID/$merge_dir/MOP.Merge.INV.4tools.vcf > $out_vcf");
+    system ("$script_dir/merge_SV_calls_ALLtype.pl -rl $read_length -v $IDdir/$merge_dir/MOP.Merge.DEL.6tools.vcf $IDdir/$merge_dir/MOP.Merge.INS.4tools.vcf $IDdir/$merge_dir/MOP.Merge.DUP.6tools.vcf $IDdir/$merge_dir/MOP.Merge.INV.4tools.vcf > $out_vcf");
     
-    system ("rm $ID/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf") if (-f "$ID/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf");
+    system ("rm $IDdir/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf") if (-f "$IDdir/$merge_dir/$group.$ID.Merge.ALL.noGT.vcf");
 }
 
  
