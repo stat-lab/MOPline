@@ -237,7 +237,7 @@ foreach my $id (@sample_id){
 		my @line = split (/\t/, $line);
 		my $chr = $line[0];
 		if ($target_chr eq 'ALL'){
-	        next if ($non_human == 0) and ($chr !~ /^c*h*r*[dXY]+$/);
+	        next if ($non_human == 0) and ($chr !~ /^c*h*r*[\dXY]+$/);
 	    }
 	    elsif (!exists $target_chr{$chr}){
 	        next;
