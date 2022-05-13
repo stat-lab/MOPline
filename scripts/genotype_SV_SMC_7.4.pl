@@ -119,7 +119,7 @@ pod2usage(-verbose => 0) if $help;
    --out_prefix pr -p <STR>  prefix name of an output vcf file [default: MOPline]
    --target_chr or -c <STR>  target chromosome [default: ALL]
    --target_type or -tt <STR> target SV type [default: ALL]
-   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) or a list file describing tool names in each line [default: 7tools]
+   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) or a list file describing tool names in each line if using a custum toolset [default: 7tools]
    --toolset_all or -ta <STR> consider all the SVs calls (except for < 100 bp DEL/DUP) from the original single tools to execute SMC (if FLASE, consider minimum supporting reads indicated in a tool parameter file, specified with -ts or -ct option) [default: TRUE]
    --non_human or -nh <INT>  samples are non-human species (0: human, 1: non-human) [default: 0]
    --build or -b <INT>       reference build (GRCh37, GRCh38) number (37 or 38) [default: 37]
