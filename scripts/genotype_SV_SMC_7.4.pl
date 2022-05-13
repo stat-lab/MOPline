@@ -107,6 +107,7 @@ GetOptions(
 ) or pod2usage(-verbose => 0);
 pod2usage(-verbose => 0) if $help;
 
+
 =head1 SYNOPSIS
 
   genotype_SV_SMC_7.4.pl -v <vcf file> -ts <preset name of tool set> -od <output directory> -p <output prefix> -n <num of threads> (-nh 1 -sr <simple repeat file> -sd <segmental dup file> if sample is a non-human species)
@@ -158,11 +159,12 @@ my $tool_set_list = "$data_dir/SVtool_param.txt";
 
 my @tools = ();
 
-@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham') if ($tool_set eq '4tools');
-@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'MELT') if ($tool_set eq '6tools_1');
-@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS') if ($tool_set eq '6tools_2');
-@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'DELLY', 'MELT', 'Lumpy', 'SoftSV') if ($tool_set eq '9tools');
-@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'DELLY', 'MELT', 'Lumpy', 'SoftSV', 'forestSV', 'Mobster') if ($tool_set eq '11tools');
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham') if ($tool_set =~ /4tools/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'MELT') if ($tool_set =~ /6tools_1/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS') if ($tool_set =~ /6tools_2/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS', 'MELT') if ($tool_set =~ /7tools/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'DELLY', 'MELT', 'Lumpy', 'SoftSV') if ($tool_set =~ /9tools/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'DELLY', 'MELT', 'Lumpy', 'SoftSV', 'forestSV', 'Mobster') if ($tool_set =~ /11tools/);
 if ((@tools == 0) and (-f $tool_set)){
     open (FILE, $tool_set);
     while (my $line = <FILE>){
@@ -3124,7 +3126,7 @@ sub collect_call{
 		    $tool_vcf = "$sample_dir/$id/$tool2.$id.vcf" if (!-f $tool_vcf);
 		    $tool_vcf = "$sample_dir/$tool/$tool2.$id.vcf" if (!-f $tool_vcf);
 		    $tool_vcf = "$sample_dir/$tool2.$id.vcf" if (!-f $tool_vcf);
-		    
+print STDERR "$GID\t$tool_vcf\n";		    
 		    open (FILE, $tool_vcf) or die "$tool_vcf is not found: $!\n";
 		    while (my $line = <FILE>){
 				chomp $line;
