@@ -3125,8 +3125,7 @@ sub collect_call{
 		    $tool_vcf = "$sample_dir/$Gdir/$id/MELT-MEI/MELT.MEI.$id.vcf" if (!-f $tool_vcf) and ($tool eq 'MELT');
 		    $tool_vcf = "$sample_dir/$id/$tool2.$id.vcf" if (!-f $tool_vcf);
 		    $tool_vcf = "$sample_dir/$tool/$tool2.$id.vcf" if (!-f $tool_vcf);
-		    $tool_vcf = "$sample_dir/$tool2.$id.vcf" if (!-f $tool_vcf);
-print STDERR "$GID\t$tool_vcf\n";		    
+		    $tool_vcf = "$sample_dir/$tool2.$id.vcf" if (!-f $tool_vcf);		    
 		    open (FILE, $tool_vcf) or die "$tool_vcf is not found: $!\n";
 		    while (my $line = <FILE>){
 				chomp $line;
