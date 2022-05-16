@@ -277,8 +277,6 @@ while (my $line = <FILE>){
 	my $pos2 = $pos;
 	my $type = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
 	$type = 'INS' if ($type eq 'ALU') or ($type eq 'LINE1') or ($type eq 'L1') or ($type eq 'SVA') or ($type eq 'HERVK') or ($type eq 'VEI') or ($type eq 'NUMT');
-	$type = 'DUP' if ($type eq 'CNV') and ($line =~ /DUP/);
-	$type = 'DEL' if ($type eq 'CNV') and ($line =~ /DEL/);
 	$type = 'CNV' if ($line[4] =~ /CNV:STR/);
 	next if ($type !~ /DEL|DUP|INS|INV|TRA|CNV/);
 	my $len = 0;
@@ -286,6 +284,21 @@ while (my $line = <FILE>){
 	my $end = 0;
 	my $end2 = 0;
 	my $count = 0;
+	my $info_pos_count = 0;
+	my $info_len_count = 0;
+	my $count2 = 0;
+	if ($line[8] =~ /VP:VL/){
+		my @INFO = split (/:/, $line[8]);
+		foreach (@INFO){
+			if ($_ eq 'VP'){
+				$info_pos_count = $count2;
+			}
+			elsif ($_ eq 'VL'){
+				$info_len_count = $count2;
+			}
+			$count2 ++;
+		}
+	}
 	if (($type ne 'INS') and ($type ne 'CNV') and ($line[8] =~ /VP:VL/)){
 		$len2 = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
 		foreach (@line){
@@ -293,13 +306,17 @@ while (my $line = <FILE>){
 			next if ($count <= 9);
 			next if ($_ =~ /^0\/0/);
 			my @info = split (/:/, $_);
-			if (($info[2] > 0) and ($info[2] < $pos)){
-				$pos = $info[2];
+			if (($info[$info_pos_count] > 0) and ($info[$info_pos_count] < $pos)){
+				$pos = $info[$info_pos_count];
 			}
-			if ($info[3] > $len){
-				$len = $info[3];
+			if ($info[$info_len_count] > $len){
+				$len = $info[$info_len_count];
 			}
 		}
+	}
+	elsif (($type ne 'INS') and ($type ne 'CNV')){
+		$len = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
+		$len2 = $len;
 	}
 	if ($type eq 'INS'){
 		$len = 1;
@@ -410,8 +427,8 @@ print STDERR "$type $pos $end $end2 $len $len2\n" if ($chr eq '1') and ($pos == 
 				next if ($count <= 9);
 				my @info = split (/:/, $_);
 				next if ($info[0] eq '0/0');
-				my $spos = $info[2];
-				my $slen = $info[3];
+				my $spos = $info[$info_pos_count];
+				my $slen = $info[$info_len_count];
 				my $send = $spos + $slen - 1 if ($type ne 'INS');
 				$send = $spos if ($type eq 'INS');
 				my $ann_str = '';
