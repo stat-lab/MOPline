@@ -61,7 +61,7 @@ git clone https://github.com/stat-lab/MOPline
 The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
 
 #### Sample data
-[Sample datasets](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
+[Sample datasets](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
 
 ## <a name="composition"></a>Composition of required directories (sample directory and tool directory)
 
@@ -227,7 +227,7 @@ mopline filter -v <input vcf> > [output vcf]
 
 ## <a name="qstart"></a>Quick Start with Sample Data
 
-The [sample data](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) provided includes two sample datasets: human and yeast (*Saccharomyces cerevisia*) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1000 Genomes CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files. An [output dataset](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data_output.tar.gz) generated with this dataset using MOPline-7t is also available.
+The [sample data](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) provided includes two sample datasets: human and yeast (*Saccharomyces cerevisia*) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1000 Genomes CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files. An [output dataset](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data_output.tar.gz) generated with this dataset using MOPline-7t is also available.
 
 ### <a name="hsample"></a>A: Using Human SV datasets of 6 samples
 
