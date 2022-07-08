@@ -92,6 +92,22 @@ while (my $line = <FILE>){
     my $cigar = $line[5];
     next if ($cigar eq '*');
     next if ($cigar =~ /H/);
+    my $flag = $line[1];
+    my $sec_align = 0;
+    if ($flag >= 2048){
+        $flag -= 2048;
+    }
+    if ($flag >= 1024){
+        $flag -= 1024;
+    }
+    if ($flag >= 512){
+        $flag -= 512;
+    }
+    if ($flag >= 256){
+        $flag -= 256;
+        $sec_align = 1;
+    }
+    next if ($sec_align == 1);
     my $mapq = $line[4];
     my $pos = $line[3];
     my $len = $read_length if ($read_length > 0);

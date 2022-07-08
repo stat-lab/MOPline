@@ -2897,7 +2897,7 @@ foreach (@header){
         next;
     }
     elsif (($_ =~ /^##contig/) and ($contig_flag == 0)){
-        print OUT "##FORMAT=<ID=MC,Number=1,Type=Integer,Description=\"Site corrected for missing calls\">\n";
+        print OUT "##FORMAT=<ID=MC,Number=1,Type=Integer,Description=\"Levels of SMC genotyping\">\n";
         print OUT "$_\n";
         $contig_flag = 1;
         next;
