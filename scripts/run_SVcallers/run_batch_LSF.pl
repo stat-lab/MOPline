@@ -87,9 +87,6 @@ while (my $line = <FILE>){
 			elsif ($opt1 eq 'run_svcaller_dir'){
 				$run_svcaller_dir = $arg;
 			}
-			if (($tool eq 'CNVnator') and ($opt1 eq 'ref_dir')){
-				$ref = $arg if ($arg ne '');
-			}
 		}
 		elsif ($tool ne ''){
 			if ($line =~ /\[\s*(\S+)\s+(\S+)\s*\]/){
@@ -154,7 +151,7 @@ while (my $line = <FILE>){
 		$bam = "../$bam" if ($bam !~ /\//);
 		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta/);
 		$opt_str =~ s/\s$//;
-		if ($tool_name eq 'CNVnator'){
+		if (($tool_name eq 'CNVnator') and ($opt_str =~ /-r\s/)){
 			$opt_str = "-b $bam -p $ID " . $opt_str;
 		}
 		else{
