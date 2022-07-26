@@ -17,7 +17,7 @@ gap_bed = ;				[run_CNVnator.pl -g]		# gap bed file indicating gap regions in re
 
 <GRIDSS>
 gridss_jar = ... /gridss-2.10.2/gridss-2.10.2-gridss-jar-with-dependencies.jar;	[run_GRIDSS2.pl -gj]	#GRIDSS jar file path
-gridss_sh = ... /gridss-2.10.2/scripts/gridss.sh;				[run_GRIDSS2.pl -gs]	#GRIDSS sh script file path
+gridss_sh = ... /gridss-2.13.1/scripts/gridss;				[run_GRIDSS2.pl -gs]	#GRIDSS sh script file path
 black_list = ;				[run_GRIDSS2.pl -bl]		# black list bed file if any
 java_path = ;				[run_GRIDSS2.pl -jp]		# directory path containing java executable (1.8 or later) unless the corrsponding version of java is set in $PATH
 r_path = ;				[run_GRIDSS2.pl -rp]		# directory path containing R executable (4.0 or later) unless the corrsponding version of R is set in $PATH
