@@ -40,7 +40,7 @@ The tools required depend on the tool presets used in MOPline or the tool sets c
 The presets customized in this MOPline package are follows:  
 - **Preset: 7tools (MOPline-7t)**  
 	- [CNVnator](https://github.com/abyzovlab/CNVnator)  
-	- [GRIDSS](https://github.com/PapenfussLab/grids)  
+	- [GRIDSS](https://github.com/PapenfussLab/gridss)  
 	- [inGAP](https://sourceforge.net/projects/ingap/files/ingap)  
 	- [Manta](https://github.com/Illumina/manta)  
 	- [MATCHCLIP](https://github.com/yhwu/matchclips2)  
