@@ -85,10 +85,10 @@ foreach (@log_file){
 my $ref_base = basename ($ref);
 system ("ln -s $ref") if ($ref ne $ref_base);
 
-my $command = "$gridss_sh --steps All --jvmheap $heap_size --otherjvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --blacklist $black_list --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($gridss_sh =~ /\.sh$/);
-$command = "$gridss_sh --steps All --jvmheap $heap_size --otherjvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($black_list eq '') and ($gridss_sh =~ /\.sh$/);
-$command = "$gridss_sh --steps All --jvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --blacklist $black_list --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($gridss_sh !~ /\.sh$/);
-$command = "$gridss_sh --steps All --jvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($black_list eq '') and ($gridss_sh !~ /\.sh$/);
+my $command = "$gridss_sh --steps All --jvmheap $heap_size --otherjvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --blacklist $black_list --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($gridss_sh !~ /\.sh$/);
+$command = "$gridss_sh --steps All --jvmheap $heap_size --otherjvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($black_list eq '') and ($gridss_sh !~ /\.sh$/);
+$command = "$gridss_sh --steps All --jvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --blacklist $black_list --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($gridss_sh =~ /\.sh$/);
+$command = "$gridss_sh --steps All --jvmheap $heap_size --reference $ref_base --output $out_prefix.vcf.gz --assembly $out_prefix.gridss.assembly.bam --jar $gridss_jar --threads $cores $input_bam 2>$out_prefix.gridss.log" if ($black_list eq '') and ($gridss_sh =~ /\.sh$/);
 
 
 open (OUT, ">> $out_prefix.command.log");
