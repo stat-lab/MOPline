@@ -9,7 +9,7 @@ run_svcaller_dir = ;		# run_SVcallers directory path of MOPline package unless t
 
 
 <CNVnator>
-cnvnator_command = ... /cmvnator;	[run_CNVnator.pl -cp]		# file path of cnvnator command cnvnator
+cnvnator_command = ... /cnvnator;	[run_CNVnator.pl -cp]		# file path of cnvnator command cnvnator
 root_dir = ... /root;			[run_CNVnator.pl -rd]		# ROOT package install directory
 ref_dir = ;				[run_CNVnator.pl -r]		# reference directory containing chr-separated fasta files, necessary for non-human species
 build = 37;				[run_CNVnator.pl -build]	# specify 38 if bam files are based on human build38 reference
