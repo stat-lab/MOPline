@@ -1942,14 +1942,14 @@ if ($total_samples >= 5){      # merge overlapping SVs in LD (>= 0.7 r2)
 						$overlap_flag = 1 if ($len / $pre_len < 3) and ($len / $pre_len > 0.33);
 				    }
 				}
-                if ($overlap_flag == 1){
-				    my $temp_vcf = "$temp_dir/$out_prefix.chr$chr.$pos.vcf";
+                		if ($overlap_flag == 1){
+				    my $temp_vcf = "$temp_dir/$out_prefix.$chr.$pos.vcf";
 				    open (OUT1, "> $temp_vcf");
 				    map{print OUT1 "$_\n"} @header;
 				    print OUT1 "$pre_line\n";
 				    print OUT1 "$line\n";
 				    close (OUT);
-				    my $ld_outprefix = "$temp_dir/$out_prefix.chr$chr.$pos";
+				    my $ld_outprefix = "$temp_dir/$out_prefix.$chr.$pos";
 				    system ("vcftools --vcf $temp_vcf --geno-r2 --ld-window-bp 1000000 --min-r2 0 --out $ld_outprefix 2>>$out_prefix.vcftool.log");
 				    my $ld_out = "$ld_outprefix.geno.ld";
 				    my $hit_ld = 0;
@@ -2079,13 +2079,13 @@ foreach my $chr (sort keys %INS){		# mergeing overlapped DUP-INS
 				    $hit_flag = 1;
 				}
 				else{
-				    my $temp_vcf = "$temp_dir/$out_prefix.chr$chr.$ipos.vcf";
+				    my $temp_vcf = "$temp_dir/$out_prefix.$chr.$ipos.vcf";
 				    open (OUT1, "> $temp_vcf");
 				    map{print OUT1 "$_\n"} @header;
 				    print OUT1 "$ins_line\n";
 				    print OUT1 "$dup_line\n";
 				    close (OUT);
-				    my $ld_outprefix = "$temp_dir/$out_prefix.chr$chr.$ipos";
+				    my $ld_outprefix = "$temp_dir/$out_prefix.$chr.$ipos";
 				    system ("vcftools --vcf $temp_vcf --geno-r2 --ld-window-bp 1000000 --min-r2 0 --out $ld_outprefix 2>>$out_prefix.vcftool.log");
 				    my $ld_out = "$ld_outprefix.geno.ld";
 				    if (-f $ld_out){
