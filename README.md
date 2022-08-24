@@ -207,7 +207,7 @@ The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to
 
 This step takes longer to perform as the sample size increases and the genome size increases. For human samples larger than 1,500, it is recommended that this step is performed for each chromosome, which can be done using the -c option (default: ALL).
 
-### <a name="step5"></a>[Step-5]  Annotate **(optional)**
+### <a name="step5"></a>[Step-5]  Annotate ####(optional)
 
 Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample in an additional output vcf file. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from Ensembl (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens9), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. As input vcf file, an output vcf file from step2, step3, step4, or step6 can be used. The annotate command can be done as follows:
 ```
@@ -216,7 +216,7 @@ mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 (-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
 This command generates two output vcf files, ${out_prefix}.annot.vcf and ${out_prefix}.AS.annot.vcf. The latter contains annotations for each sample in the FORMAT AN subfield.
 
-### <a name="step6"></a>[Step-6]  Filter **(optional)**
+### <a name="step6"></a>[Step-6]  Filter (optional)
 
 This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human that indicate regions where large SVs (> 10 Kb) are always indeterminately called in short read WGS data. By default, the bed file is automatically selected for human. If you do not prefer to use this filtering, specify any letter (e.g., -ex 0) for the -ex option. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field. As input vcf file, an output vcf file from step2, step3, step4, or step5 can be used.
 ```
