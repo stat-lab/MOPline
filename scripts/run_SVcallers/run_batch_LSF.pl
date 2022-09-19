@@ -128,7 +128,10 @@ while (my $line = <FILE>){
 	if ($bam_base =~ /\.cram$/){
 		die "input alignment file should be in bam format (not cram)\n";
 	}
-	$bam_base = "$ID.bam" if ($bam_base !~ /.bam$/);
+	if ($bam_base !~ /\.bam$/){
+		$bam_base = "$ID.bam";
+		$bam .= '.bam';
+	}
 	system ("mkdir $ID") if (!-d $ID);
 	chdir $ID;
 	if (!-f $bam_base){
