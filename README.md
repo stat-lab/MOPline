@@ -77,7 +77,7 @@ By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) 
 
 ### <a name="run_sv"></a>(1) Run SV detection tools
 
-The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline-specific vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
+The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline-specific vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). Because many short read-based SV detection algorithms, including MOPline, cannot determine the length of INSs, the length of the INS is recorded as 0 or 1 in many INS calls.The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
 
 **Table 1.** Conversion scripts for 10 SV detection algorithms
 |Algorithm|Command using a conversion script (for a sample name, AB)                      |
