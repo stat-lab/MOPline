@@ -129,20 +129,25 @@ my $flag = 0;
 my $gene_id = '';
 my %ref_chr;
 my $chr_prefix = '';
+my $vcf_column = 0;
 
-open (FILE, $sv_vcf) or die "$sv_vcf is not found: $!\n";
+open (FILE, $sv_vcf) or die "$sv_vcf is not found:$!\n" if ($sv_vcf !~ /\.gz$/);
+open (FILE, "gzip -dc $sv_vcf |") or die "$sv_vcf is not found:$!\n" if ($sv_vcf =~ /\.gz$/);
 while (my $line = <FILE>){
 	chomp $line;
 	if ($line =~ /^##contig=<ID=(.+),/){
 		my $chr = $1;
+		$chr =~ s/^chr// if ($chr =~ /^chr/) and ($non_human == 0) and ($build == 37);
 		$ref_chr{$chr} = 1;
-		$chr_prefix = $1 if ($chr =~ /^(.+?)[\dIVX]+/);
+		$chr_prefix = $1 if ($chr =~ /^(.*?)[\dIVX]+/);
+	}
+	elsif ($line =~ /^#CHROM/){
+		my @line = split (/\t/, $line);
+		$vcf_column = scalar @line;
 	}
 	last if ($line !~/^#/);
 }
 close (FILE);
-#print STDERR "chr-prefix: $chr_prefix\n";
-
 
 open (FILE, "gzip -dc $ref_gff |") or die "$ref_gff file is not found: $!\n" if ($ref_gff =~ /\.gz$/);
 open (FILE, $ref_gff) or die "$ref_gff file is not found: $!\n" if ($ref_gff !~ /\.gz$/);
@@ -171,6 +176,7 @@ while (my $line = <FILE>){
 			}
 		}
 	}
+#die "inconsistent chrom: $chr\n" if ($chr !~ /^[\dXY]+$/);
 	next if ($target_chr ne 'ALL') and ($chr ne $target_chr);
 	my $code = $line[2];
 	next if ($line[1] eq 'GRCh37') or ($line[1] eq 'GRCh38');
@@ -246,7 +252,7 @@ while (my $line = <FILE>){
 }
 close (FILE);
 
-print STDERR "Total genes: ", scalar keys %annot, "\n";
+print STDERR "Total genes in $target_chr: ", scalar keys %annot, "\n";
 
 my @header;
 my %total_hit_genes;
@@ -259,8 +265,9 @@ $vcf_out1 = "$temp_dir/$out_prefix.annot.$target_chr.vcf" if ($target_chr ne 'AL
 my $vcf_out2 = "$out_prefix.AS.annot.vcf" if ($target_chr eq 'ALL');
 $vcf_out2 = "$temp_dir/$out_prefix.AS.annot.$target_chr.vcf" if ($target_chr ne 'ALL');
 open (OUT1, "> $vcf_out1");
-open (OUT2, "> $vcf_out2");
-open (FILE, $sv_vcf) or die "$sv_vcf is not found: $!\n";
+open (OUT2, "> $vcf_out2") if ($vcf_column > 10);
+open (FILE, $sv_vcf) or die "$sv_vcf is not found:$!\n" if ($sv_vcf !~ /\.gz$/);
+open (FILE, "gzip -dc $sv_vcf |") or die "$sv_vcf is not found:$!\n" if ($sv_vcf =~ /\.gz$/);
 while (my $line = <FILE>){
 	chomp $line;
 	if ($line =~ /^#/){
@@ -278,7 +285,7 @@ while (my $line = <FILE>){
 	my $type = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
 	$type = 'INS' if ($type eq 'ALU') or ($type eq 'LINE1') or ($type eq 'L1') or ($type eq 'SVA') or ($type eq 'HERVK') or ($type eq 'VEI') or ($type eq 'NUMT');
 	$type = 'CNV' if ($line[4] =~ /CNV:STR/);
-	next if ($type !~ /DEL|DUP|INS|INV|TRA|CNV/);
+	next if ($type !~ /DEL|DUP|INS|INV|TRA|CNV|CPX/);
 	my $len = 0;
 	my $len2 = 0;
 	my $end = 0;
@@ -287,7 +294,7 @@ while (my $line = <FILE>){
 	my $info_pos_count = 0;
 	my $info_len_count = 0;
 	my $count2 = 0;
-	if ($line[8] =~ /VP:VL/){
+	if ((defined $line[8]) and ($line[8] =~ /VP:VL/)){
 		my @INFO = split (/:/, $line[8]);
 		foreach (@INFO){
 			if ($_ eq 'VP'){
@@ -299,12 +306,12 @@ while (my $line = <FILE>){
 			$count2 ++;
 		}
 	}
-	if (($type ne 'INS') and ($type ne 'CNV') and ($line[8] =~ /VP:VL/)){
+	if (($type ne 'INS') and ($type ne 'CNV') and (defined $line[8]) and ($line[8] =~ /VP:VL/)){
 		$len2 = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
 		foreach (@line){
 			$count ++;
 			next if ($count <= 9);
-			next if ($_ =~ /^0\/0/);
+			next if ($_ =~ /^0[\|\/]0/);
 			my @info = split (/:/, $_);
 			if (($info[$info_pos_count] > 0) and ($info[$info_pos_count] < $pos)){
 				$pos = $info[$info_pos_count];
@@ -325,7 +332,12 @@ while (my $line = <FILE>){
 		$end2 = $pos2;
 	}
 	elsif ($type eq 'CNV'){
-		$end = $1 if ($line[7] =~ /STREND=(\d+)/);
+		if ($line[7] =~ /STREND=(\d+)/){
+			$end = $1;
+		}
+		else{
+			$end = $pos + $len - 1;
+		}
 		$len = $end - $pos + 1;
 		$end2 = $end;
 		$len2 = $len;
@@ -335,8 +347,7 @@ while (my $line = <FILE>){
 		$end2 = $pos2 + $len2 - 1;
 	}
 	$line[7] =~ s/;$// if ($line[7] =~ /;$/);
-	$line2[8] .= ':AN';
-print STDERR "$type $pos $end $end2 $len $len2\n" if ($chr eq '1') and ($pos == 66159);
+	$line2[8] .= ':AN' if ($vcf_column > 10);
 	foreach my $gstart (sort {$a <=> $b} keys %{$gene{$chr}}){
 		my $hit_gene = '';
 		my $hit_gene2 = '';
@@ -403,17 +414,17 @@ print STDERR "$type $pos $end $end2 $len $len2\n" if ($chr eq '1') and ($pos == 
 			if (($info_flag == 1) and ($header !~ /^##INFO=/)){
 				print OUT1 "##INFO=<ID=SVANN,Number=1,Type=String,Description=\"Affected_Gene,GeneID|GeneName|Region\">\n";
 				print OUT1 "$header\n";
-				print OUT2 "##INFO=<ID=SVANN,Number=1,Type=String,Description=\"Affected_Gene,GeneID|GeneName|Region\">\n";
-				print OUT2 "$header\n";
+				print OUT2 "##INFO=<ID=SVANN,Number=1,Type=String,Description=\"Affected_Gene,GeneID|GeneName|Region\">\n" if ($vcf_column > 10);
+				print OUT2 "$header\n" if ($vcf_column > 10);
 				$info_flag = 0;
 			}
 			else{
 				if (($format_flag == 1) and ($header !~ /^##FORMAT/)){
-					print OUT2 "##FORMAT=<ID=AN,Number=1,Type=String,Description=\"Annotation for each sample, E:exon, AE:all exons, I:intron, 5U:5UTR, 3U:3UTR, 5F:flank5, 3F:flank3\">\n";
+					print OUT2 "##FORMAT=<ID=AN,Number=1,Type=String,Description=\"Annotation for each sample, E:exon, AE:all exons, I:intron, 5U:5UTR, 3U:3UTR, 5F:flank5, 3F:flank3\">\n" if ($vcf_column > 10);
 					$format_flag = 0;
 				}
 				print OUT1 "$header\n";
-				print OUT2 "$header\n";
+				print OUT2 "$header\n" if ($vcf_column > 10);
 			}
 		}
 		$flag_1st = 1;
@@ -421,7 +432,7 @@ print STDERR "$type $pos $end $end2 $len $len2\n" if ($chr eq '1') and ($pos == 
 	if (scalar keys %ANN > 0){
 		my %SVANN;
 		$count = 0;
-		if ((@line >= 9) and ($line[8] =~ /VP:VL/)){
+		if (($vcf_column > 10) and (defined $line[8]) and ($line[8] =~ /VP:VL/)){
 			foreach (@line){
 				$count ++;
 				next if ($count <= 9);
@@ -654,14 +665,14 @@ print STDERR "Missing ORF $gid\n" if (!exists $ORF{$gid});
 		}
 		$svann_str =~ s/,$// if ($svann_str =~ /,$/);
 		$line[7] .= ';SVANN=' . $svann_str if ($svann_str ne '');
-		$line2[7] .= ';SVANN=' . $svann_str if ($svann_str ne '');
+		$line2[7] .= ';SVANN=' . $svann_str if ($vcf_column > 10) and ($svann_str ne '');
 	}
 	print OUT1 join ("\t", @line), "\n";
-	print OUT2 join ("\t", @line2), "\n" if (@line >= 9);
+	print OUT2 join ("\t", @line2), "\n" if ($vcf_column > 10);
 }
 close (FILE);
 close (OUT1);
-close (OUT2);
+close (OUT2) if ($vcf_column > 10);
 
-print STDERR "Total SV-overlapping genes: ", scalar keys %total_hit_genes, "\n";
-print STDERR "Total SV-exon overlapping genes:", scalar keys %total_hit_genes_cds, "\n";
+print STDERR "Total SV-overlapping genes in $target_chr: ", scalar keys %total_hit_genes, "\n";
+print STDERR "Total SV-exon overlapping genes in $target_chr:", scalar keys %total_hit_genes_cds, "\n";
