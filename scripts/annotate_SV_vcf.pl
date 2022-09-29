@@ -285,7 +285,7 @@ while (my $line = <FILE>){
 	my $type = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
 	$type = 'INS' if ($type eq 'ALU') or ($type eq 'LINE1') or ($type eq 'L1') or ($type eq 'SVA') or ($type eq 'HERVK') or ($type eq 'VEI') or ($type eq 'NUMT');
 	$type = 'CNV' if ($line[4] =~ /CNV:STR/);
-	next if ($type !~ /DEL|DUP|INS|INV|TRA|CNV|CPX/);
+	next if ($type !~ /DEL|DUP|INS|INV|TRA|CNV|CPX|BND/);
 	my $len = 0;
 	my $len2 = 0;
 	my $end = 0;
