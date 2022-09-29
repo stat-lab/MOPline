@@ -137,7 +137,7 @@ else{
 			foreach (@jobs){
 				my ($chr2, $out1_chr, $out2_chr) = $_->join;
 				$out_files1{$chr2} = $out1_chr;
-				$out_files2{$chr2} = $out2_chr;
+				$out_files2{$chr2} = $out2_chr if (-f $out2_chr);
 			}
 			$count = 0;
 			undef @jobs;
@@ -147,21 +147,18 @@ else{
 		foreach (@jobs){
 			my ($chr2, $out1_chr, $out2_chr) = $_->join;
 			$out_files1{$chr2} = $out1_chr;
-			$out_files2{$chr2} = $out2_chr;
+			$out_files2{$chr2} = $out2_chr if (-f $out2_chr);
 		}
 		$count = 0;
 		undef @jobs;
 	}
 	my $out_vcf1 = "$out_prefix.annot.vcf";
-	my $out_vcf2 = "$out_prefix.AS.annot.vcf";
 	my $count2 = 0;
 	open (OUT1, "> $out_vcf1");
-	open (OUT2, "> $out_vcf2");
 	foreach my $chr (@ref_chr){
 		$count2 ++;
 		next if (!exists $out_files1{$chr});
 		my $out1_chr = $out_files1{$chr};
-		my $out2_chr = $out_files2{$chr};
 		open (FILE, $out1_chr) or die "$out1_chr is not found:$!\n";
 		while (my $line = <FILE>){
 			chomp $line;
@@ -174,21 +171,30 @@ else{
 			print OUT1 $line, "\n";
 		}
 		close (FILE);
-		open (FILE, $out2_chr) or die "$out2_chr is not found:$!\n";
-		while (my $line = <FILE>){
-			chomp $line;
-			if ($line =~ /^#/){
-				if ($count2 == 1){
-					print OUT2 "$line\n";
-				}
-				next;
-			}
-			print OUT2 $line, "\n";
-		}
-		close (FILE);
 	} 
 	close (OUT1);
-	close (OUT2);
+	if (scalar keys %out_files2 > 0){
+		my $out_vcf2 = "$out_prefix.AS.annot.vcf";
+		open (OUT2, "> $out_vcf2");
+		$count2 = 0;
+		foreach my $chr (@ref_chr){
+			$count2 ++;
+			my $out2_chr = $out_files2{$chr};
+			open (FILE, $out2_chr) or die "$out2_chr is not found:$!\n";
+			while (my $line = <FILE>){
+				chomp $line;
+				if ($line =~ /^#/){
+					if ($count2 == 1){
+						print OUT2 "$line\n";
+					}
+					next;
+				}
+				print OUT2 $line, "\n";
+			}
+			close (FILE);
+		}
+		close (OUT2);
+	}
 }
 
 print STDERR "SV vcf annotation finished:\n";
