@@ -72,7 +72,6 @@ pod2usage(-verbose => 0) if $help;
    --build or -b <INT>      human reference build (GRCh37, GRCh38) number (37 or 38, only effective for human) [default: 37]
    --gap or -gap <STR>      gap bed file, indicating gap regions in reference genome. may be specified for non-human species [default for human: Data/gap.bed or gap.b38,bed]
    --gender or -g <STR>     sample name-gender table file to exclude chrY for female (sample_name and M/F, separated with tab in each line) [optional]
-   --read_len or -rl <INT>  read length [default: 150]
    --min_size or -ms <INT>  minimum size (bp) of SV, except for INS [default: 50]
    --max_inv or -mv <INT>   maximum size (bp) of INV [default: 200000]
    --ins_sd or -is <INT>    maximum distance (bp) between proximal INS breakpoints to be merged [default: 200]
