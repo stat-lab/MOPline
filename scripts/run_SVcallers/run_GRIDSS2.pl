@@ -34,7 +34,7 @@ GetOptions(
     'prefix|p=s' => \$out_prefix,
     'non_human|nh=i' => \$non_human,
     'mopdir|md=s' => \$MOP_dir,
-    'threads|n=i' => $cores,
+    'threads|n=i' => \$cores,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
 
