@@ -167,7 +167,7 @@ while (my $line = <FILE>){
 		}
 #print STDERR "$tool_name\t$run_script $opt_str\n";
 		$bam = "../$bam" if ($bam !~ /\//);
-		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta/);
+		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|GRIDSS/);
 		$opt_str =~ s/\s$//;
 		if (($tool_name eq 'CNVnator') and ($opt_str =~ /-r\s/)){
 			$opt_str = "-b $bam -p $ID " . $opt_str;
@@ -191,12 +191,12 @@ while (my $line = <FILE>){
 			my $jobid = `$sbatch_opt2 -o $out_log -e $error_log run.sh`;
 			$jobid = $1 if ($jobid =~ /(\d+)/);
 			
-      print STDERR "$tool_name:$jobid\n";
-    }
-    else{
-    	print STDERR "No sbatch command: $sbatch_opt2\n";
-    }
-    chdir '..';
+      			print STDERR "$tool_name:$jobid\n";
+		 }
+		 else{
+			print STDERR "No sbatch command: $sbatch_opt2\n";
+		 }
+		 chdir '..';
 	}
 	print STDERR "\n";
 	chdir $cur_dir;
