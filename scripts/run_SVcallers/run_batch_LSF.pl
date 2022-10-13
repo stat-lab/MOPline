@@ -156,7 +156,7 @@ while (my $line = <FILE>){
 		}
 #print STDERR "$tool_name\t$run_script $opt_str\n";
 		$bam = "../$bam" if ($bam !~ /\//);
-		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta/);
+		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|GRIDSS/);
 		$opt_str =~ s/\s$//;
 		if (($tool_name eq 'CNVnator') and ($opt_str =~ /-r\s/)){
 			$opt_str = "-b $bam -p $ID " . $opt_str;
