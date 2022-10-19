@@ -18,6 +18,7 @@ Detection and Genotyping of Structural Variants
 	- [\[Step-4\] Genotype and SMC](#step4)
 	- [\[Step-5\] Annotate](#step5)
 	- [\[Step-6\] Filter](#step6)
+- [Data Required for Non-Human Species](#mhdata)
 - [Quick Start with Sample Data](#quick)
 	- [A: Human SV datasets of 6 samples](#hsample)
 	- [B: Yeast WGS bam files of 10 samples](#ysample)
@@ -228,6 +229,18 @@ mopline filter -v <input vcf> > [output vcf]
 ```
 (-build 38 for human build 38, -nh 1 -g <gap_bed> -sd <segmental duplication file> for non-human species)
 
+## <a name="hndata"></a>Data Required for Non-Human Species
+
+For non-human species, the following files are required at specific MOPline steps (for human, these files are provided in this package and automatically selected at each step). Human sample data files are present in the Data directory of this package.
+
+**Table 2.** Files required for non-human species, which must be supplied by users
+|Name  |Description                 |Sample file                   |Available|Required step|
+| :--- | :------------------------- | :--------------------------- | :------ | :---------- |
+|Gap   |BED file of 'N' regions in the reference fasta|gap.bed     |[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|steps-0,2,3,6
+|STR   |Simple tandem repeat file   |simpleRepeat.txt.gz           |[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4
+|SegDup|Segmental duplications file |genomicSuperDups.txt.gz       |[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4,6
+|Gene  |Gene annotation GFF3 file   |Homo_sapiens.GRCh37.87.gff3.gz|[Ensembl](ftp://ftp.ensembl.org/pub)|step-5
+|Rindex|Reference fasta index       |hs37.fa.fai                   |samtools faidx|step-1
 
 ## <a name="qstart"></a>Quick Start with Sample Data
 
