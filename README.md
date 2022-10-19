@@ -34,9 +34,9 @@ R 3.0 or later
 [samtools](https://github.com/samtools/samtools) (v1.13 or later is required for GRIDSS v2.13-)  
 [vcftools](https://vcftools.github.io/index.html) (v0.1.15 or later)  
 java 1.8 or later (for GRIDSS and MELT)
-#### General input file
-Alignmnet bam file
-Reference fasta file
+### General input file
+Alignmnet bam file  
+Reference fasta file  
 Gender list file (optional, 1st column: sample name, 2nd column: M|F, separated by tab)
 
 ### SV detection tools (algorithms)  
