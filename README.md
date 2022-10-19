@@ -134,7 +134,7 @@ mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_
 **bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is a `${sample_name}.bam` and exists in the `${sample_name}` directory.  
 **read_length:** Mean read length in the bam file
 
-The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (${sample_name}.chr*.cov.gz).
+The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (`${sample_name}.chr*.cov.gz`).
 
 For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can be used to submit a single bam file job using a job manager such as Slurm and LSF.
 
@@ -146,7 +146,7 @@ mopline merge_7tools -s <sample-list-file or a sample name> -rl <read length>
 ```
 (-nh 1 if sample is a non-human species)
 
-This command generates a $\{sample_name\}.Merge.ALL.vcf file in the ‘Merge_7tools’ folder (default for 7tools preset) created under the sample directory. The INFO field of each SV line displays a TOOLS key indicating which algorithm called the corresponding SV.
+This command generates a `${sample_name}.Merge.ALL.vcf` file in the ‘Merge_7tools’ folder (default for 7tools preset) created under the sample directory. The INFO field of each SV line displays a TOOLS key indicating which algorithm called the corresponding SV.
 
 ### [Using custom algorithm set]
 
@@ -161,7 +161,7 @@ If the -tc option is not specified in the above command, the tool configuration 
 
 In this step, alignment statistics such as DPR, SR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample (see [create coverage files](#create_cov)), recording the read depth and the number of soft-clipped ends for each 50-bp window.
 
-Using the coverage files you created, add alignment statistics to each SV site in the $\{sample_name\}.Merge.ALL.vcf file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
+Using the coverage files you created, add alignment statistics to each SV site in the `${sample_name}.Merge.ALL.vcf` file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
 ```
 mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
 ```
@@ -170,7 +170,7 @@ mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_thre
 **tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
 
-The above command updates a $\{sample_name\}.Merge.ALL.vcf file in the vcf_directory and rename the original vcf file as $\{sample_name\}.Merge.ALL.noAdd.vcf. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
+The above command updates a `${sample_name}.Merge.ALL.vcf` file in the vcf_directory and rename the original vcf file as `${sample_name}.Merge.ALL.noAdd.vcf`. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
 
 For batch jobs, we provide a add_GT_DPR_vcf_single.pl script to submit a single vcf file job using a job manager such as Slurm and LSF.
 
@@ -181,13 +181,13 @@ Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix>
 ```
 (-build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)  
-**sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory. If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as ${sample_directory_name},${sample_name}. It is assumed that the input vcf files (${sample_name}.Merge.ALL.vcf) exist in ${sample_directory}/${merge_dir}/.  
+**sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory. If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as `${sample_directory_name},${sample_name}`. It is assumed that the input vcf files (`${sample_name}.Merge.ALL.vcf`) exist in `${sample_directory}/${merge_dir}`.  
 **merge_dir:** Name of the directory containing the input vcf files under the sample directories [default: Merge_7tools]  
 **out_dir:** Name of the directory where the output vcf file will be generated [default: the same name as merge_dir]  
 **out_prefix:** Prefix name of the output vcf file  
 **gap_bed:** A bed file of reference gap regions. For human, the file is automatically selected from the MOPline package. For non-human species, obtain from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) or create manually.
 
-The above command outputs ${out_prefix}.vcf under ${out_dir} directory.
+The above command outputs `${out_prefix}.vcf` under `${out_dir}` directory.
 
 ### <a name="step4"></a>[Step-4]  Genotype and SMC
 
@@ -214,7 +214,7 @@ Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (
 mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 ```
 (-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
-This command generates two output vcf files, ${out_prefix}.annot.vcf and ${out_prefix}.AS.annot.vcf. The latter contains annotations for each sample in the FORMAT AN subfield.
+This command generates two output vcf files, `${out_prefix}.annot.vcf` and `${out_prefix}.AS.annot.vcf`. The latter contains annotations for each sample in the FORMAT AN subfield.
 
 ### <a name="step6"></a>[Step-6]  Filter (optional)
 
@@ -241,14 +241,14 @@ export PATH=$PATH:${MOPline-install-directory-path}
 ```
 mopline merge_7tools -s sample_list.txt -rl 150 -d Merge_7tools
 ```
-The command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
+The command adds alignment statistics and genotype data to `${sample}.Merge.ALL.vcf` for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
 
 #### [Step-2] Add alignment statistics to SV sites
 Step 2-(1) ‘Create coverage files’ is omitted for this sample data because the Cov directory in each sample director already contains coverage files.
 ```
 mopline add_cov -s sample_list.txt -ts 7tools -vd Merge_7tools -n 4 
 ```
-The command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
+The command adds alignment statistics and genotype data to `${sample}.Merge.ALL.vcf` for each sample. Check the values given by the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files.
 
 #### [Step-3] Merge vcf files from multiple samples
 ```
@@ -293,7 +293,7 @@ create_bam_link.pl -b bam_list.txt -bd ../Yeast_10samples
 ```
 mopline merge_7tools -s bam_list.txt -rl 101 -d Merge_7tools -nh 1 -r S288C.fa.fai
 ```
-The command generates a vcf files named ${sample}.Merge.ALL.vcf in the Merge_7tools directory generated in each sample directory. For non-human species, a reference index file should be specified with the -r option.
+The command generates a vcf files named `${sample}.Merge.ALL.vcf` in the Merge_7tools directory generated in each sample directory. For non-human species, a reference index file should be specified with the -r option.
 
 #### [Step-2] Add alignment statistics to SV sites
 ```
@@ -303,7 +303,7 @@ The command creates a Cov directory under the sample directory, which contains t
 ```
 mopline add_cov -s bam_list.txt -ts 7tools -vd Merge_7tools -n 4 -nh 1 -r S288C.fa.fai
 ```
-The command adds alignment statistics and genotype data to ${sample}.Merge.ALL.vcf for each sample. Check the values given in the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files. For non-human species, a reference index file should be specified with the -r option.
+The command adds alignment statistics and genotype data to `${sample}.Merge.ALL.vcf` for each sample. Check the values given in the DR, DS, and SR tags in the FORMAT/SAMPLE fields of the vcf files. For non-human species, a reference index file should be specified with the -r option.
 
 #### [Step-3] Merge vcf files from multiple samples
 ```
