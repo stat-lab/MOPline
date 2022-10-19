@@ -131,10 +131,10 @@ Create a coverage file using the create_coverage_file_bam.pl script as follows:
 mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_threads>
 ```
 (-nh 1 if sample is a non-human species)  
-**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is ${sample_name}.bam and exists in the ${sample_name} directory.  
+**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is $\{sample_name\}.bam and exists in the $\{sample_name\} directory.  
 **read_length:** Mean read length in the bam file
 
-The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (${sample_name}.chr*.cov.gz).
+The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome ($\{sample_name\}.chr*.cov.gz).
 
 For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can be used to submit a single bam file job using a job manager such as Slurm and LSF.
 
@@ -146,7 +146,7 @@ mopline merge_7tools -s <sample-list-file or a sample name> -rl <read length>
 ```
 (-nh 1 if sample is a non-human species)
 
-This command generates a ${sample_name}.Merge.ALL.vcf file in the ‘Merge_7tools’ folder (default for 7tools preset) created under the sample directory. The INFO field of each SV line displays a TOOLS key indicating which algorithm called the corresponding SV.
+This command generates a $\{sample_name\}.Merge.ALL.vcf file in the ‘Merge_7tools’ folder (default for 7tools preset) created under the sample directory. The INFO field of each SV line displays a TOOLS key indicating which algorithm called the corresponding SV.
 
 ### [Using custom algorithm set]
 
@@ -161,7 +161,7 @@ If the -tc option is not specified in the above command, the tool configuration 
 
 In this step, alignment statistics such as DPR, SR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample (see [create coverage files](#create_cov)), recording the read depth and the number of soft-clipped ends for each 50-bp window.
 
-Using the coverage files you created, add alignment statistics to each SV site in the ${sample_name}.Merge.ALL.vcf file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
+Using the coverage files you created, add alignment statistics to each SV site in the $\{sample_name\}.Merge.ALL.vcf file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
 ```
 mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
 ```
@@ -170,7 +170,7 @@ mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_thre
 **tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
 
-The above command updates a \${sample_name}.Merge.ALL.vcf file in the vcf_directory and rename the original vcf file as ${sample_name}.Merge.ALL.noAdd.vcf. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
+The above command updates a $\{sample_name\}.Merge.ALL.vcf file in the vcf_directory and rename the original vcf file as $\{sample_name\}.Merge.ALL.noAdd.vcf. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
 
 For batch jobs, we provide a add_GT_DPR_vcf_single.pl script to submit a single vcf file job using a job manager such as Slurm and LSF.
 
