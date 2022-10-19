@@ -170,7 +170,7 @@ mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_thre
 **tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
 
-The above command updates a ${sample_name}.Merge.ALL.vcf file in the vcf_directory and rename the original vcf file as ${sample_name}.Merge.ALL.noAdd.vcf. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
+The above command updates a \${sample_name}.Merge.ALL.vcf file in the vcf_directory and rename the original vcf file as ${sample_name}.Merge.ALL.noAdd.vcf. Alignment statistics are added to the FORMAT/SAMPLE fields with DR, DS, and SR keys in the updated vcf file.
 
 For batch jobs, we provide a add_GT_DPR_vcf_single.pl script to submit a single vcf file job using a job manager such as Slurm and LSF.
 
