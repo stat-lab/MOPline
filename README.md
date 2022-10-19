@@ -237,8 +237,8 @@ For non-human species, the following files are required at specific MOPline step
 |Name  |Description                |Sample file                   |Available|Required step|
 | :--- | :------------------------ | :--------------------------- | :------ | :------- |
 |Gap   |BED file of 'N' regions in the reference fasta|gap.bed     |[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|steps-0, 2, 3, 6
-|STR   |Simple tandem repeats (2nd-4th columns only required)|simpleRepeat.txt.gz|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4
-|SegDup|Segmental duplications (2nd-4th columns only required)|genomicSuperDups.txt.gz|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4, 6
+|STR   |Simple tandem repeats (2nd-4th columns required)|simpleRepeat.txt.gz|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4
+|SegDup|Segmental duplications (2nd-4th columns required)|genomicSuperDups.txt.gz|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4, 6
 |Gene  |Gene annotation GFF3 file   |Homo_sapiens.GRCh37.87.gff3.gz|[Ensembl](https://asia.ensembl.org/index.html)|step-5
 |Rindex|Reference fasta index       |hs37.fa.fai                   |samtools faidx|step-1
 
