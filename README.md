@@ -131,7 +131,7 @@ Create a coverage file using the create_coverage_file_bam.pl script as follows:
 mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_threads>
 ```
 (-nh 1 if sample is a non-human species)  
-**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is a ${sample_name}.bam and exists in the ${sample_name} directory.  
+**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is a `${sample_name}.bam` and exists in the `${sample_name}` directory.  
 **read_length:** Mean read length in the bam file
 
 The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (${sample_name}.chr*.cov.gz).
