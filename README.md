@@ -18,7 +18,7 @@ Detection and Genotyping of Structural Variants
 	- [\[Step-4\] Genotype and SMC](#step4)
 	- [\[Step-5\] Annotate](#step5)
 	- [\[Step-6\] Filter](#step6)
-- [Data Required for Non-Human Species](#mhdata)
+- [Data Required for Non-Human Species](#nhdata)
 - [Quick Start with Sample Data](#quick)
 	- [A: Human SV datasets of 6 samples](#hsample)
 	- [B: Yeast WGS bam files of 10 samples](#ysample)
