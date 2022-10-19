@@ -229,7 +229,7 @@ mopline filter -v <input vcf> > [output vcf]
 ```
 (-build 38 for human build 38, -nh 1 -g <gap_bed> -sd <segmental duplication file> for non-human species)
 
-## <a name="hndata"></a>Data Required for Non-Human Species
+## <a name="nhdata"></a>Data Required for Non-Human Species
 
 For non-human species, the following files are required at specific MOPline steps (for human, these files are provided in this package and automatically selected at each step). Human sample data files are present in the Data directory of this package.
 
@@ -242,7 +242,7 @@ For non-human species, the following files are required at specific MOPline step
 |Gene  |Gene annotation GFF3 file   |Homo_sapiens.GRCh37.87.gff3.gz|[Ensembl](ftp://ftp.ensembl.org/pub)|step-5
 |Rindex|Reference fasta index       |hs37.fa.fai                   |samtools faidx|step-1
 
-## <a name="qstart"></a>Quick Start with Sample Data
+## <a name="quick"></a>Quick Start with Sample Data
 
 The [sample data](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) provided includes two sample datasets: human and yeast (*Saccharomyces cerevisia*) data. The human data includes SV datasets generated with high coverage WGS datasets of 6 individuals from a 1000 Genomes CEU population (ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/1000G_2504_high_coverage/data). The yeast data includes WGS bam files for 10 yeast isolates (Peter J. et al., Nature 556, pages 339–344 (2018)) and associated files including reference fasta and annotation files. An [output dataset](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data_output.tar.gz) generated with this dataset using MOPline-7t is also available.
 
