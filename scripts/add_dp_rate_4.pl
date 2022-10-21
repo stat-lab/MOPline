@@ -9,7 +9,6 @@ my $pos_file = shift @ARGV;
 my $cov_dir = shift @ARGV;
 my $min_split_diff = shift @ARGV;
 
-my $flank_len = 1000;
 my $flank_rate = 0.1;
 my $bin_size = 50;
 
@@ -58,6 +57,7 @@ foreach my $chr (keys %pos_info){
         my $incons_cov_rate = 0;
         my $split_rate = 0;
         my $CNVnator_flag = 0;
+        my $flank_len = 1000;
         $flank_len = 100 if ($len < 150) and ($type eq 'DUP');
         my $pos2 = $pos - 1;
         $CNVnator_flag = 1 if ($pos2 % 1000 <= 1) and ($len >= 2000);
