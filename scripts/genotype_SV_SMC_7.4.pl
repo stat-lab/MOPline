@@ -3297,7 +3297,7 @@ sub add_dp_rate{
     close (OUT2);
     
     my $dr_out = "$temp_dir/dprate.$dnum.txt";
-    my $command = "add_dp_rate_samples_3.pl $sample_out $dr_out $temp_dir $min_split_diff 2>$temp_dir/calc_dprate.$dnum.log";
+    my $command = "$Bin/add_dp_rate_samples_3.pl $sample_out $dr_out $temp_dir $min_split_diff 2>$temp_dir/calc_dprate.$dnum.log";
     system ($command);
     
     threads->yield();
