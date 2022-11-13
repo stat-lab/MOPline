@@ -315,7 +315,7 @@ mkdir CBS457
 cd CBS457
 run_single.pl -c ../config.yeast.txt -b CBS457.bam -sn CBS457
 ```
-<Batch mode using slurm>  
+<Batch mode using slurm>   
 ```
 run_batch_slurm.pl -c ../config.yeast.txt -b bam_list.txt -a <account> -p <partition>
 ```
