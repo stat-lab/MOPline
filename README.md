@@ -307,6 +307,14 @@ ln -s ../Yeast_10samples/MELT_lib
 ln -s ../Yeast_10samples/bam_list.txt
 create_bam_link.pl -b bam_list.txt -bd ../Yeast_10samples
 ```
+#### [Step-0] Run SV detection tools
+
+<For a single sample>  
+```
+```
+run_single.pl -c config.yeast.txt -b 
+```
+
 #### [Step-1] Select overlap calls from SV call sets
 ```
 mopline merge_7tools -s bam_list.txt -rl 101 -d Merge_7tools -nh 1 -r S288C.fa.fai
