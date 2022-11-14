@@ -320,7 +320,7 @@ A run with this sample config file will generate SV call results of 7 tools in 7
 	
 (Batch mode using slurm)  
 ```
-run_batch_slurm.pl -c ../config.yeast.txt -b bam_list.txt -a <account> -p <partition>
+run_batch_slurm.pl -c config.yeast.txt -b bam_list.txt -a <account> -p <partition>
 ```
 A run with this sample config file will generate SV call results of 7 tools in 7 tool directories in each of 10 sample directories.
 	
