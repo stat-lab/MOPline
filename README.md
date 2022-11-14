@@ -315,12 +315,15 @@ mkdir CBS457
 cd CBS457
 run_single.pl -c ../config.yeast.txt -b CBS457.bam -sn CBS457
 ```
-
+A sample config file (config.yeast.txt) is contained in the Sample_data_output/yeast_run folder.
+A run with this sample config file will generate SV call results of 7 tools in 7 tool directories.
+	
 (Batch mode using slurm)  
 ```
 run_batch_slurm.pl -c ../config.yeast.txt -b bam_list.txt -a <account> -p <partition>
 ```
-
+A run with this sample config file will generate SV call results of 7 tools in 7 tool directories in each of 10 sample directories.
+	
 #### [Step-1] Select overlap calls from SV call sets
 ```
 mopline merge_7tools -s bam_list.txt -rl 101 -d Merge_7tools -nh 1 -r S288C.fa.fai
