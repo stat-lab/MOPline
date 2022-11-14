@@ -309,13 +309,14 @@ create_bam_link.pl -b bam_list.txt -bd ../Yeast_10samples
 ```
 #### [Step-0] Run SV detection tools (working directory: yeast_run)
 
-<Single sample mode (sample: CBS457)>  
+(Single sample mode [sample: CBS457])  
 ```
 mkdir CBS457
 cd CBS457
 run_single.pl -c ../config.yeast.txt -b CBS457.bam -sn CBS457
 ```
-<Batch mode using slurm>   
+
+(Batch mode using slurm)  
 ```
 run_batch_slurm.pl -c ../config.yeast.txt -b bam_list.txt -a <account> -p <partition>
 ```
