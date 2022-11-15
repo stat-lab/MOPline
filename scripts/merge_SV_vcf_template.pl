@@ -36,7 +36,8 @@ pod2usage(-verbose => 0) if $help;
   Options:
    --sample or -s <STR>         a file of sample name list (or a sample name can be specified if a single sample is treated)
    --dir or -d <STR>            output directory name, which contains output vcf files [default: Merge_7tools]
-   --group or -g <STR>          group ID to be added to output vcf file name, for distingwishing from other sample groups (output vcf file: ${groupID}.${sample_name}.Merge.ALL.vcf) [optional]
+   --group or -g <STR>          group ID to be added to output vcf file name, for distingwishing from other sample groups 
+                                (output vcf file: ${groupID}.${sample_name}.Merge.ALL.vcf) [optional]
    --read_length or -rl <STR>   mean read length in bam files used for SV calling [default: 150]
    --non_human or -nh <INT>     samples are non-human species (human: 0, non-human: 1) [default: 0]
    --help or -h                 output help message

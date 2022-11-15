@@ -42,7 +42,7 @@ melt_target = ALU,LINE1,SVA,HERVK;	[run_MELT.pl -mt]		# comma-separated list of 
 melt_gene = ... /MELTv2.2.2/add_bed_files/Hg37/hg37.genes.bed;	[run_MELT.pl -mg]			# MELT gene annotation file
 java_path = ;				[run_MELT.pl -jp]		# directory path containing java executable (1.8 or later) unless the corrsponding version of java is set in $PATH
 bowtie_path = ;				[run_MELT.pl -bp]		# directory path containing bowtie2 executable unless bowtie2 is set in $PATH
-threads = 4;				[run_MELT.pl -n]		# number of threads
+threads = 1;				[run_MELT.pl -n]		# number of threads
 
 <Wham>
 wham_path = ... /wham/bin/whamg;	[run_Wham.pl -cp]		# file path of Wham executable whamg

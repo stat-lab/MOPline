@@ -46,7 +46,7 @@ GetOptions(
     'gender|g=s' => \$gender_list,
     'gap_bed|gap=s' => \$gap_bed,
     'non_human|nh=i' => \$non_human,
-    'build|b=i' => \$build,
+    'build|b=s' => \$build,
     'min_size|ms=i' => \$min_sv_len,
     'max_inv|mv=i' => \$max_inv_size,
     'ins_sd|is=i' => \$ins_sd,
@@ -57,20 +57,25 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  merge_SV_calls_ALLsamples.pl -s <sample list> -md <merged vcf directory> -od <output directory> (-gap <gap bed -nh 1 if samples are non-human sepecies)
+  merge_SV_calls_ALLsamples.pl -s <sample list> -md <merged vcf directory> -od <output directory> 
+  (-gap <gap bed -nh 1 if samples are non-human sepecies)
 
   Options:
-   --sample_list or -s <STR> sample list file, which indicates sample_directory,sample_name in each line (e.g., SampleA,sampleA). If sample name and sample directory name are identical, only sample name can be indicted [mandatory]
-							MOPline expects that the working directory contains ${sample_directory}/${merge_dir}/${sample_name}.Merge.ALL.vcf, where ${merge_dir} is a directory name specified with the -md option (e.g., Merge_7tools)
-							If sample directories are located under a group directory and/or sample name has a group name at the head (e.g., ${Group}.${sample_name}), the group name # tag (i.e., #GROUP:${Group}) should be added at the lines before a group of sample lines.
+   --sample_list or -s <STR> sample list file, which indicates sample_directory,sample_name in each line (e.g., SampleA,sampleA). [mandatory]
+                            If sample name and sample directory name are identical, only sample name can be indicted.
+                            MOPline expects that the working directory contains ${sample_directory}/${merge_dir}/${sample_name}.Merge.ALL.vcf, 
+                            where ${merge_dir} is a directory name specified with the -md option (e.g., Merge_7tools).
+                            If sample directories are located under a group directory and/or sample name has a group name at the head (e.g., ${Group}.${sample_name}), 
+                            the group name # tag (i.e., #GROUP:${Group}) should be added at the lines before a group of sample lines.
 							
    --merge_dir or -md <STR> directory name containing merged vcf files from multiple SV callers for every sample [default: Merge_7tools]
    --outdir or -od <STR>    output directory [default: directory name specified with -md]
    --prefix or -p <STR>     prefix name of an output joint called vcf file [default: MOPline]
    --target or -t <STR>     target chromosome(s) (comma-separated chromosome name(s)) [default: ALL]
    --non_human or -nh <INT> samples are non-human species (0: human, 1: non-human) [default: 0]
-   --build or -b <INT>      human reference build (GRCh37, GRCh38) number (37 or 38, only effective for human) [default: 37]
-   --gap or -gap <STR>      gap bed file, indicating gap regions in reference genome. may be specified for non-human species [default for human: Data/gap.bed or gap.b38,bed]
+   --build or -b <STR>      human reference build [GRCh37, GRCh38, T2T-CHM13] (37, 38, or T2T: only effective for human) [default: 37]
+   --gap or -gap <STR>      gap bed file, indicating gap regions in reference genome. 
+                            This may be specified for non-human species [automatically selected for human: Data/gap.bed or gap.b38,bed]
    --gender or -g <STR>     sample name-gender table file to exclude chrY for female (sample_name and M/F, separated with tab in each line) [optional]
    --min_size or -ms <INT>  minimum size (bp) of SV, except for INS [default: 50]
    --max_inv or -mv <INT>   maximum size (bp) of INV [default: 200000]
@@ -93,8 +98,8 @@ my @depth_callers = ('CNVnator', 'readDepth');
 my $depth_callers = join ('=', @depth_callers);
 
 if ($non_human == 0){
-	$gap_bed = "$data_dir/gap.bed";
-	$gap_bed = "$data_dir/gap.b38.bed" if ($build == 38);
+	$gap_bed = "$data_dir/gap.bed" if ($build eq '37');
+	$gap_bed = "$data_dir/gap.b38.bed" if ($build eq '38');
 }
 
 my %gap;
@@ -242,7 +247,7 @@ foreach my $id (@sample_id){
 	        next;
 	    }
 		next if ($target_chr ne 'ALL') and ($chr ne $target_chr);
-		next if ($gender{$id}) and ($gender{$id} eq 'F') and ($chr eq 'Y');
+		next if ($gender{$id}) and ($gender{$id} eq 'F') and ($chr =~ /c*h*r*Y/i);
 		my $pos = $line[1];
 		my $type = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
 		my $subtype = '';
@@ -277,13 +282,20 @@ foreach my $id (@sample_id){
 		    $dr = $1;
 		    $ds = $2;
 		    $sr = $3;
-		    if (($type eq 'DEL') and ($tools =~ /CNVnator/) and ($tools !~ /,/)){
-		    	next if ($dr >= 0.8);
-#		    	next if ($len < 100000) and ($ds > 0.1);
+		    if (($type eq 'DEL') and ($len >= 1000)){
+		    	next if ($dr >= 0.9);
+		    	next if ($ds >= 0.5);
 		    }
 		    if (($type eq 'DEL') and ($len >= 100000)){
 		    	next if ($dr >= 0.8);
 		    	next if ($ds >= 0.35);
+		    }
+		    if (($type eq 'DUP') and ($len >= 1000)){
+		    	next if ($dr <= 1.1);
+		    	next if ($len < 10000) and ($ds >= 0.5);
+		    }
+		    if (($type eq 'DUP') and ($len >= 10000)){
+		    	next if ($ds >= 0.3);
 		    }
 		}
 		${${${$call{$type}}{$chr}}{$pos}}{$id} = $len;
@@ -1358,6 +1370,7 @@ foreach my $type (keys %vcf_type){                  # merge overlapping variants
                     my $new_len = 0;
                     my $sum_pos = 0;
                     my $sum_len = 0;
+                    my @len;
                     if ($sn >= $pre_sn){
                         foreach (@pre_idpos){
                             my ($id) = split (/==/, $_);
@@ -1383,10 +1396,13 @@ foreach my $type (keys %vcf_type){                  # merge overlapping variants
                         my ($gid2, $pos2, $len2) = split (/==/, $ids{$gid});
                         $new_idpos .= "$ids{$gid},";
                         $sum_pos += $pos2;
-                        $sum_len += $len2;
+                        push @len, $len2 if ($len2 > 1);
+                    }
+                    if (@len > 0){
+                    	map{$sum_len += $_} @len;
+                    	$new_len = int ($sum_len / @len + 0.5);
                     }
                     $new_pos = int ($sum_pos / $new_sn + 0.5);
-                    $new_len = int ($sum_len / $new_sn + 0.5);
                     $new_idpos =~ s/,$//;
                     delete ${${$vcf_type{$type}}{$chr}}{$pre_pos};
                     delete ${${$vcf_type{$type}}{$chr}}{$pos};

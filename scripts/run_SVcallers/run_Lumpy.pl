@@ -29,7 +29,7 @@ GetOptions(
     'prefix|p=s' => \$out_prefix,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
-
+pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 

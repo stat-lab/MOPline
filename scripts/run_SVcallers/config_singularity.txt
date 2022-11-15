@@ -1,0 +1,60 @@
+# <Tool> that is not run should be comment-out with '#' at the line head.
+# This config temp file is specific to singularity executable. Do not change the path of command for each tool.
+
+<general>
+ref = ;			[-r]	# reference fasta file path on the host
+target = 'ALL'		[-c]	# target chromosome(s), commma-separated
+non_human = 0;		[-nh]	# specify 1 if samples is non-human species
+run_svcaller_dir = /opt/local/tools/MOPline/scripts/run_SVcallers;	# run_SVcallers directory path of MOPline package unless this directory is set in $PATH [Do not change]
+
+
+<CNVnator>
+cnvnator_command = cnvnator;		[run_CNVnator.pl -cp]		# file path of cnvnator command cnvnator [Do not change]
+root_dir = /opt/local/src/root;		[run_CNVnator.pl -rd]		# ROOT package install directory [Do not change]
+ref_dir = ;				[run_CNVnator.pl -r]		# reference directory containing chr-separated fasta files, necessary for non-human species
+build = 37;				[run_CNVnator.pl -build]	# specify 38 if bam files are based on human build38 reference
+gap_bed = ;				[run_CNVnator.pl -g]		# gap bed file indicating gap regions in reference fasta on the host if any
+
+<GRIDSS>
+gridss_jar = /opt/local/tools/gridss-2.13.2-gridss-jar-with-dependencies.jar;	[run_GRIDSS2.pl -gj]	#GRIDSS jar file path [Do not change]
+gridss_sh = gridss;			[run_GRIDSS2.pl -gs]		#GRIDSS sh script file path [Do not change]
+black_list = ;				[run_GRIDSS2.pl -bl]		# black list bed file on the host if any
+threads = 3;				[run_GRIDSS2.pl -n]		# number of threads
+
+<inGAP>
+ingap_jar = inGAP.jar;	[run_inGAP.pl -ij]				# inGAP-sv jar path [Do not change]
+
+<Manta>
+manta_path = /opt/local/tools/manta/bin/configManta.py;	[run_Manta.pl -cp]		# file path of Manta configManta.py script [Do not change]
+build = 37;				[run_Manta.pl -build]	# specify 38 if bam files are based on human build38 reference
+threads = 3;				[run_Manta.pl -n]		# number of threads
+
+<MATCHCLIP>
+matchclip_path = matchclips;	[run_MATCHCLIP.pl -cp]	# file path of MATCHCLIP executable, matchclips [Do not change]
+threads = 4;				[run_MATCHCLIP.pl -n]		# number of threads
+
+#<MELT>		# This tool is not implemented in singularity due to liccense restriction.
+melt_jar = ... /MELTv2.2.2/MELT.jar;	[run_MELT.pl -mj]		# MELT jar path
+melt_lib = ... /MELTv2.2.2/me_refs/1KGP_Hg37;			[run_MELT.pl -ml]			# MELT mobile element reference data directory containing *_MELT.zip files
+melt_target = ALU,LINE1,SVA,HERVK;	[run_MELT.pl -mt]		# comma-separated list of MELT mobile element or other sequence target
+melt_gene = ... /MELTv2.2.2/add_bed_files/Hg37/hg37.genes.bed;	[run_MELT.pl -mg]			# MELT gene annotation file
+java_path = ;				[run_MELT.pl -jp]		# directory path containing java executable (1.8 or later) unless the corrsponding version of java is set in $PATH
+bowtie_path = ;				[run_MELT.pl -bp]		# directory path containing bowtie2 executable unless bowtie2 is set in $PATH
+threads = 1;				[run_MELT.pl -n]		# number of threads
+
+<Wham>
+wham_path = whamg;	[run_Wham.pl -cp]		# file path of Wham executable whamg [Do not change]
+picard_jar = /opt/local/tools/picard.jar;	[run_Wham.pl -pj]	# picard jar path, to use AddOrReplaceReadGroups function, if the input bam has no RG tag [Do not change]
+threads = 1;				[run_Wham.pl -n]		# number of threads
+
+#<DELLY>
+delly_path = delly;	[run_DELLY.pl -cp]		# file path of DELLY executable [Do not change]
+exclude_tsv = ;				[run_DELLY.pl -ex]		# tsv file indicating exclude regions if any
+
+#<Lumpy>
+lumpy_path = lumpy;	[run_Lumpy.pl -cp]				# file path of Lumpy executable [Do not change]
+lumpy_scripts = /opt/local/src/lumpy-sv/scripts;	[run_Lumpy.pl -ls]		# Lumpy scripts directory [Do not change]
+
+#<SoftSV>
+softsv_path = SoftSV;	[run_SoftSV.pl -cp]		# file path of SoftSV executable [Do not change]
+

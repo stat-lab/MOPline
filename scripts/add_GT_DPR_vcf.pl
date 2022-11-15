@@ -48,25 +48,32 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  add_GT_DPR_vcf.pl -s <sample_list> -vd <vcf_directory> -ts <tool_set> -n <num_threads> (-ri <reference_index> -gap <gap_bed> -nh 1 if sample is a non-human species)
-  (Add genotype and alignment information (GT/DR/DS/SR tags) to the genotype field of MOP-merged vcf files with cov files that were generated with add_GT_DPR_vcf_thread.pl, using multiple threads)
+  add_GT_DPR_vcf.pl -s <sample_list> -vd <vcf_directory> -ts <tool_set> -n <num_threads> 
+  (-ri <reference_index> -gap <gap_bed> -nh 1 if sample is a non-human species)
+  (Add genotype and alignment information (GT/DR/DS/SR tags) to the genotype field of MOP-merged 
+   vcf files with cov files that were generated with add_GT_DPR_vcf_thread.pl, using multiple threads)
 
   Options:
-   --sample_list or -s <STR> sample list file or bam list file. The sample directory, ${sample_name}, should contain ${sample_name}.bam in the working directory [mandatory]
-   --vcf_dname or -vd <STR> vcf directory name containing a MOP-based merged vcf file from multiple tools, which should be under the sample directory [default: Merge_7tools]
+   --sample_list or -s <STR> sample list file or bam list file. [mandatory]
+                            The working directory should contain (a) sample directories (i.e., ${sample_name}), which contain a bam file (.i.e., ${sample_name}.bam)
+   --vcf_dname or -vd <STR> vcf directory name containing a MOP-based merged vcf file from multiple tools, 
+                            which should be under the sample directory [default: Merge_7tools]
    --non_human or -nh <INT> sample is non-human species (human: 0. non-human: 1) [default: 0]
-   --build or -b <INT>      human reference build (GRCh37, GRCh38) (37 or 38) [default: 37]
+   --build or -b <STR>      human reference build (GRCh37, GRCh38, T2T-CHM13) (37, 38, or T2T) [default: 37]
    --ref_index or -r <STR>  reference fasta index file [mandatory if non-human species]
-   --gap_bed or -gb <STR>   gap bed file indicating reference gap regions (1st column: chr-name, 2nd and 3rd columns: start and end positions of a gap) [optional, automatically selected for human]
+   --gap_bed or -gb <STR>   gap bed file indicating reference gap regions 
+                            (1st column: chr-name, 2nd and 3rd columns: start and end positions of a gap) [optional, automatically selected for human]
    --threads or -n <INT>    number of threads [default: 1]
    --help or -h             output help message
 
-   ## For adding SV genotype from SV callers to vcf ##
-   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) or a list file describing tool names in each line [default: 7tools]
-   --min_score or -ms <INT> minimum score to accept SV genotype (if multiple tools call the same genotype at a site, a summed score from these tools is considered) [default: 85]
+   ## Options for adding SV genotype from SV callers to vcf ##
+   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) 
+                             or a list file describing tool names in each line [default: 7tools]
+   --min_score or -ms <INT> minimum score to accept SV genotype (if multiple tools call the same genotype at a site, 
+                            a summed score from these tools is considered) [default: 85]
    --disable_genotype or -dg <BOOLEAN> disable SV geneotype addition [default: false]
 
-   ## For adding DPR/SR alignment information to vcf ##
+   ## Options for adding DPR/SR alignment information to vcf ##
    --cov_dname or -cd <STR> directory name containing coverage data [default: Cov]
    --flank or -f <INT>      flanking size of SV (DEL and DUP) breakpoints to be analyzed for DPR/SR [default: 1000]
    --bin <INT>              bin size of coverage data (Cov/*.cov file) [default: 50]
@@ -77,12 +84,13 @@ die "sample list file is not specified: \n" if ($sample_list eq '');
 die "ref index *.fa.fai is not specified: \n" if ($non_human == 1) and ($ref_index eq '');
 
 if (($non_human == 0) and ($ref_index eq '')){
-    $ref_index = "$data_dir/hs37.fa.fai";
-    $ref_index = "$data_dir/hs38.fa.fai" if ($build == 38);
+    $ref_index = "$data_dir/hs37.fa.fai" if ($build eq '37');
+    $ref_index = "$data_dir/hs38.fa.fai" if ($build eq '38');
+    $ref_index = "$data_dir/chm13v2.0.fa.fai" if ($build eq 'T2T');
 }
 if (($non_human == 0) and ($gap_bed eq '')){
-    $gap_bed = "$data_dir/gap.bed";
-    $gap_bed = "$data_dir/gap.b38.bed" if ($build == 38);
+    $gap_bed = "$data_dir/gap.bed" if ($build eq '37');
+    $gap_bed = "$data_dir/gap.b38.bed" if ($build eq '38');
 }
 
 my $work_dir = `pwd`;

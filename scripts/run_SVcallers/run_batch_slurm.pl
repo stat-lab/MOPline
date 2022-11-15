@@ -11,6 +11,7 @@ my $quos = '';
 my $partition = '';
 my $memory = 30000;
 my $time = 0;
+my $node_list = '';
 my $help;
  
 GetOptions(
@@ -21,6 +22,7 @@ GetOptions(
     'partition|p=s' => \$partition,
     'mem|m=i' => \$memory,
     'time|t=i' => \$time,
+    'node|w=s' => \$node_list,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
 pod2usage(-verbose => 0) if $help;
@@ -35,8 +37,9 @@ pod2usage(-verbose => 0) if $help;
    --account or -a <STR>    account name for slurm [mandatory]
    --quos or -q             quality of service level if specified
    --partition or -p <INT>  partition name if specified
-   --memory or -m <INT>     minimum amount of real memory (MB) [default: 30000]
-   --time or -t <INT>  		  time limit (optional)
+   --memory or -m <INT>     minimum amount of real memory in MB [default: 30000]
+   --time or -t <INT>  		  time limit in min (optional)
+   --node or -w <STR>       node list (optional)
    --help or -h             output help message
    
 =cut
@@ -57,6 +60,9 @@ if ($memory ne ''){
 }
 if ($time > 0){
 	$sbatch_opt .= " -t $time";
+}
+if ($node_list ne ''){
+	$sbatch_opt .= " -w $node_list";
 }
 
 my $ref = '';
@@ -185,18 +191,18 @@ while (my $line = <FILE>){
 		print OUT "$command\n";
 		close (OUT);
 		open (OUT, "> $ID.command.log");
-		print OUT "slurm command: $sbatch_opt\n";
+		print OUT "slurm command: $sbatch_opt2 -o $out_log -e $error_log run.sh\n";
 		close (OUT);
 		if ($sbatch_flag == 1){
 			my $jobid = `$sbatch_opt2 -o $out_log -e $error_log run.sh`;
 			$jobid = $1 if ($jobid =~ /(\d+)/);
 			
-      			print STDERR "$tool_name:$jobid\n";
-		 }
-		 else{
-			print STDERR "No sbatch command: $sbatch_opt2\n";
-		 }
-		 chdir '..';
+      print STDERR "$tool_name:$jobid\n";
+    }
+    else{
+    	print STDERR "No sbatch command: $sbatch_opt2\n";
+    }
+    chdir '..';
 	}
 	print STDERR "\n";
 	chdir $cur_dir;

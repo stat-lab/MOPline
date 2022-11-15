@@ -37,7 +37,8 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  create_coverage_file_bam_single.pl -b <bam file path> -sn <sample name> -sd <sample dir> -r <ref fasta> -rl <read length> (-nh 1 if sample is a non-human species)
+  create_coverage_file_bam_single.pl -b <bam file path> -sn <sample name> -sd <sample dir> -r <ref fasta> -rl <read length> 
+  (-nh 1 if sample is a non-human species)
   (create files with coverage and split read information of read alignment at 50-bp window for a single bam)
   outout Cov directory will be created in the working directory or under ${sample_name} directory if sample-bam/cram table or sample list file is provided
 

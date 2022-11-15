@@ -38,7 +38,8 @@ pod2usage(-verbose => 0) if $help;
   Options:
    --sample or -s <STR>     sample list file or a single sample name
    --group or -g <STR>      group ID if group ID is contained in the input vcf file name (i.e., ${groupID}.${sample_name}.Merge.ALL.vcf)
-   --toolset or -ts <STR>   preset tool set used for merging/selecting of SV calls from multiple SV call sets (7tools|6tools_1|6tools_2|9tools|11tools) [default: 7tools]
+   --toolset or -ts <STR>   preset tool set used for merging/selecting of SV calls from multiple SV call sets 
+                            (7tools|6tools_1|6tools_2|9tools|11tools) [default: 7tools]
    --input_dir or -d <STR>  input directory name containing input merged/slected vcf files [default: Merge_ + $toolset, e.g., Merge_7tools]
    --non_human or -nh <INT> samples are non-human species (human: 0, non-human: 1) [default: 0]
    --build <INT>            human reference build build 37 or build 38 (37|38) [default: 37] (adapted for only human)

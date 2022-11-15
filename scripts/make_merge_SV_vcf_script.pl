@@ -31,7 +31,8 @@ pod2usage(-verbose => 0) if $help;
   (This script creates a custom perl script, such as merge_SV_vcf.7tools.pl, for selecting overlap calls from tool pairs using a user-specified tool set)
 
   Options:
-   --tool_set or -t <STR>       Comma-sepated tool-names or a list file with tool name per line. Tool names should be ones contained in pre-defined tool set, specified in ${tool_config} file (e.g., CNVnator,DELLY,inGAP,Manta,Lumpy) [mandatory]
+   --tool_set or -t <STR>       Comma-sepated tool-names or a list file with tool name per line. 
+                                Tool names should be ones contained in pre-defined tool set, specified in ${tool_config} file (e.g., CNVnator,DELLY,inGAP,Manta,Lumpy) [mandatory]
                                 If tools of interest are not specified in ${tool_config} file, the tool names and their minimum RSSs in each SV category should be added to the ${tool_config} file.
                                 All the tool names should exactly match the tool directory name and the tool names contained in the SV vcf file in the tool directory.
    --tool_config or -tc <STR>   configuration file for tool pairs and minimum RSS to select overlap calls [default: MOPline_xx/Data/SVtool_pairs_config.txt]

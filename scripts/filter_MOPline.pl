@@ -21,6 +21,8 @@ my $segdup_file = '';
 
 my $exclude_bed = '';
 
+my $exclude_cen = '';
+
 my $min_del_len = 10000;
 my $min_dup_len1 = 1000;
 my $min_dup_len2 = 200;
@@ -35,7 +37,8 @@ my $min_dup_dprate1 = 1.25;
 my $min_dup_dprate2= 1.35;
 
 
-my $max_del_dsr = 0.2;
+my $max_del_dsr = 0.35;
+my $max_del_dsr2 = 0.2;
 my $max_dup_dsr = 0.1;
 
 my $min_repeat_overlap = 1;
@@ -48,15 +51,18 @@ my $min_sample_overlap_rate = 0.8;
 my $min_overlap_rate = 0.5;
 my $ins_sd = 20;
 
+my $min_AF_lowconf = 0.01;
+
 my $help;
  
 GetOptions(
     'vcf|v=s' => \$vcf,
     'non_human|nh=i' => \$non_human,
-    'build|b=i' => \$build,
+    'build|b=s' => \$build,
     'gap|g=s' => \$gap_bed,
     'segdup|sg=s' => \$segdup_file,
     'exclude|ex=s' => \$exclude_bed,
+    'exclude_cen|ec' => \$exclude_cen,
     'overlap_rate|or=f' => \$min_overlap_rate,
     'insdup_sd|ids=i' => \$ins_sd,
     'min_sd_duplen|msd=i' => \$min_dup_len3,
@@ -81,12 +87,15 @@ pod2usage(-verbose => 0) if $help;
   Options:
    --vcf or -v <STR>        SV vcf file [mandatory]
    --non_human or -nh <INT> sample is non-human species (0: humna, 1: non-human) [default: 0]
-   --build or -b <INT>      human reference build (37 or 38, effective for only human) [default: 37]
+   --build or -b <STR>      human reference build (37, 38, or T2T; effective for only human) [default: 37]
    --gap or -g <STR>        gap bed file, indicating gap regions in reference genome [default for human: Data/gap.bed or gap.b38,bed]
-   --segdup or -sg <STR>    sgmental duplication file from UCSC [default for human: Data/genomicSuperDups.txt.gz or genomicSuperDups.b38.txt.gz]
+   --segdup or -sg <STR>    sgmental duplication file from UCSC [default for human: Data/genomicSuperDups.txt.gz]
    --exclude or -ex <STR>   bed file indicating ambiguous/excludable regions in reference genome. These regions could often generate false positive SV calls
                             If it is prefferable for human data to disable this option, specify any character that is not a file.
-                            [default for human: Data/BBJ.ambiguous.DEL.DUP.bed or BBJ.ambiguous.DEL.DUP.b38.bed]
+                            [default for human: Data/Low_confidence.bed]
+   --exclude_cen or -ec     bed file indicating centromere regions to exclude SVs within centromeres
+                            If it is prefferable for human data to disable this option, specify any character that is not a file.
+                            [default for human build 38 and T2T: Data/hg38.centromere.bed or Data/chm13.v2.0.centromere.bed]
    --overlap_rate or -or <FLOAT> minimum reciprocal overlap rate between SVs and ambiguous/excludable regions [default: 0.5]
    --insdup_sd or -isd <INT>  minimum distance (bp) between INS and DUP to be merged for a single sample vcf [default: 20]
 
@@ -112,25 +121,34 @@ my $data_dir = "$Bin/../Data";
 
 if ($non_human == 0){
     if ($gap_bed eq ''){
-        $gap_bed = "$data_dir/gap.bed";
-        $gap_bed = "$data_dir/gap.b38.bed" if ($build == 38);
+        $gap_bed = "$data_dir/gap.bed" if ($build eq '37');
+        $gap_bed = "$data_dir/gap.b38.bed" if ($build eq '38');
     }
     if ($segdup_file eq ''){
         $segdup_file = "$data_dir/genomicSuperDups.txt.gz";
-        $segdup_file = "$data_dir/genomicSuperDups.b38.txt.gz" if ($build == 38);
+        $segdup_file = "$data_dir/genomicSuperDups.b38.txt.gz" if ($build eq '38');
+        $segdup_file = "$data_dir/genomicSuperDups.T2T-chm13.v2.0.txt.gz" if ($build eq 'T2T');
     }
     if ($exclude_bed eq ''){
-        $exclude_bed = "$data_dir/BBJ.ambiguous.DEL.DUP.bed";
-        $exclude_bed = "$data_dir/BBJ.ambiguous.DEL.DUP.b38.bed" if ($build == 38);
+        $exclude_bed = "$data_dir/Low_confidence.bed";
+        $exclude_bed = "$data_dir/Low_confidence.b38.bed" if ($build eq '38');
+        $exclude_bed = "$data_dir/Low_confidence.T2T-chm13.v2.0.bed" if ($build eq 'T2T');
+    }
+    if ($exclude_cen eq ''){
+        $exclude_cen = "$data_dir/hg38.centromere.bed" if ($build eq '38');
+        $exclude_cen = "$data_dir/chm13.v2.0.centromere.bed" if ($build eq 'T2T');
     }
 }
+print STDERR "exlude SV: $exclude_bed\n";
 
 my $del_num = 0;
 my $dup_num = 0;
 my $ins_num = 0;
+my $inv_num = 0;
 my $del_filt = 0;
 my $dup_filt = 0;
 my $ins_filt = 0;
+my $inv_filt = 0;
 my @del_dprate;
 my @dup_dprate;
 
@@ -140,6 +158,8 @@ my %repeat;
 my %repeat2;
 my %segdup;
 my %ambiguous;
+my %ambiguous_flag;
+my %exclude;
 my $total_segdup = 0;
 my $Mbin_size = 1000000;
 
@@ -177,7 +197,7 @@ if ($segdup_file ne ''){
         next if ($line =~ /^#|^$/);
         my @line = split (/\t/, $line);
         my $chr = $line[1];
-        $chr =~ s/^chr// if ($chr =~ /^chr/) and ($non_human == 0) and ($build == 37);
+        $chr =~ s/^chr// if ($chr =~ /^chr/) and ($non_human == 0) and ($build eq '37');
         next if ($chr !~ /^c*h*r*[\dXY]+$/) and ($non_human == 0);
         my $pos = $line[2];
         my $end = $line[3];
@@ -244,7 +264,37 @@ if (($exclude_bed ne '') and (-f $exclude_bed)){
         chomp $line;
         my ($chr, $pos, $end, $type) = split (/\t/, $line);
         my $len = $end - $pos + 1;
-        ${${$ambiguous{$type}}{$chr}}{$pos} = $len;
+        if ((defined $type) and ($type =~ /DEL|DUP|INV|INS|ALL/)){
+            if ($type =~ /\//){
+                my @type = split (/\//, $type);
+                foreach (@type){
+                    ${${$ambiguous{$_}}{$chr}}{$pos} = $len;
+                    ${${$ambiguous{$_}}{$chr}}{$pos} = $len;
+                }
+            }
+            elsif ($type eq 'ALL'){
+                ${${$ambiguous{'INS'}}{$chr}}{$pos} = $len;
+                ${${$ambiguous{'DUP'}}{$chr}}{$pos} = $len;
+                ${${$ambiguous{'DEL'}}{$chr}}{$pos} = $len;
+                ${${$ambiguous{'INV'}}{$chr}}{$pos} = $len;
+            }
+            else{
+                ${${$ambiguous{$type}}{$chr}}{$pos} = $len;
+                ${${$ambiguous_flag{$type}}{$chr}}{$pos} = 1;
+            }
+        }
+        else{
+            ${$exclude{$chr}}{$pos} = $end;
+        }
+    }
+    close (FILE);
+}
+if (($exclude_cen ne '') and (-f $exclude_cen)){
+    open (FILE, $exclude_cen) or die "$exclude_cen is not found:$!\n";
+    while (my $line = <FILE>){
+        chomp $line;
+        my ($chr, $pos, $end) = split (/\t/, $line);
+        ${$exclude{$chr}}{$pos} = $end;
     }
     close (FILE);
 }
@@ -281,7 +331,8 @@ while (my $line = <FILE>){
     ${${$sv{$type}}{$chr}}{$pos} = $line;
     $del_num ++ if ($type eq 'DEL');
     $dup_num ++ if ($type eq 'DUP');
-    $ins_num ++ if ($type eq 'INS')     
+    $ins_num ++ if ($type eq 'INS');
+    $inv_num ++ if ($type eq 'INV')   
 }
 close (FILE);
 
@@ -297,7 +348,7 @@ foreach my $type (keys %sv){
             my $len = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
             my $end = $pos + $len - 1;
 
-            if (($type eq 'DUP') and ($len >= 10000)){
+            if (($type eq 'DUP') and ($len >= 150)){
                 my $pos_f1 = $pos - $len * 1.2;
                 my $pos_f2 = $pos - $len * 0.2;
                 my $end_f1 = $end + $len * 1.2;
@@ -316,6 +367,14 @@ foreach my $type (keys %sv){
                     }
 #print STDERR "$gstart-$gend\t$flank_gap\n" if ($chr eq '21') and ($pos1 == 14338001);
                 }
+                if (($flank_gap / $len >= 0.5) or ($flank_gap >= 20000)){
+                    my $chr_pos = "$chr:$pos";
+                    $gap_dup{$chr_pos} = $len;
+                    ${${$delete{$type}}{$chr}}{$pos} = 1;
+#print STDERR "${${$sv{$type}}{$chr}}{$pos1}\n";
+                    next;
+                }
+=pod
                 if ($flank_gap / $len >= 0.8){
                     my $chr_pos = "$chr:$pos";
                     $gap_dup{$chr_pos} = $len;
@@ -329,6 +388,26 @@ foreach my $type (keys %sv){
                     ${${$delete{$type}}{$chr}}{$pos} = 1;
 #print STDERR "${${$sv{$type}}{$chr}}{$pos1}\n";
                     next;
+                }
+=cut
+            }
+            if (($type eq 'DEL') and ($len >= 10000)){
+                my $gap_flag = 0;
+                foreach my $gstart (sort {$a <=> $b} keys %{$gap{$chr}}){
+                    my $gend = ${$gap{$chr}}{$gstart};
+                    last if ($gstart > $pos + 1000);
+                    if (($pos >= $gstart - 200) and ($pos <= $gstart + 1000)){
+                        $gap_flag = 1;
+                        last;
+                    }
+                    if (($end >= $gend - 1000) and ($end <= $gend + 200)){
+                        $gap_flag = 1;
+                        last;
+                    }
+                }
+                if ($gap_flag == 1){
+                    ${${$delete{$type}}{$chr}}{$pos} = 1;
+                    $del_filt ++;
                 }
             }
             if (($type eq 'DUP') and ($len >= $min_dup_len3) and ($segDup_filt == 1)){
@@ -421,7 +500,7 @@ foreach my $type (keys %sv){
                         }
                     }
                     $line[2] = $rcount;
-                    $flag = 0 if ($rcount <= 2);
+                    $flag = 0 if ($rcount <= 1);
                 }
                 if ($flag == 1){
                     ${${$delete{$type}}{$chr}}{$pos} = 1;
@@ -488,6 +567,7 @@ foreach my $type (sort keys %merged_sv){
 
 my $ambiguous_del = 0;
 my $ambiguous_dup = 0;
+my $ambiguous_ins = 0;
 my @filt_sv;
 
 foreach (@header){
@@ -616,16 +696,18 @@ foreach my $chr (sort keys %vcf){
                 }
                 if ($flag == 0){
                     if ($len >= $min_del_len){
-                        if (($DPR > $max_del_dprate2) and ($DSR > $max_del_dsr)){
+                        if (($DPR > $max_del_dprate2) and ($DSR > $max_del_dsr2)){
                             push @filt_sv, $line;
                             $del_filt ++;
                             next;
                         }
-                        if ($DPR > $max_del_dprate1){
-                            push @filt_sv, $line;
-                            $del_filt ++;
-                            next;
-                        }
+                    }
+                }
+                if ($len >= $min_del_len){
+                    if (($DPR > $max_del_dprate1) or ($DSR > $max_del_dsr)){
+                        push @filt_sv, $line;
+                        $del_filt ++;
+                        next;
                     }
                 }
             }
@@ -662,35 +744,42 @@ foreach my $chr (sort keys %vcf){
                 $dup_filt ++;
                 next;
             }
-            
-            if ((exists ${$ambiguous{$type}}{$chr2}) and (@line > 10)){
-                my $end = $pos + $len - 1;
+            if ((exists ${$ambiguous{$type}}{$chr2}) and ($af >= $min_AF_lowconf)){
                 my $match = 0;
                 foreach my $apos (sort {$a <=> $b} keys %{${$ambiguous{$type}}{$chr2}}){
                     last if ($apos > $end);
                     my $alen = ${${$ambiguous{$type}}{$chr2}}{$apos};
                     my $aend = $apos + $alen - 1;
                     next if ($aend < $pos);
-#print STDERR "$type\t$chr2:$pos-$len\t$apos $alen\n";
-                    my $overlap = 0;
-                    if (($apos <= $pos) and ($aend >= $end)){
-                        $overlap = $len;
-                        if (($len >= 5000) and ($af >= 0.05) and ($type eq 'DEL')){
-                            $match = 1;
-                            last;
-                        }
-                    }
-                    elsif (($apos >= $pos) and ($apos <= $end)){
-                        $overlap = $end - $apos + 1;
-                        $overlap = $alen if ($aend < $end);
-                    }
-                    elsif (($aend >= $pos) and ($aend <= $end)){
-                        $overlap = $aend - $pos + 1;
-                        $overlap = $alen if ($apos > $pos);
-                    }
-                    if (($overlap >= $len * $min_overlap_rate) and ($overlap >= $alen * $min_overlap_rate)){
+                    if ($type eq 'INS'){
                         $match = 1;
                         last;
+                    }
+                    else{
+                        my $overlap = 0;
+                        if (($apos <= $pos) and ($aend >= $end)){
+                            $overlap = $len;
+                        }
+                        elsif (($apos >= $pos) and ($apos <= $end)){
+                            $overlap = $end - $apos + 1;
+                            $overlap = $alen if ($aend < $end);
+                        }
+                        elsif (($aend >= $pos) and ($aend <= $end)){
+                            $overlap = $aend - $pos + 1;
+                            $overlap = $alen if ($apos > $pos);
+                        }
+                        if ($overlap >= $len * $min_repeat_overlap2){
+                            if (exists ${${$ambiguous_flag{$type}}{$chr2}}{$apos}){
+                                if ($len >= 8000){
+                                    $match = 1;
+                                    last;
+                                }
+                            }
+                            else{
+                                $match = 1;
+                                last;
+                            }
+                        }
                     }
                 }
                 if ($match == 1){
@@ -702,10 +791,60 @@ foreach my $chr (sort keys %vcf){
                         $dup_filt ++;
                         $ambiguous_dup ++;
                     }
+                    elsif ($type eq 'INS'){
+                        $ins_filt ++;
+                        $ambiguous_ins ++;
+                    }
                     next;
                 }
             }
-            
+            if (exists $exclude{$chr}){
+                my $match = 0;
+                foreach my $cpos (sort {$a <=> $b} keys %{$exclude{$chr}}){
+                    last if ($cpos > $end);
+                    my $cend = ${$exclude{$chr}}{$cpos};
+                    next if ($cend < $pos);
+                    if ($type eq 'INS'){
+                        $match = 1;
+                        last;
+                    }
+                    else{
+                        my $clen = $cend - $cpos + 1;
+                        my $overlap = 0;
+                        if (($cpos <= $pos) and ($cend >= $end)){
+                            $match = 1;
+                            last;
+                        }
+                        elsif (($cpos >= $pos) and ($cpos <= $end)){
+                            $overlap = $end - $cpos + 1;
+                            $overlap = $clen if ($cend < $end);
+                        }
+                        elsif (($cend >= $pos) and ($cend <= $end)){
+                            $overlap = $cend - $pos + 1;
+                            $overlap = $clen if ($cpos > $pos);
+                        }
+                        if ($overlap >= $len *  $min_overlap_rate){
+                            $match = 1;
+                            last;
+                        }
+                    }
+                }
+                if ($match == 1){
+                    if ($type eq 'DEL'){
+                        $del_filt ++;
+                    }
+                    elsif ($type eq 'DUP'){
+                        $dup_filt ++;
+                    }
+                    elsif ($type eq 'INS'){
+                        $ins_filt ++;
+                    }
+                    elsif ($type eq 'INV'){
+                        $inv_filt ++;
+                    }
+                    next;
+                }
+            }
             print "$line\n";
         }
     }
@@ -724,14 +863,17 @@ $dup_filt += $rep_dup;
 my $del_filt_rate = 0;
 my $dup_filt_rate = 0;
 my $ins_filt_rate = 0;
+my $inv_filt_rate = 0;
 
 $del_filt_rate = int ($del_filt / $del_num * 1000) / 10 if ($del_num > 0);
 $dup_filt_rate = int ($dup_filt / $dup_num * 1000) / 10 if ($dup_num > 0);
 $ins_filt_rate = int ($ins_filt / $ins_num * 1000) / 10 if ($ins_num > 0);
+$inv_filt_rate = int ($inv_filt / $inv_num * 1000) / 10 if ($inv_num > 0);
 
 print STDERR "\nTotal DEL num: $del_num\tFiltered: $del_filt ($del_filt_rate%)\n";
 print STDERR "Total DUP num: $dup_num\tFiltered: $dup_filt ($dup_filt_rate%)\n";
 print STDERR "Total INS num: $ins_num\tFiltered: $ins_filt ($ins_filt_rate%)\n";
+print STDERR "Total INV num: $inv_num\tFiltered: $inv_filt ($inv_filt_rate%)\n";
 
 =pod
 my $vcf_base = basename ($vcf);

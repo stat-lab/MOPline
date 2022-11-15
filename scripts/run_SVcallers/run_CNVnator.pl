@@ -26,12 +26,12 @@ GetOptions(
     'root_dir|rd=s' => \$root_dir,
     'prefix|p=s' => \$out_prefix,
     'non_human|nh=i' => \$non_human,
-    'build=i' => \$build,
+    'build=s' => \$build,
     'gap_bed|g=s' => \$gap_bed,
     'mopdir|md=s' => \$MOP_dir,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
-
+pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
@@ -45,9 +45,10 @@ GetOptions(
    --root_dir or -rd <STR>  ROOT package install directory, in which bin and lib directories should be present [mandatory]
    --prefix or -p <STR>     outpout prefix [mandatory]
    --non_human or -nh <INT> samples are non-human species (0: human, 1: non-human) [default: 0]
-   --build <INT>            reference build (GRCh37, GRCh38) number (37 or 38) when sample is human [default: 37]
+   --build <STR>            reference build (GRCh37, GRCh38, T2T-CHM13) number (37, 38, or T2T) when sample is human [default: 37]
    --mopdir or -md <STR>      MOPline install directory (optional)
-   --gap_bed or -g <STR>    gap bed file indicating gap regions in reference (chr start end, separated with tab). Necessary for non-human species (Data/gap.bed or gap.b38.bed for human)
+   --gap_bed or -g <STR>    gap bed file indicating gap regions in reference (chr start end, separated with tab). 
+                            Necessary for non-human species (Data/gap.bed or gap.b38.bed for human)
    --help or -h             output help message
    
 =cut
@@ -59,8 +60,8 @@ my $chr_list = '';
 
 if ($non_human == 0){
     $chr_list = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y';
-    $chr_list = 'chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY' if ($build == 38);
-    if ($build == 38){
+    $chr_list = 'chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY' if ($build eq '38') or ($build eq 'T2T');
+    if ($build eq '38'){
         if ($MOP_dir ne ''){
             $gap_bed = "$MOP_dir/Data/gap.b38.bed";
         }
@@ -68,7 +69,7 @@ if ($non_human == 0){
             $gap_bed = "$Bin/../../Data/gap.b38.bed";
         }
     }
-    else{
+    elsif ($build eq '37'){
         if ($MOP_dir ne ''){
             $gap_bed = "$MOP_dir/Data/gap.bed";
         }
@@ -76,8 +77,6 @@ if ($non_human == 0){
             $gap_bed = "$Bin/../../Data/gap.bed";
         }
     }
-    
-    
 }
 else{
     if (-d $ref){

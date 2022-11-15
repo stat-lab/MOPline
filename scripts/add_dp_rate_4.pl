@@ -15,7 +15,6 @@ my $bin_size = 50;
 my %cov;
 my %cov2;
 my %split;
-my %cnv;
 my %chrlen;
 my %pos_info;
 my $cov2_flag = 0;
@@ -30,11 +29,6 @@ while (my $line = <FILE>){
     $end = $pos if ($type eq 'INS');
     my $pos_res = $pos % $bin_size;
     my $pos2 = $pos - $pos_res;
-    while (1){
-        ${$cnv{$chr}}{$pos2} = $end;
-        $pos2 += $bin_size;
-        last if ($pos2 > $end);
-    }
     ${$pos_info{$chr}}{$pos} = "$len=$type";
 }
 
@@ -86,6 +80,7 @@ foreach my $chr (keys %pos_info){
         my @left_cov;
         my @right_cov;
         my @sv_cov;
+        my @sv_cov2;
         my @flankcov;
         my %split_num;
         my %split_num2;
@@ -97,26 +92,21 @@ foreach my $chr (keys %pos_info){
             for (my $i = $left_start; $i <= $left_end; $i += $bin_size){
                 next if (!exists $cov_info{$i});
                 my ($cov1, $cov2, $split1, $split2) = split (/=/, $cov_info{$i});
-                if (!exists ${$cnv{$chr}}{$i}){
-                    push @left_cov, $cov1 if ($type eq 'DUP');
-                    push @left_cov, $cov2 if ($type eq 'DEL');
-                }
-                push @flankcov, $cov1 if ($type eq 'DUP');
-                push @flankcov, $cov2 if ($type eq 'DEL');
+                push @left_cov, $cov1 if ($type eq 'DUP') and ($cov1 > 0);
+                push @left_cov, $cov2 if ($type eq 'DEL') and ($cov2 > 0);
             }
             for (my $i = $right_start; $i <= $right_end; $i += $bin_size){
                 next if (!exists $cov_info{$i});
                 my ($cov1, $cov2, $split1, $split2) = split (/=/, $cov_info{$i});
-                if (!exists ${$cnv{$chr}}{$i}){
-                    push @right_cov, $cov1 if ($type eq 'DUP');
-                    push @right_cov, $cov2 if ($type eq 'DEL');
-                }
+                push @right_cov, $cov1 if ($type eq 'DUP') and ($cov1 > 0);
+                push @right_cov, $cov2 if ($type eq 'DEL') and ($cov2 > 0);
             }
             for (my $i = $start; $i <= $end2; $i += $bin_size){
                 next if (!exists $cov_info{$i});
                 my ($cov1, $cov2, $split1, $split2) = split (/=/, $cov_info{$i});
                 push @sv_cov, $cov1 if ($type eq 'DUP');
                 push @sv_cov, $cov2 if ($type eq 'DEL');
+                push @sv_cov2, $cov1 if ($type eq 'DEL') and ($len >= 1000);
             }
         }
         for (my $i = $start1; $i <= $start4; $i += $bin_size){
@@ -164,26 +154,72 @@ foreach my $chr (keys %pos_info){
         my $sum = 0;
         my $sum_flank = 0;
         my $ave = 0;
+        my $ave2 = 0;
         my $ave_flank = 0;
+        my $ave_left_flank = 0;
+        my $ave_right_flank = 0;
         map{$sum += $_} @sv_cov;
         $ave = int ($sum / @sv_cov * 100) / 100 if (@sv_cov > 0);
-        if ((@left_cov > 0) or (@right_cov > 0)){
+        if (($type eq 'DEL') and ($len >= 1000)){
+            my $sum2 = 0;
+            map{$sum2 += $_} @sv_cov2;
+            $ave2 = int ($sum2 / @sv_cov2 * 100) / 100 if (@sv_cov2 > 0);
+        }
+        if (@left_cov > 0){
             map{$sum_flank += $_} @left_cov;
+            $ave_left_flank = int ($sum_flank / @left_cov * 100) / 100;
+        }
+        $sum_flank = 0;
+        if (@right_cov > 0){
             map{$sum_flank += $_} @right_cov;
-            $ave_flank = int ($sum_flank / (@left_cov + @right_cov) * 100) / 100 if (@left_cov + @right_cov > 0);
+            $ave_right_flank = int ($sum_flank / @right_cov * 100) / 100;
+        }
+        if (($ave_left_flank == 0) and ($ave_right_flank == 0)){
+            $ave_flank = 30;
+        }
+        elsif ($ave_left_flank == 0){
+            $ave_flank = $ave_right_flank;
+        }
+        elsif ($ave_right_flank == 0){
+            $ave_flank = $ave_left_flank;
         }
         else{
-            map{$sum_flank += $_} @flankcov;
-            $ave_flank = int ($sum_flank / @flankcov * 100) / 100 if (@flankcov > 0);
+            if (($ave_left_flank / $ave_right_flank >= 1.2) or ($ave_left_flank / $ave_right_flank <= 0.83)){
+                if ($type eq 'DEL'){
+                    if ($ave_left_flank < $ave_right_flank){
+                        $ave_flank = $ave_left_flank;
+                    }
+                    else{
+                        $ave_flank = $ave_right_flank;
+                    }
+                }
+                elsif ($type eq 'DUP'){
+                    if ($ave_left_flank < $ave_right_flank){
+                        $ave_flank = $ave_right_flank;
+                    }
+                    else{
+                        $ave_flank = $ave_left_flank;
+                    }
+                }
+            }
+            else{
+                $ave_flank = int (($ave_left_flank + $ave_right_flank) * 0.5);
+            }
         }
         $cov_rate = int ($ave / $ave_flank * 100 + 0.5) / 100 if ($ave_flank > 0);
+        if ($ave2 > 0){
+            my $cov_rate2 = int ($ave2 / $ave_flank * 100 + 0.5) / 100 if ($ave_flank > 0);
+            if ($cov_rate2 > 1){
+                $cov_rate = $cov_rate2;
+            }
+        }
         my $incons_cov = 0;
         if (($ave_flank > 0) and (@sv_cov > 0)){
             foreach (@sv_cov){
-                if (($type eq 'DEL') and ($_ / $ave_flank > 0.8)){
+                if (($type eq 'DEL') and ($_ / $ave_flank >= 0.91)){
                     $incons_cov ++;
                 }
-                elsif (($type eq 'DUP') and ($_ / $ave_flank < 1.1)){
+                elsif (($type eq 'DUP') and ($_ / $ave_flank <= 1.1)){
                     $incons_cov ++;
                 }
             }

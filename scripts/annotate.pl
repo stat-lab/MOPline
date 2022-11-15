@@ -45,7 +45,7 @@ GetOptions(
     'target|t=s' => \$target_chr,
     'prefix|p=s' => \$out_prefix,
     'non_human|nh=i' => \$non_human,
-    'build|b=i' => \$build,
+    'build|b=s' => \$build,
     'num_threads|n=i' => \$cores,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
@@ -53,18 +53,20 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  annotate.pl -v <vcf file> -p <prefix of output vcf> -n <num of threads> (-nh 1 -r <reference gff3 annotation file from Ensemble> if sample is a non-human sepecies)
+  annotate.pl -v <vcf file> -p <prefix of output vcf> -n <num of threads> 
+  (-nh 1 -r <reference gff3 annotation file from Ensemble> if sample is a non-human sepecies)
   output vcf files: ${out_prefix}.annot.vcf and ${out_prefix}.AS.annot.vcf
 
   Options:
    --sv or -v <STR>         vcf file of SVs
-   --ref or -r <STR>        ref gff3 annotation file from Ensembl [default for human: Data/Homo_sapiens.GRCh37.87.gff3.gz or Data/Homo_sapiens.GRCh38.104.gff3.gz]
+   --ref or -r <STR>        ref gff3 annotation file from Ensembl 
+                            [default for human: Data/Homo_sapiens.GRCh37.87.gff3.gz or Data/Homo_sapiens.GRCh38.104.gff3.gz]
    --flank5 or -f5 <INT>    maximum size (bp) of 5' distal flanking gene region, that overlaps SV [default: 50000]
    --flank3 or -f3 <INT>    maximum size (bp) of 3' distal flanking gene region, that overlaps SV [default: 50000]
    --core5 or -c5 <INT>     maximum size (bp) of 5' proximal flanking gene region, that overlaps SV [default: 5000]
    --core3 or -c3 <INT>     maximum size (bp) of 3' proximal flanking gene region, that overlaps SV [default: 5000]
    --non_human or -nh <INT>  samples are non-human species (0: human, 1: non-human) [default: 0]
-   --build <INT>            reference build (GRCh37, GRCh38) number (37 or 38) [default: 37]
+   --build <STR>            reference build [GRCh37, GRCh38, T2T-CHM13] (37, 38, or T2T) [default: 37]
    --target or -t <STR>     target chromosome [default: ALL]
    --prefix or -p <STR>     outpout prefix
    --num_threads or -n <INT> number of threads to be used [default: 1]
@@ -83,7 +85,7 @@ if ($ref_gff ne ''){
 if ($non_human != 0){
 	$arg .= "-nh $non_human ";
 }
-if ($build != 37){
+if ($build ne '37'){
 	$arg .= "-b $build ";
 }
 if ($target_chr ne 'ALL'){

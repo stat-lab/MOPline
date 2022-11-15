@@ -34,8 +34,10 @@ pod2usage(-verbose => 0) if $help;
    --vcf or -v <STR>        SV vcf file path to be genotyped
    --sample_name or -sn <STR>  sample name [mandatory]
    --sample_dir or -sd <STR>   sample directory (optional, sample_dir is regarded as sample_name if not specified)
-   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) or a list file describing tool names in each line [default: 7tools]
-   --min_score or -ms <INT> minimum score to accept genotype (if multiple tools call the same genotype at a site, a summed score from these tools is considered) [default: 85]
+   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) 
+                             or a list file describing tool names in each line [default: 7tools]
+   --min_score or -ms <INT> minimum score to accept genotype 
+                            (if multiple tools call the same genotype at a site, a summed score from these tools is considered) [default: 85]
    --help or -h             output help message
    
 =cut

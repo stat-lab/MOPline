@@ -1115,8 +1115,8 @@ foreach my $chr (sort keys %vcf){
 				my ($gt, $gq, $vp, $vl, $dr, $ds, $sr, $mc) = split (/:/, $_);
 				($dr, $ds, $sr) = split (/=/, ${${${$dp_rate{$id2}}{$chr2}}{$vp}}{$type}) if (exists ${${${$dp_rate{$id2}}{$chr2}}{$vp}}{$type});
 				next if ($dr >= 4);
-				next if ($dr >= 1) and ($type eq 'DEL');
-				next if ($type eq 'DUP') and ($vl >= 200) and ($dr <= 1);
+				next if ($dr >= 1.2) and ($type eq 'DEL');
+				next if ($type eq 'DUP') and ($vl >= 200) and ($dr <= 0.9);
 				next if ($type eq 'DUP') and ($vl <= 1000) and ($sr < 0.1) and ($mc >= 1);
 				next if ($type eq 'INS') and ($sr < 0.02);
 				next if ($type eq 'INV') and ($sr < 0.1);
@@ -1161,6 +1161,7 @@ foreach my $chr (sort keys %vcf){
 				else{
 				    $gq = 99 if ($tpos > 0);
 				    ($dr, $ds, $sr, $sr_diff) = split (/=/, ${${${$dp_rate{$id2}}{$chr2}}{$tpos}}{$type}) if (exists ${${${$dp_rate{$id2}}{$chr2}}{$tpos}}{$type});
+=pod
                     if (($type eq 'INS') and ($sr_diff >= $min_split_diff)){
                         $line[$count - 1] = "0/0:0:0:0:$dr:$ds:0:3";
 						next;
@@ -1173,6 +1174,7 @@ foreach my $chr (sort keys %vcf){
                     	$line[$count - 1] = "0/0:0:0:0:$dr:$ds:0:3";
 						next;
                     }
+=cut
 #print STDERR "$count\t$id2\t$gt\t$tpos\t$dr\t$sr\t$MCtag\n";
 				    if ($tpos == 0){
 						$tpos = $pos;
@@ -1184,8 +1186,8 @@ foreach my $chr (sort keys %vcf){
 						    next;
 						}
 						elsif (($MCtag >= 2) and (($dr > 0.65) or ($ds >= 0.5))){
-						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-						    next;
+#						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#						    next;
 						}
 						elsif (($MCtag >= 2) and ($len <= 1000) and ($sr < 0.03)){
 						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
@@ -1194,12 +1196,12 @@ foreach my $chr (sort keys %vcf){
 						elsif ($gt eq './.'){
 						    if ($DP_filter == 1){
 								if ($dr >= 0.8){
-								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-								    next;
+#								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#								    next;
 								}
 								elsif (($len >= 1000) and ($ds > 0.25)){
-								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-								    next;
+#								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#								    next;
 								}
 						    }
 						    if (($dr >= $dr_boundary + 0.05) and ($dr <= $het_dr + 0.1)){
@@ -1221,18 +1223,18 @@ foreach my $chr (sort keys %vcf){
 						    next;
 						}
 						if (($MCtag == 2) and ($dr < 1.3)){
-						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-						    next;
+#						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#						    next;
 						}
 						elsif ($gt ne '0/0'){
 						    if ($DP_filter == 1){
 								if (($dr <= 1) or (($len >= $min_dup_len) and ($dr < $min_dup_dprate) and ($ds > $max_dup_dsr))){
-								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-								    next;
+#								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#								    next;
 								}
 								elsif (($len >= $min_len) and ($dr < $min_dup_dprate3)){
-								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-								    next;
+#								    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#								    next;
 								}
 						    }
 						    if (($dr >= $dr_boundary + 0.05) and ($len >= 2000)){
@@ -1257,8 +1259,8 @@ foreach my $chr (sort keys %vcf){
 						    next;
 						}
 						elsif (($sr < 0.2) and ($MCtag >= 2) and ($type eq 'INS')){
-						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
-						    next;
+#						    $line[$count - 1] = "0/0:0:0:0:$dr:$ds:$sr:0";
+#						    next;
 						}
 						elsif (($gt eq './.') and ($type eq 'INS')){
 						    if (($sr <= $sr_boundary - 0.1) and ($sr >= $het_sr - 0.1)){
@@ -1364,6 +1366,7 @@ foreach my $chr (sort keys %vcf){
 				$count ++;
 				$test_order{$count} = "$pos2=$count2";
 				my ($dr, $sr, $mdr, $msr) = split (/=/, ${${$gt_pred{$type2}}{$pos2}}{$count2});
+#print STDERR "$type2\t$pos2\t${${$gt_pred{$type2}}{$pos2}}{$count2}\t$sample_order{$count2}\n" if ($chr eq '1') and ($sample_order{$count2} =~ /NA12878/);
 				if ($type2 eq 'DEL1'){
 				    print OUT1 "0\t$dr\t$sr\t$mdr\t$msr\t$pos2:$type2:$count2\n";
 				}
@@ -1544,6 +1547,8 @@ $GQ = 999 if ($GQ > 999);
 $GQ2 = $GQ;
 				    my ($test_pos, $test_order) = split (/=/, $test_order{$num});
 				    ${${$pred{$test_pos}}{$type3}}{$test_order} = "$top_gt=$top_prob=$sec_gt=$GQ=$GQ2";
+#print STDERR "$test_pos\t$type2\t$test_order\t$sample_order{$test_order}\t$top_gt=$top_prob=$sec_gt=$GQ=$GQ2\n" if ($chr eq '1') and ($sample_order{$test_order} =~ /NA12878/);
+print STDERR "$test_pos\t$type2\t$test_order\t$sample_order{$test_order}\t$top_gt=$top_prob=$sec_gt=$GQ=$GQ2\n" if ($chr eq '01');
 				}
 				close (FILE2);
 		    }
@@ -1870,8 +1875,8 @@ $GQ2 = $GQ;
 						$filt_flag = 1;
 				    }
 				    if ($filt_flag == 1){
-						${${$rm_sv{$type}}{$chr}}{$pos} = 1;
-						next;
+	#					${${$rm_sv{$type}}{$chr}}{$pos} = 1;
+	#					next;
 				    }
 				}
 		    }
@@ -2335,12 +2340,12 @@ foreach my $type (keys %vcf2){
                     }
                     if ($type =~ /DEL|DUP/){
                     	if (($type eq 'DEL') and ($ori_len >= 200) and ($dr > 0.9) and ($mc >= 1)){
-                    		$line[$count - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
-                    		next;
+#                    		$line[$count - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
+#                    		next;
                     	}
                     	elsif (($type eq 'DUP') and ($ori_len >= 100) and ($dr <= 1.1)){
-                    		$line[$count - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
-                    		next;
+#                    		$line[$count - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
+#                    		next;
                     	}
                     	push @dr_het, $dr if ($gt eq '0/1') and ($mc <= 1);
                     	push @dr_hom, $dr if ($gt eq '1/1') and ($mc <= 1);
@@ -2446,14 +2451,14 @@ foreach my $type (keys %vcf2){
                     if ($gt ne '0/0'){
 #	                    if (($mc >= 2) and ($sr < $min_sr_mc0) and ($min_sr_het < 1) and (($sr < $min_sr_het) or ($sr < $ave_sr_het - $sr_sd * 1.5) or ($sr < $ave_sr_hom))){
 						if (($mc >= 1) and ($sr < $min_sr_mc0) and ($min_sr_het < 1) and ($sr < $med_sr_het - $sr_sd * 2.5)){
-	                    	$gt = '0/0';
-	                    	$line[$count1 - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
-							$sn --;
+#	                    	$gt = '0/0';
+#	                    	$line[$count1 - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
+#							$sn --;
 	                    }
 	                    elsif (($mc >= 2) and ($sr <= 0.2) and ($min_sr_het < 1) and (($sr < $min_sr_het) or ($sr < $med_sr_het - $sr_sd * 2.5))){
-	                    	$gt = '0/0';
-	                    	$line[$count1 - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
-							$sn --;
+#	                    	$gt = '0/0';
+#	                    	$line[$count1 - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
+#							$sn --;
 	                    }
 	                    elsif (($mc >= 2) and ($gt eq '0/1') and ($med_sr_hom > 0) and ($sr > $min_sr_hom) and ($sr > $med_sr_hom - $sr_hom_sd * 2)){
 	                    	$gt = '1/1';
@@ -2575,6 +2580,7 @@ foreach my $type (keys %vcf2){
                     next if ($mc == 0);
                     my $drsr = $sr + (1 - $dr);
     #                if (($type eq 'DEL') and ($len > 1000) and (@dr_het > 0) and ($drsr < $min_drsr_mc0)){
+=pod
                     if (($type eq 'DEL') and ($len > 100) and (@dr_het > 0) and ($drsr < $min_drsr_mc0)){
                     	$line[$count1 - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
 						$sn --;
@@ -2615,7 +2621,8 @@ foreach my $type (keys %vcf2){
                         $line[$count1 - 1] = "0/0:$gq:$vp:$vl:$dr:$ds:$sr:0";
                         $sn --;
                     }
-                    elsif (($type eq 'DEL') and ($gt eq '0/1') and (@dr_hom > 0) and ($dr <= $max_dr_hom) and ($dr < $ave_dr_hom + $dr_hom_sd * 2)){
+=cut
+                    if (($type eq 'DEL') and ($gt eq '0/1') and (@dr_hom > 0) and ($dr <= $max_dr_hom) and ($dr < $ave_dr_hom + $dr_hom_sd * 2)){
                     	$line[$count1 - 1] = "1/1:$gq:$vp:$vl:$dr:$ds:$sr:$mc";
                     }
                     elsif (($type eq 'DEL') and ($gt eq '1/1') and (@dr_het > 0) and ($dr >= $min_dr_het) and ($dr > $ave_dr_het - $dr_sd * 2)){

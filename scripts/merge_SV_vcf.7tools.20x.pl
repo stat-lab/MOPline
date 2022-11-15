@@ -39,9 +39,11 @@ pod2usage(-verbose => 0) if $help;
   Tools used: GRIDSS, MATCHCLIP, inGAP, CNVnator, Manta, Wham, MELT
 
   Options:
-   --sample or -s <STR>         a list file of sample names or bam files containing sample names (or a sample name can be specified if a single sample is treated)
+   --sample or -s <STR>         a list file of sample names or bam files containing sample names 
+                                (or a sample name can be specified if a single sample is treated)
    --dir or -d <STR>            output directory name, which contains output vcf files [default: Merge_7tools]
-   --group or -g <STR>          group ID to be added to output vcf file name, for distingwishing from other sample groups (output vcf file: ${groupID}.${sample_name}.Merge.ALL.vcf) [optional]
+   --group or -g <STR>          group ID to be added to output vcf file name, for distingwishing from other sample groups 
+                                (output vcf file: ${groupID}.${sample_name}.Merge.ALL.vcf) [optional]
    --read_length or -rl <STR>   mean read length in bam files used for SV calling
    --non_human or -nh           samples are non-human species (human: 0, non-human: 1) [default: 0]
    --refi or -r <STR>           reference fasta index (*.fai) file (only for non-human sample)

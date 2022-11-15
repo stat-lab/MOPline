@@ -42,7 +42,7 @@ GetOptions(
     'threads|n=i' => \$cores,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
-
+pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
@@ -53,7 +53,8 @@ GetOptions(
    --ref or -r <STR>          reference fasta file, index file (*.fa.fai) should be present in the same directory [mandatory]
    --target or -c <STR>       target chromosome(s) (comma-separated chromosome name(s)) [default: ALL]
    --melt_jar or -mj <STR>    MELT jar executable path (e.g., ..../MELTv2.2.2/MELT.jar) [mandatory]
-   --melt_lib or -ml <STR>    MELT mobile element reference data directory, containing *_MELT.zip files (* corresponds to target element specified with -mt option) (e.g., ..../MELTv2.2.2/me_refs/Hg38) [mandatory]
+   --melt_lib or -ml <STR>    MELT mobile element reference data directory, containing *_MELT.zip files (* corresponds to target element specified with -mt option) 
+                              (e.g., ..../MELTv2.2.2/me_refs/Hg38) [mandatory]
    --melt_gene or -mg <STR>   MELT gene annotation file (e.g., ..../MELTv2.2.2/add_bed_files/Hg38/Hg38.genes.bed) [mandatory]
    --prefix or -p <STR>       outpout prefix [mandatory]
    --melt_target or -mt <STR> MELT mobile element or other sequence target comma-separated list [default: ALU,LINE1,SVA,HERVK]
@@ -98,7 +99,7 @@ if (($non_human == 0) and ($excl_chr_list eq '')){
         
     }
     close (FILE);
-    $excl_chr_list = join ('/', @excl_list);
+    $excl_chr_list = join ('/', @excl_list) if (@excl_list > 0);
 }
 else{
     my %excl_chr;

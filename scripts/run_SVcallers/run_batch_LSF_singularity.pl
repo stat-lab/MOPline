@@ -4,16 +4,24 @@ use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
 
+my $sif_file = '';
 my $bam_list = '';
 my $config = '';
+my $temp_dir = '';
+my $bind_dir = '';
+my $no_home = 0;
 my $queue = '';
 my $memory = 30000000;
 my $time = 0;
 my $help;
  
 GetOptions(
+	  'sif|s=s' => \$sif_file,
     'bam_list|b=s' => \$bam_list,
     'config|c=s' => \$config,
+    'temp_dir|td=s' => \$temp_dir,
+    'bind_dir|bd=s' => \$bind_dir,
+    'no_home|noh' => \$no_home,
     'queue|q=s' => \$queue,
     'mem|m=i' => \$memory,
     'time|t=i' => \$time,
@@ -26,8 +34,12 @@ pod2usage(-verbose => 0) if $help;
   run_batch_LSF.pl -b <bam_list> -c <config_file> -q <queue> -m <memory(MB)>
 
   Options:
+   --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam_list or -b <STR>   bam list file [mandatory]
    --config or -c <STR>     config file [mandatory]
+   --temp_dir or -td <STR>  tmp directory on the host [mandatory]
+   --bind_dir or -bd <STR>  comma-separated list of path (except for the working directory: sample directory) on the host to be added to singularity container (optional)
+   --no_home or -noh <BOOLEAN>  do not add $HOME on the host to singularity container [default: false]
    --queue or -q            The partition that this job will run on [mandatory]
    --memory or -m <INT>     minimum amount of real memory in KB [default: 30000000]
    --time or -t <INT>  		  time limit in min (optional)
@@ -35,8 +47,10 @@ pod2usage(-verbose => 0) if $help;
    
 =cut
 
+die "sif file is not specified: or does not exist\n" if ($sif_file eq '') or (!-f $sif_file);
 die "bam list is not specified:\n" if ($bam_list eq '');
 die "config file is not specified:\n" if ($config eq '');
+die "tmp directory not specified:\n" if ($temp_dir eq '');
 die "queue is not specified:\n" if ($queue eq '');
 
 my $bsub_opt = "bsub -q $queue";
@@ -51,7 +65,7 @@ if ($time > 0){
 my $ref = '';
 my $target_chr = 'ALL';
 my $non_human = 0;
-my $run_svcaller_dir = '';
+my $run_svcaller_dir = '/opt/local/tools/MOPline/scripts/run_SVcallers';
 
 my @tools;
 
@@ -102,6 +116,10 @@ close (FILE);
 
 my $cur_dir = `pwd`;
 chomp $cur_dir;
+
+my $bind_dir2 = $temp_dir;
+$bind_dir2 .= ",$cur_dir";
+$bind_dir2 .= ",$bind_dir" if ($bind_dir ne '');
 
 my $bam_path = '';
 
@@ -168,7 +186,8 @@ while (my $line = <FILE>){
 		$bsub_opt2 .= " -n $thread";
 		my $error_log = "$ID.error.log";
 		my $out_log = "$ID.out.log";
-		my $command = "$run_script $opt_str";
+		my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
+		$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 		open (OUT, "> run.sh");
 		print OUT "#! /usr/bin/bash\n\n";
 		print OUT "$command\n";

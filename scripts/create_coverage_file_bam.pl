@@ -37,13 +37,14 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  create_coverage_file_bam.pl -b <bam_list or a bam file path> -r <ref fasta> -rl <read length> -n <threads> (-nh 1 if sample is a non-human species)
+  create_coverage_file_bam.pl -b <bam_list or a bam file path> -r <ref fasta> -rl <read length> -n <threads> 
+  (-nh 1 if sample is a non-human species)
   (create files with coverage and split read information of read alignment at 50-bp window using mutiple threads)
   outout Cov directory will be created in the working directory or under ${sample_name} directory if sample-bam/cram table or sample list file is provided
 
   Options:
-   --bam_list or -b <STR>   sample-bam/cram table file. Table file contains sample directory and bam file name in the 1st and 2nd columns, respectively. [mandatory]
-                            or a sample (bam) list file if the working directory contains ${sample_name}/${sample_name}.bam
+   --bam_list or -b <STR>   sample-bam/cram table file. Table file contains sample directory and bam file name in the 1st and 2nd columns, respectively.
+                            or a sample (bam) list file if the working directory contains ${sample_name}/${sample_name}.bam [mandatory]
    --ref or -r <STR>        reference fasta file used for creating cram (only needed for cram files as input) [mandatory]
    --read_len or -rl <INT>  read length [mandatory]
    --non_human or -nh <INT> samples are non-human species (0: human, 1: non-human) [default: 0]

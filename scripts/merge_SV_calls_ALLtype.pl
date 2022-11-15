@@ -72,51 +72,51 @@ my $vei = 0;
 foreach my $var_file (@var_file){
     open (FILE, $var_file) or die "$var_file is not found: $!\n";
     while (my $line = <FILE>){
-	chomp $line;
-	if ($line =~ /^#/){
-	    next;
-	}
-	my @line = split (/\t/, $line);
-	my $chr = $line[0];
-	my $pos = $line[1];
-	my $type = $line[2];
-	my $subtype = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
-    if ($type ne $subtype){
-        my $stype = $type;
-        $type = $subtype;
-        $subtype = $stype;
-    }
-    if (($type eq 'INS') and ($subtype ne 'INS')){
-        if ($subtype eq 'NUMT'){
-            $numt = 1;
+    	chomp $line;
+    	if ($line =~ /^#/){
+    	    next;
+    	}
+    	my @line = split (/\t/, $line);
+    	my $chr = $line[0];
+    	my $pos = $line[1];
+    	my $type = $line[2];
+    	my $subtype = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
+        if ($type ne $subtype){
+            my $stype = $type;
+            $type = $subtype;
+            $subtype = $stype;
         }
-        elsif ($subtype eq 'VEI'){
-            $vei = 1;
+        if (($type eq 'INS') and ($subtype ne 'INS')){
+            if ($subtype eq 'NUMT'){
+                $numt = 1;
+            }
+            elsif ($subtype eq 'VEI'){
+                $vei = 1;
+            }
+            else{
+                $mei_type{$subtype} = 1;
+            }
         }
-        else{
-            $mei_type{$subtype} = 1;
-        }
-    }
-	my $len = 0;
-	$len = $1 if ($line[7] =~ /SVLEN=(\d+)/);
-	my $end = 0;
-	$end = $pos + $len - 1 if ($type ne 'INS');
-	my $chr2 = '';
-	my $pos2 = 0;
-	if ($type eq 'TRA'){
-	    $chr2 = $1 if ($line[7] =~ /CHR2=(.+?);/);
-	    $pos2 = $1 if ($line[7] =~ /POS2=(\d+)/);
-	    $end = 0;
-	    $len = 0;
-	}
-	if (@line > 8){
-	    my $tool = $line[8];
-	    $line[7] .= ';' . $tool;
-	    splice (@line, -1);
-	    $line = join ("\t", @line);
-	}
-	my $flag = 0;
-	if ($type eq 'DEL'){
+    	my $len = 0;
+    	$len = $1 if ($line[7] =~ /SVLEN=(\d+)/);
+    	my $end = 0;
+    	$end = $pos + $len - 1 if ($type ne 'INS');
+    	my $chr2 = '';
+    	my $pos2 = 0;
+    	if ($type eq 'TRA'){
+    	    $chr2 = $1 if ($line[7] =~ /CHR2=(.+?);/);
+    	    $pos2 = $1 if ($line[7] =~ /POS2=(\d+)/);
+    	    $end = 0;
+    	    $len = 0;
+    	}
+    	if (@line > 8){
+    	    my $tool = $line[8];
+    	    $line[7] .= ';' . $tool;
+    	    splice (@line, -1);
+    	    $line = join ("\t", @line);
+    	}
+    	my $flag = 0;
+    	if ($type eq 'DEL'){
             if ($len > $min_DEL_nonDepth_caller){
                 my $flag = 0;
                 foreach my $dpcaller (@depth_callers){
@@ -129,7 +129,7 @@ foreach my $var_file (@var_file){
                 }
             }
         }
-	elsif ($type eq 'DUP'){
+	    elsif ($type eq 'DUP'){
             if ($len > $min_DUP_nonDepth_caller){
                 my $flag = 0;
                 foreach my $dpcaller (@depth_callers){
@@ -148,7 +148,10 @@ foreach my $var_file (@var_file){
         elsif ((exists ${${$var{$chr}}{$pos}}{'INS'}) and ($type ne 'INS')){
             delete ${${$var{$chr}}{$pos}}{'INS'};
         }
-	${${$var{$chr}}{$pos}}{$type} = $line;
+        if (($type eq 'INS') and ($len > 0) and ($len < 40)){
+            $line =~ s/SVLEN=$len/SVLEN=0/;
+        }
+	    ${${$var{$chr}}{$pos}}{$type} = $line;
         my $tool = $1 if ($line[7] =~ /TOOLS=(\S+)/);
     }
 }
@@ -248,7 +251,7 @@ foreach my $chr (sort keys %var){
                 $pre_pos = 0;
                 $pre_end = 0;
             }
-	    my $pre_len = $pre_end - $pre_pos + 1;
+	        my $pre_len = $pre_end - $pre_pos + 1;
             if ($pre_end >= $pos){
                 if ($type eq 'INS'){
                     if ($pre_type eq 'INS'){
@@ -271,51 +274,51 @@ foreach my $chr (sort keys %var){
                         }
                     }
                     elsif ($pre_type eq 'DEL'){
-			if ($pos - $pre_pos <= $ins_sd2){
-			    delete ${$vcf{$chr02d}}{$pre_pos};
-			}
-			elsif (abs ($pre_end - $pos) <= $ins_sd2){
-			    delete ${$vcf{$chr02d}}{$pre_pos};
-			}
-			else{
-			    next;
-			}
+            			if ($pos - $pre_pos <= $ins_sd2){
+            			    delete ${$vcf{$chr02d}}{$pre_pos};
+            			}
+            			elsif (abs ($pre_end - $pos) <= $ins_sd2){
+            			    delete ${$vcf{$chr02d}}{$pre_pos};
+            			}
+            			else{
+            			    next;
+            			}
                     }
-		    elsif ($pre_type eq 'DUP'){
-			if ($pos - $pre_pos <= $ins_sd2){
-			    next;
-			}
-			else{
-			    if ($tool_num >= $pre_tool_num){
-				delete ${$vcf{$chr02d}}{$pre_pos} if ($pre_len < 50000);
-			    }
-			    elsif ($tool_num < $pre_tool_num){
-				next;
-			    }
-			}
-		    }
-		    elsif ($pre_type eq 'INV'){
-			delete ${$vcf{$chr02d}}{$pre_pos};
-		    }
+            		elsif ($pre_type eq 'DUP'){
+            			if ($pos - $pre_pos <= $ins_sd2){
+            			    next;
+            			}
+            			else{
+            			    if ($tool_num >= $pre_tool_num){
+            				    delete ${$vcf{$chr02d}}{$pre_pos} if ($pre_len < 50000);
+            			    }
+            			    elsif ($tool_num < $pre_tool_num){
+            				    next;
+            			    }
+            			}
+        		    }
+        		    elsif ($pre_type eq 'INV'){
+            			delete ${$vcf{$chr02d}}{$pre_pos};
+            		}
                 }
                 elsif ($type eq 'DEL'){
                     if ($pre_type eq 'INS'){
                         if ($pre_subtype eq 'INS'){
                             delete ${$vcf{$chr02d}}{$pre_pos};
                         }
-			elsif ($pos - $pre_pos <= $ins_sd2){
-			    next;
-			}
-			elsif (abs ($pre_end - $pos) <= $ins_sd2){
-			    next;
-			}
+            			elsif ($pos - $pre_pos <= $ins_sd2){
+            			    next;
+            			}
+            			elsif (abs ($pre_end - $pos) <= $ins_sd2){
+            			    next;
+            			}
                     }
                     elsif ($pre_type eq 'DUP'){
                         my $overlap = $pre_end - $pos + 1;
                         $overlap = $len if ($end < $pre_end);
                         if (($overlap < $pre_len * $min_overlap_ratio) and ($overlap < $len * $min_overlap_ratio)){
                             delete ${$vcf{$chr02d}}{$pre_pos};
-#                            delete ${$vcf{$chr02d}}{$pos};
+        #                            delete ${$vcf{$chr02d}}{$pos};
                         }
                     }
                 }
@@ -347,20 +350,19 @@ foreach my $chr (sort keys %var){
                         my $overlap = $pre_end - $pos + 1;
                         $overlap = $len if ($end < $pre_end);
                         if (($overlap < $pre_len * $min_overlap_ratio) and ($overlap < $len * $min_overlap_ratio)){
-#                            delete ${$vcf{$chr02d}}{$pre_pos};
+        #                    delete ${$vcf{$chr02d}}{$pre_pos};
                             delete ${$vcf{$chr02d}}{$pos};
                         }
                     }
-		    elsif ($pre_type eq 'INS'){
-			if ($pos - $pre_pos <= $ins_sd2){
-			    next;
-			}
-			elsif ($end -$pre_pos <= $ins_sd2){
-			    next;
-			}
-		    }
+        	        elsif ($pre_type eq 'INS'){
+            			if ($pos - $pre_pos <= $ins_sd2){
+            			    next;
+            			}
+            			elsif ($end -$pre_pos <= $ins_sd2){
+            			    next;
+            			}
+            		}
                 }
-
                 elsif ($type eq 'INV'){
                     if ($pre_type eq 'INV'){
                         if ($pre_end >= $end){

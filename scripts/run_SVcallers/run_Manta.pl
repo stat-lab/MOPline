@@ -26,12 +26,12 @@ GetOptions(
     'command_path|cp=s' => \$manta_script,
     'prefix|p=s' => \$out_prefix,
     'non_human|nh=i' => \$non_human,
-    'build=i' => \$build,
+    'build=s' => \$build,
     'mopdir|md=s' => \$MOP_dir,
     'threads|n=i' => \$cores,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
-
+pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
@@ -43,7 +43,7 @@ GetOptions(
    --target or -c <STR>       target chromosome(s) (comma-separated chromosome name(s)) [default: ALL]
    --command_path or -cp <STR>   Manata configManta.py command path (e.g., ..../manta-1.6.0.centos6_x86_64/bin/configManta.py) [mandatory]
    --non_human or -nh <INT>   samples are non-human species (0: human, 1: non-human) [default: 0]
-   --build <INT>              reference build (GRCh37, GRCh38) number (37 or 38) when sample is human [default: 37]
+   --build <STR>              reference build (GRCh37, GRCh38) number (37, 38, or T2T) when sample is human [default: 37]
    --mopdir or -md <STR>      MOPline install directory (optional)
    --prefix or -p <STR>       outpout prefix [mandatory]
    --threads or -n <INT>      number of threads to be used [default: 1]
@@ -60,7 +60,7 @@ else{
 }
 
 my $command_config = "$manta_script --bam $input_bam --referenceFasta $ref --runDir ./ 2>$out_prefix.config.log";
-$command_config = "$manta_script --bam $input_bam --referenceFasta $ref --runDir ./ --callRegions $chr_bed 2>$out_prefix.config.log" if ($non_human == 0) and ($build == 38);
+$command_config = "$manta_script --bam $input_bam --referenceFasta $ref --runDir ./ --callRegions $chr_bed 2>$out_prefix.config.log" if ($non_human == 0) and ($build eq '38');
 
 my $command_run = "./runWorkflow.py -m local -j $cores -g 100 2>$out_prefix.find.log";
 

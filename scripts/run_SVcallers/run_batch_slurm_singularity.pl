@@ -4,54 +4,85 @@ use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
 
+my $sif_file = '';
 my $bam_list = '';
 my $config = '';
-my $queue = '';
-my $memory = 30000000;
+my $temp_dir = '';
+my $bind_dir = '';
+my $no_home = 0;
+my $account = '';
+my $quos = '';
+my $partition = '';
+my $memory = 30000;
 my $time = 0;
+my $node_list = '';
 my $help;
  
 GetOptions(
+	  'sif|s=s' => \$sif_file,
     'bam_list|b=s' => \$bam_list,
     'config|c=s' => \$config,
-    'queue|q=s' => \$queue,
+    'temp_dir|td=s' => \$temp_dir,
+    'bind_dir|bd=s' => \$bind_dir,
+    'no_home|noh' => \$no_home,
+    'account|a=s' => \$account,
+    'quos|q=s' => \$quos,
+    'partition|p=s' => \$partition,
     'mem|m=i' => \$memory,
     'time|t=i' => \$time,
+    'node|w=s' => \$node_list,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
 pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  run_batch_LSF.pl -b <bam_list> -c <config_file> -q <queue> -m <memory(MB)>
+  run_batch_slurm.pl -b <bam_list> -c <config_file> -a <account> -m <memory(MB)> (-q <quos> -p <partition>)
 
   Options:
+   --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam_list or -b <STR>   bam list file [mandatory]
    --config or -c <STR>     config file [mandatory]
-   --queue or -q            The partition that this job will run on [mandatory]
-   --memory or -m <INT>     minimum amount of real memory in KB [default: 30000000]
+   --temp_dir or -td <STR>  tmp directory on the host [mandatory]
+   --bind_dir or -bd <STR>  comma-separated list of path (except for the working directory: sample directory) on the host to be added to singularity container (optional)
+   --no_home or -noh <BOOLEAN>  do not add $HOME on the host to singularity container [default: false]
+   --account or -a <STR>    account name for slurm [mandatory]
+   --quos or -q             quality of service level if specified
+   --partition or -p <INT>  partition name if specified
+   --memory or -m <INT>     minimum amount of real memory in MB [default: 30000]
    --time or -t <INT>  		  time limit in min (optional)
+   --node or -w <STR>       node list (optional)
    --help or -h             output help message
    
 =cut
 
+die "sif file is not specified: or does not exist\n" if ($sif_file eq '') or (!-f $sif_file);
 die "bam list is not specified:\n" if ($bam_list eq '');
 die "config file is not specified:\n" if ($config eq '');
-die "queue is not specified:\n" if ($queue eq '');
+die "tmp directory not specified:\n" if ($temp_dir eq '');
+die "account is not specified:\n" if ($account eq '');
 
-my $bsub_opt = "bsub -q $queue";
-
+my $sbatch_opt = "sbatch -A $account";
+if ($quos ne ''){
+	$sbatch_opt .= " --qos $quos";
+}
+if ($partition ne ''){
+	$sbatch_opt .= " -p $partition";
+}
 if ($memory ne ''){
-	$bsub_opt .= " -M $memory";
+	$sbatch_opt .= " --mem $memory";
 }
 if ($time > 0){
-	$bsub_opt .= " -W $time";
+	$sbatch_opt .= " -t $time";
+}
+if ($node_list ne ''){
+	$sbatch_opt .= " -w $node_list";
 }
 
 my $ref = '';
 my $target_chr = 'ALL';
 my $non_human = 0;
-my $run_svcaller_dir = '';
+my $run_svcaller_dir = '/opt/local/tools/MOPline/scripts/run_SVcallers';
 
 my @tools;
 
@@ -103,12 +134,16 @@ close (FILE);
 my $cur_dir = `pwd`;
 chomp $cur_dir;
 
+my $bind_dir2 = $temp_dir;
+$bind_dir2 .= ",$cur_dir";
+$bind_dir2 .= ",$bind_dir" if ($bind_dir ne '');
+
 my $bam_path = '';
 
-my $bsub_flag = 0;
-my $return = `which bsub`;
+my $sbatch_flag = 0;
+my $return = `which sbatch`;
 chomp $return;
-$bsub_flag = 1 if ($return !~ /no|\s/);
+$sbatch_flag = 1 if ($return !~ /no|\s/);
 
 
 open (FILE, $bam_list) or die "$bam_list is not found:$!\n";
@@ -164,27 +199,29 @@ while (my $line = <FILE>){
 		else{
 			$opt_str = "-b $bam -p $ID -r $ref " . $opt_str;
 		}
-		my $bsub_opt2 = $bsub_opt;
-		$bsub_opt2 .= " -n $thread";
+		my $sbatch_opt2 = $sbatch_opt;
+		$sbatch_opt2 .= " -c $thread";
 		my $error_log = "$ID.error.log";
 		my $out_log = "$ID.out.log";
-		my $command = "$run_script $opt_str";
+		my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
+		$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 		open (OUT, "> run.sh");
 		print OUT "#! /usr/bin/bash\n\n";
 		print OUT "$command\n";
 		close (OUT);
 		open (OUT, "> $ID.command.log");
-		print OUT "LSF command: $bsub_opt2 -o $out_log -e $error_log run.sh\n";
+		print OUT "slurm command: $sbatch_opt2 -o $out_log -e $error_log run.sh\n";
 		close (OUT);
-		if ($bsub_flag == 1){
-			my $jobid = `$bsub_opt2 -o $out_log -e $error_log run.sh`;
+		if ($sbatch_flag == 1){
+			my $jobid = `$sbatch_opt2 -o $out_log -e $error_log run.sh`;
 			$jobid = $1 if ($jobid =~ /(\d+)/);
-	        print STDERR "$tool_name:$jobid\n";
-	    }
-	    else{
-	    	print STDERR "No sbatch command:\n";
-	    }
-        chdir '..';
+			
+      print STDERR "$tool_name:$jobid\n";
+    }
+    else{
+    	print STDERR "No sbatch command: $sbatch_opt2\n";
+    }
+    chdir '..';
 	}
 	print STDERR "\n";
 	chdir $cur_dir;

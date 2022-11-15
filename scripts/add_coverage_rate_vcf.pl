@@ -47,7 +47,7 @@ GetOptions(
     'flank|f=i' => \$flank_len,
     'bin=i' => \$bin_size,
     'non_humna|nh=i' => \$non_human,
-    'build|b=i' => \$build,
+    'build|b=s' => \$build,
     'ref_index|ri=s' => \$ref_index,
     'gap_bed|gap=s' => \$gap_bed,
     'prefix|p=s' => \$out_prefix,
@@ -57,7 +57,8 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  add_coverage_rate_vcf.pl -v <vcf file> -sn <sample name> -sd <sample directory> (-ri <reference index file> -gap <gap bed file> -nh 1 if sample is a non-human species)
+  add_coverage_rate_vcf.pl -v <vcf file> -sn <sample name> -sd <sample directory> 
+  (-ri <reference index file> -gap <gap bed file> -nh 1 if sample is a non-human species)
   (Add alignment information (DR/DS/SR tags) field of a specified MOP-merged vcf file with cov files that were generated with add_GT_DPR_vcf_thread.pl)
 
   Options:
@@ -65,12 +66,13 @@ pod2usage(-verbose => 0) if $help;
    --sample_name or -sn <STR>  sample name [mandatory]
    --sample_dir or -sd <STR>   sample directory (optional, sample_dir is regarded as sample_name if not specified)
    --ref_index or -ri <STR> reference fasta index file [mandatory if non-human species]
-   --gap_file or -gap <STR> gap bed file indicating reference gap regions (1st column: chr-name, 2nd and 3rd columns: start and end positions of a gap) [optional, automatically selected for human]
+   --gap_file or -gap <STR> gap bed file indicating reference gap regions 
+                            (1st column: chr-name, 2nd and 3rd columns: start and end positions of a gap) [optional, automatically selected for human]
    --cov_dname or -cd <STR> directory name containing coverage data [default: Cov]
    --flank or -f <INT>      flanking size of SV (DEL and DUP) breakpoints to be analyzed [default: 1000]
    --bin <INT>              bin size of coverage data [default: 50]
    --non_human or -nh <INT> sample is non-human species (human: 0. non-human: 1) [default: 0]
-   --build or -b <INT>      human reference build (GRCh37, GRCh38) (37 or 38) [default: 37]
+   --build or -b <STR>      human reference build (GRCh37, GRCh38, T2T-CHM13) (37, 38, or T2T) [default: 37]
    --prefix or -p <STR>     output prefix
    --help or -h             output help message
    
@@ -83,12 +85,13 @@ die "Reference fasta index file is not specified:\n" if ($non_human == 1) and ($
 $sample_dir = $sample_name if ($sample_dir eq '');
 
 if (($non_human == 0) and ($ref_index eq '')){
-    $ref_index = "$data_dir/hs37.fa.fai";
-    $ref_index = "$data_dir/hs38.fa.fai" if ($build == 38);
+    $ref_index = "$data_dir/hs37.fa.fai" if ($build eq '37');
+    $ref_index = "$data_dir/hs38.fa.fai" if ($build eq '38');
+    $ref_index = "$data_dir/chm13v2.0.fa.fai" if ($build eq 'T2T');
 }
 if (($non_human == 0) and ($gap_bed eq '')){
-    $gap_bed = "$data_dir/gap.bed";
-    $gap_bed = "$data_dir/gap.b38.bed" if ($build == 38);
+    $gap_bed = "$data_dir/gap.bed" if ($build eq '37');
+    $gap_bed = "$data_dir/gap.b38.bed" if ($build eq '38');
 }
 
 my %cov;
@@ -475,12 +478,16 @@ while (my $line = <FILE>){
         my @left_cov;
         my @right_cov;
         my @sv_cov;
+        my @sv_cov2;
         my $ref_cov = \%cov;
         $ref_cov = \%cov2 if ($type eq 'DEL');
         while (1){
             if (exists ${$ref_cov}{$start}){
     #print STDERR "$start\t${$cov{$chr}}{$start}\n" if ($chr eq '19') and ($pos == 54727001);
                 push @sv_cov, ${$ref_cov}{$start};
+                if (($type eq 'DEL') and ($len >= 1000)){
+                    push @sv_cov2, $cov{$start};
+                }
             }
             else{
                 push @sv_cov, 0;
@@ -501,6 +508,12 @@ while (my $line = <FILE>){
             next;
         }
         my $ave = int ($sum / @sv_cov * 100) / 100;
+        my $ave2 = 0;
+        if (($type eq 'DEL') and ($len >= 1000)){
+            my $sum2 = 0;
+            map{$sum2 += $_} @sv_cov2;
+            $ave2 = int ($sum2 / @sv_cov2 * 100) / 100 if (@sv_cov2 > 0);
+        }
         
         while (1){
             if ((exists ${$ref_cov}{$left_end}) and (!exists ${$gap{$chr}}{$left_end})){
@@ -581,14 +594,20 @@ while (my $line = <FILE>){
             $ave_flank = $cov_ave2 if ($type eq 'DEL');
         }
         $cov_rate = int ($ave / $ave_flank * 100 + 0.5) / 100 if ($ave_flank > 0);
+        if ($ave2 > 0){
+            my $cov_rate2 = int ($ave2 / $ave_flank * 100 + 0.5) / 100 if ($ave_flank > 0);
+            if ($cov_rate2 > 1){
+                $cov_rate = $cov_rate2;
+            }
+        }
         my $incons_cov = 0;
         if ($ave_flank > 0){
             foreach (@sv_cov){
                 if ($type eq 'DEL'){
-                    $incons_cov ++ if ($_ / $ave_flank > 0.8);
+                    $incons_cov ++ if ($_ / $ave_flank >= 0.91);
                 }
                 elsif ($type eq 'DUP'){
-                    $incons_cov ++ if ($_ / $ave_flank < 1.1);
+                    $incons_cov ++ if ($_ / $ave_flank <= 1.1);
                 }
             }
         }
