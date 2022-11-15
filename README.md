@@ -35,6 +35,7 @@ R 3.0 or later
 [samtools](https://github.com/samtools/samtools) (v1.13 or later is required for GRIDSS v2.13-)  
 [vcftools](https://vcftools.github.io/index.html) (v0.1.15 or later)  
 java 1.8 or later (for GRIDSS and MELT)
+
 #### General input file
 Reference fasta file  
 Alignmnet bam/cram file (only bam file is permitted for several SV detection tools)  
@@ -63,7 +64,7 @@ The presets customized in this MOPline package are follows:
 ```
 git clone https://github.com/stat-lab/MOPline
 ```
-The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data file for the human build 37/38 reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
+The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data file for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
 
 ### Sample data
 [Sample datasets](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
@@ -74,7 +75,7 @@ MOPline assumes a directory structure of sample_directory/tool_directory under t
 
 ## <a name="hdata"></a>Human and Non-human Data
 
-By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) generated based on the human build 37 reference (GRCh37 or GRCh37d5). When using the data based on the human build 38 reference, run several MOPline scripts using the option ‘-build 38’. For non-human species, run several MOPline scripts using the option ‘-nh 1’ and, in some cases, also using other options specifying some reference-specific annotation files for gap, repeat, and gene regions.
+By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) generated based on the human build 37 reference (GRCh37 or GRCh37d5). When using the data based on the human build 38 reference or T2T-CHM13.v2.0, run several MOPline scripts using the option ‘--build 38’ or '--build T2T. By specifying the --build option, specific data files associated with the human reference will be automatically selected from the Data folder. For non-human species, run several MOPline scripts using the option ‘-nh 1’ and, in some cases, also using other options specifying some reference-specific annotation files for gap, repeat, and gene regions ([for detail](#nhdata)).
 
 ## <a name="gusage"></a>General Usage
 
@@ -136,7 +137,7 @@ Create a coverage file using the create_coverage_file_bam.pl script as follows:
 mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_threads>
 ```
 (-nh 1 if sample is a non-human species)  
-**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is a `${sample_name}.bam` and exists in the `${sample_name}` directory.  
+**bam_list:** bam/cram list file specifying bam or cram file name per line. The bam_list can also be a list of sample names if the bam file name is `${sample_name}.bam` and exists in the `${sample_name}` directory.  
 **read_length:** Mean read length in the bam file
 
 The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (`${sample_name}.chr*.cov.gz`).
@@ -170,7 +171,7 @@ Using the coverage files you created, add alignment statistics to each SV site i
 ```
 mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
 ```
-(-build 38 for human build38, -nh 1 -ri <ref.index> -gap <gap_bed> for non-human species)  
+(--build 38 for human build38, -nh 1 -ri <ref.index> -gap <gap_bed> for non-human species)  
 **sample_list:** A sample list file showing sample names per line. A sample directoy with the same names as the specified sample list must exist under the working directory.  
 **tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
@@ -185,7 +186,7 @@ Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 ```
 mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix>
 ```
-(-build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)  
+(--build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)  
 **sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory. If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as `${sample_directory_name},${sample_name}`. It is assumed that the input vcf files (`${sample_name}.Merge.ALL.vcf`) exist in `${sample_directory}/${merge_dir}`.  
 **merge_dir:** Name of the directory containing the input vcf files under the sample directories [default: Merge_7tools]  
 **out_dir:** Name of the directory where the output vcf file will be generated [default: the same name as merge_dir]  
@@ -200,7 +201,7 @@ In this step, all SV alleles are genotyped based on multinominal logistic regres
 ```
 mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_threads>
 ```
-(-build 38 for human build 38, -nh 1 -sr <STR_file> -sd <SD_file> for non-human species)  
+(--build 38 for human build 38, -nh 1 -sr <STR_file> -sd <SD_file> -r <ref_index> for non-human species)  
 **input_vcf:** An input vcf file from Step-3  
 **tool_set:** Algorithm preset name or a list file showing algorithm names per line [default: 7tools]  
 **out_dir:** Name of the directory where the output vcf file will be generated  
@@ -214,20 +215,20 @@ This step takes longer to perform as the sample size increases and the genome si
 
 ### <a name="step5"></a>[Step-5]  Annotate (optional)
 
-Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample in an additional output vcf file. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz or Homo_sapiens.GRCh38.104.gff3.gz), downloaded from Ensembl (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens9), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. As input vcf file, an output vcf file from step2, step3, step4, or step6 can be used. The annotate command can be done as follows:
+Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample in an additional output vcf file. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz, Homo_sapiens.GRCh38.104.gff3.gz, or Homo_sapience.T2T-chm13v2.0.ensemble.gff3.gz), downloaded from Ensembl (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens9), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. As input vcf file, an output vcf file from step2, step3, step4, or step6 can be used. The annotate command can be done as follows:
 ```
 mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
 ```
-(-build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
+(--build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
 This command generates two output vcf files, `${out_prefix}.annot.vcf` and `${out_prefix}.AS.annot.vcf`. The latter contains annotations for each sample in the FORMAT AN subfield.
 
 ### <a name="step6"></a>[Step-6]  Filter (optional)
 
-This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human that indicate regions where large SVs (> 10 Kb) are always indeterminately called in short read WGS data. By default, the bed file is automatically selected for human. If you do not prefer to use this filtering, specify any letter (e.g., -ex 0) for the -ex option. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field. As input vcf file, an output vcf file from step2, step3, step4, or step5 can be used.
+This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human reference builds 37, 38, and T2T-CHM13 that indicate regions where SVs are always indeterminately called due to low quality alignments of short reads. The total lengths of the excluding regions of build 37 and 38 are 26 Mb and 16 Mb, respectively. In addition, SVs within the centromere regions for the human builds 38 and T2T-CHM13 are removed. By default, the bed files of these regions are automatically selected for human but user-provided files can be specified with the -ex and -ec options. If you do not prefer to use these filtering, specify any letter (e.g., -ex 0 or -ec 0) for the options. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field. As input vcf file, an output vcf file from step2, step3, step4, or step5 can be used.
 ```
 mopline filter -v <input vcf> > [output vcf]
 ```
-(-build 38 for human build 38, -nh 1 -g <gap_bed> -sd <segmental duplication file> for non-human species)
+(--build 38 for human build 38, -nh 1 -g <gap_bed> -sd <segmental duplication file> for non-human species)
 
 ## <a name="nhdata"></a>Data Required for Non-Human Species
 
@@ -235,11 +236,11 @@ For non-human species, the following files are required at specific MOPline step
 
 **Table 2.** Files required for non-human species, which must be supplied by users
 |Name  |Description                   |Sample file                   |Available site|Required step|
-| :--- | :--------------------------- | :--------------------------- | :----- | :------ |
+| :--- | :--------------------------- | :--------------------------- | :------ | :------- |
 |Gap   |BED file of 'N' regions in the reference fasta|gap.bed     |[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|steps-0,2,3,6
-|STR   |Simple tandem repeats (required columns: 2,3,4)|simpleRepeat.txt.gz|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4
+|STR   |Simple tandem repeats (required columns: 2,3,4)|simpleRepeat.txt.gz |[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-4
 |SegDup|Segmental duplications (required columns: 2,3,4)|genomicSuperDups.txt.gz|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|steps-4,6
-|Cen   |BED file of Centromere regions|hg38.centromere.bed|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-6
+|Cen   |BED file of centromere regions|hg38.centromere.bed|[UCSC](https://hgdownload.soe.ucsc.edu/downloads)|step-6
 |Gene  |Gene annotation GFF3 file   |Homo_sapiens.GRCh37.87.gff3.gz|[Ensembl](https://asia.ensembl.org/index.html)|step-5
 |Rindex|Reference fasta index       |hs37.fa.fai                   |samtools faidx|steps-1,2
 
@@ -307,6 +308,7 @@ ln -s ../Yeast_10samples/MELT_lib
 ln -s ../Yeast_10samples/bam_list.txt
 create_bam_link.pl -b bam_list.txt -bd ../Yeast_10samples
 ```
+
 #### [Step-0] Run SV detection tools (working directory: yeast_run)
 
 (Single sample mode [sample: CBS457])  
@@ -323,7 +325,7 @@ A run with this sample config file will generate SV call results of 7 tools in 7
 run_batch_slurm.pl -c config.yeast.txt -b bam_list.txt -a <account> -p <partition>
 ```
 A run with this sample config file will generate SV call results of 7 tools in 7 tool directories in each of 10 sample directories.
-	
+
 #### [Step-1] Select overlap calls from SV call sets
 ```
 mopline merge_7tools -s bam_list.txt -rl 101 -d Merge_7tools -nh 1 -r S288C.fa.fai
