@@ -1,0 +1,151 @@
+# Singularity Definition for MOPline
+# run: singularity build --fakeroot mopline.sif mopline-manifest.txt
+Bootstrap: docker
+From: centos:7.9.2009
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/local/tools:/opt/local/R/bin:${PATH}
+    export LD_LIBRARY_PATH=/usr/local/lib64:${LD_LIBRARY_PATH}
+    export GRIDSS_JAR=/opt/local/src/gridss/gridss-2.13.2-gridss-jar-with-dependencies.jar
+
+%files
+#    MELTv2.2.2.tar.gz    /opt
+
+%post
+    echo "Hello from inside the container"
+    yum -y update
+    yum -y groupinstall "Development Tools"
+    yum -y install epel-release time which wget zip 
+    yum -y install cmake cmake3 java-11-openjdk
+    yum -y install lzma-sdk-devel xz-devel ncurses-devel bzip2-devel libzstd-devel pcre2-devel
+    yum -y install libcurl-devel zlib-devel readline-devel freetype-devel openssl-devel boost-devel
+
+    export SRCDIR=/opt/local/src
+    export TOOLDIR=/opt/local/tools
+    mkdir -p ${SRCDIR} ${TOOLDIR}
+
+    # install R 4.2.1 -------
+    cd ${SRCDIR}
+    wget -O - https://cran.r-project.org/src/base/R-4/R-4.2.1.tar.gz | tar xzf -
+    cd R-4.2.1
+    ./configure --prefix=/opt/local/R --with-x=no
+    make && make install && make clean
+
+    # MELT - (need to register and download manually) -------
+    # https://melt.igs.umaryland.edu/downloads.php
+    if [ -f /opt/METLv2.2.2.tar.gz ]; then
+        cd ${SRCDIR}
+        tar xzf /opt/METLv2.2.2.tar.gz && rm -f /opt/METLv2.2.2.tar.gz
+        cp -a MELTv2.2.2/MELT.jar ${TOOLDIR}/.
+    fi
+
+    # install inGAP -------
+    cd ${SRCDIR}
+    wget --no-check-certificate -O - https://sourceforge.net/projects/ingap/files/ingap/v3.1.1/inGAP_3_1_1.tgz/download | tar xzf -
+    cp -a inGAP_3_1_1/inGAP.jar ${TOOLDIR}/.
+
+    # install GRIDSS -------
+    mkdir gridss && cd gridss
+    wget -O - https://github.com/PapenfussLab/gridss/releases/download/v2.13.2/gridss-2.13.2.tar.gz | tar xzf -
+    perl -pi -e 's/^ulimit/#ulimit/' gridss
+    ln -s ${SRCDIR}/gridss/gridss ${TOOLDIR}/gridss
+    ln -s ${SRCDIR}/gridss-2.13.2-gridss-jar-with-dependencies.jar ${TOOLDIR}/gridss-2.13.2-gridss-jar-with-dependencies.jar
+#    cp -a gridss ${TOOLDIR}/.
+
+    # install DELLY -------
+    cd ${SRCDIR}
+    wget https://github.com/dellytools/delly/releases/download/v1.1.5/delly_v1.1.5_linux_x86_64bit
+    cp delly_v1.1.5_linux_x86_64bit ${TOOLDIR}/delly
+    chmod +x ${TOOLDIR}/delly
+
+    # install SAMTOOLS & CERN root -------
+    wget -O - https://root.cern/download/root_v6.24.06.Linux-centos7-x86_64-gcc4.8.tar.gz | tar xzf -
+    export CERNROOT=${SRCDIR}/root
+    wget -O - https://github.com/samtools/samtools/releases/download/1.13/samtools-1.13.tar.bz2 | tar xjf -
+    cd samtools-1.13
+    ./configure && make install
+
+    # install CNVnator-------
+    cd ${SRCDIR}
+    git clone https://github.com/abyzovlab/CNVnator.git
+    cd CNVnator
+    ln -s ../samtools-1.13 samtools
+    make LIBS="-lcrypto -Wl,-rpath=${CERNROOT}/lib" ROOTSYS=${CERNROOT}
+    cp -a cnvnator ${TOOLDIR}/. && make clean
+
+    # install MATCHCLIPS-------
+    cd ${SRCDIR}
+    wget -O matchclips2.zip https://github.com/yhwu/matchclips2/archive/master.zip
+    unzip matchclips2.zip && rm -f matchclips2.zip
+    cd matchclips2-master
+    make  && cp -a cnvtable matchclips ${TOOLDIR}/. && make clean
+
+    # install Manta --------
+    cd ${SRCDIR}
+    wget -O - https://github.com/Illumina/manta/releases/download/v1.6.0/manta-1.6.0.centos6_x86_64.tar.bz2 | tar xjf -
+    ln -s ${SRCDIR}/manta-1.6.0.centos6_x86_64 ${TOOLDIR}/manta
+
+    # install WHAM -------
+    cd ${SRCDIR}
+    git clone --recursive  https://github.com/zeeev/wham.git
+    cd wham
+    make && cp -a bin/* ${TOOLDIR}/. && make clean
+
+    # install LUMPY -------
+    cd ${SRCDIR}
+    git clone --recursive https://github.com/arq5x/lumpy-sv.git
+    cd lumpy-sv
+    make && cp -a bin/* ${TOOLDIR}/. && make clean
+
+    # install SEQAN Library -------
+    cd ${SRCDIR}
+    wget http://packages.seqan.de/seqan-library/seqan-library-2.1.1.zip
+    unzip seqan-library-2.1.1.zip && mv seqan-library-2.1.1 ${TOOLDIR}/. && rm -f seqan-library-2.1.1.zip
+
+    # install BAMtools -------
+    wget -O - https://github.com/pezmaster31/bamtools/archive/refs/tags/v2.5.2.tar.gz | tar xzf -
+    cd bamtools-2.5.2 && mkdir build && cd build
+    cmake3 -DBUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="-fPIC" ..
+    make install && make clean
+    cd /usr/local/include && ln -s bamtools/* .
+
+    # install VCFtools -------
+    cd ${SRCDIR}
+    wget -O - https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz | tar xzf -
+    cd vcftools-0.1.16 && ./configure 
+    make install && make clean
+
+    # install bcftools -------
+    cd ${SRCDIR}
+    wget -O - https://github.com/samtools/bcftools/releases/download/1.16/bcftools-1.16.tar.bz2 | tar xjf -
+    cd bcftools-1.16
+    ./configure && make
+    make install
+
+    # install picard
+    cd ${SRCDIR}
+    wget https://github.com/broadinstitute/picard/releases/download/2.27.5/picard.jar
+    ln -s ${SRCDIR}/picard.jar ${TOOLDIR}/picard.jar
+    
+    # install SoftSV -------
+    cd ${SRCDIR}
+    wget --no-check-certificate https://altushost-swe.dl.sourceforge.net/project/softsv/SoftSV_1.4.2.zip
+    unzip SoftSV_1.4.2.zip && rm -f SoftSV_1.4.2.zip
+    cd SoftSV_1.4.2 && perl -pi -e 's/\/lib/\/lib64/' makefile
+    make BAMTOOLS=/usr/local SEQAN=${TOOLDIR}/seqan-library-2.1.1
+    cp -a SoftSV ${TOOLDIR}/.  && make clean
+
+    # install MOPline -------
+    cd ${TOOLDIR}
+    git clone https://github.com/stat-lab/MOPline.git
+    cd MOPline && chmod +x mopline scripts/*.pl scripts/run_SVcallers/*.pl
+    ln -s $(pwd)/mopline /opt/local/tools/mopline
+
+%runscript
+    echo "This is what happens when you run the container..."
+
+%labels
+    Author who@riken.jp
+    Version v0.0.1
+
