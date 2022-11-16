@@ -4,7 +4,6 @@ use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
 
-my $singularity_path = '';
 my $sif_file = '';
 my $bam_list = '';
 my $config = '';
@@ -20,7 +19,6 @@ my $node_list = '';
 my $help;
  
 GetOptions(
-	  'sing_path|sp=s' => \$singularity_path,
 	  'sif|s=s' => \$sif_file,
     'bam_list|b=s' => \$bam_list,
     'config|c=s' => \$config,
@@ -42,7 +40,6 @@ pod2usage(-verbose => 0) if $help;
   run_batch_slurm.pl -b <bam_list> -c <config_file> -a <account> -m <memory(MB)> (-q <quos> -p <partition>)
 
   Options:
-   --sing_path or -sp <STR> path of singularity on the host [mandatory]
    --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam_list or -b <STR>   bam list file [mandatory]
    --config or -c <STR>     config file [mandatory]
@@ -59,7 +56,6 @@ pod2usage(-verbose => 0) if $help;
    
 =cut
 
-die "singularity path on the host is not specified:\n" if ($singularity_path eq '');
 die "sif file is not specified: or does not exist\n" if ($sif_file eq '') or (!-f $sif_file);
 die "bam list is not specified:\n" if ($bam_list eq '');
 die "config file is not specified:\n" if ($config eq '');
@@ -142,13 +138,9 @@ close (FILE);
 my $cur_dir = `pwd`;
 chomp $cur_dir;
 
-my $bind_dir2 = $singularity_path;
-$bind_dir2 = $1 if ($singularity_path =~ /(.+)\/singularity$/);
-$bind_dir2 .= ",$temp_dir";
+my $bind_dir2 = $temp_dir;
 $bind_dir2 .= ",$cur_dir";
 $bind_dir2 .= ",$bind_dir" if ($bind_dir ne '');
-
-$singularity_path .= '/singularity' if ($singularity_path !~ /\/singularity$/);
 
 my $bam_path = '';
 
@@ -215,8 +207,8 @@ while (my $line = <FILE>){
 		$sbatch_opt2 .= " -c $thread";
 		my $error_log = "$ID.error.log";
 		my $out_log = "$ID.out.log";
-		my $command = "$singularity_path exec --bind $bind_dir2 $sif_file $run_script $opt_str";
-		$command = "$singularity_path exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
+		my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
+		$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 		if ($tool_name =~ /MELT/){
 			$command = "$run_script $opt_str";
 		}
