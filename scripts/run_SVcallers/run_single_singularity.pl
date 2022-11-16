@@ -139,7 +139,7 @@ foreach my $tool_name (@tools){
 	open (OUT, "> $comman_log");
 	print OUT "$tool_name run: $command\n";
 	close (OUT);
-	system ("$command 2>$error_log");
+	my $run = `$command 2>$error_log`;
 	chdir '..';
 }
 chdir '..';
