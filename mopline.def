@@ -20,6 +20,7 @@ From: centos:7.9.2009
     yum -y install cmake cmake3 java-11-openjdk
     yum -y install lzma-sdk-devel xz-devel ncurses-devel bzip2-devel libzstd-devel pcre2-devel
     yum -y install libcurl-devel zlib-devel readline-devel freetype-devel openssl-devel boost-devel
+    yum -y install openssl-devel libuuid-devel libseccomp-devel squashfs-tools
 
     export SRCDIR=/opt/local/src
     export TOOLDIR=/opt/local/tools
@@ -31,6 +32,17 @@ From: centos:7.9.2009
     cd R-4.2.1
     ./configure --prefix=/opt/local/R --with-x=no
     make && make install && make clean
+
+　　 # install singularity -------
+    cd ${SRCDIR}
+    yum -y install golang
+    git clone https://github.com/sylabs/singularity.git
+    cd singularity
+    go get -u -v github.com/golang/dep/cmd/dep
+    ./mconfig
+    make -C builddir
+    make -C builddir install
+    ln -s ${SRCDIR}/singularity/singularity ${TOOLDIR}/singularity
 
     # MELT - (need to register and download manually) -------
     # https://melt.igs.umaryland.edu/downloads.php
