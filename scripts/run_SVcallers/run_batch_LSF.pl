@@ -168,6 +168,9 @@ while (my $line = <FILE>){
 		else{
 			$opt_str = "-b $bam -p $ID -r $ref " . $opt_str;
 		}
+		if ($target_chr ne 'ALL'){
+			$opt_str .= " -c $target_chr";
+		}
 		my $bsub_opt2 = $bsub_opt;
 		$bsub_opt2 .= " -n $thread";
 		my $error_log = "$ID.error.log";

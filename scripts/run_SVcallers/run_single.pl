@@ -117,6 +117,9 @@ foreach my $tool_name (@tools){
 	$opt_str =~ s/\s$//;
 	$opt_str = "-b $bam -p $sample_name " . $opt_str if ($tool_name eq 'CNVnator');
 	$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str if ($tool_name ne 'CNVnator');
+	if ($target_chr ne 'ALL'){
+		$opt_str .= " -c $target_chr";
+	}
 	my $command = "$run_script $opt_str";
 	my $comman_log = "$sample_name.command.log";
 	my $error_log = "$sample_name.error.log";

@@ -137,6 +137,9 @@ foreach my $tool_name (@tools){
 	$opt_str =~ s/\s$//;
 	$opt_str = "-b $bam -p $sample_name " . $opt_str if ($tool_name eq 'CNVnator');
 	$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str if ($tool_name ne 'CNVnator');
+	if ($target_chr ne 'ALL'){
+		$opt_str .= " -c $target_chr";
+	}
 	my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
 	$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 	if ($tool_name =~ /MELT/){
