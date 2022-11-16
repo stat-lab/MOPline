@@ -3,7 +3,9 @@ use strict;
 use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
+use File::Spec;
 
+my $singularity_path = '';
 my $sif_file = '';
 my $bam = '';
 my $sample_name = '';
@@ -14,6 +16,7 @@ my $no_home = 0;
 my $help;
  
 GetOptions(
+	  'sing_path|sp=s' => \$singularity_path,
 		'sif|s=s' => \$sif_file,
     'bam|b=s' => \$bam,
     'sample_name|sn=s' => \$sample_name,
@@ -30,6 +33,7 @@ pod2usage(-verbose => 0) if $help;
   run_single.pl -b <input bam> -c <config file> (-sn <sample name>)
 
   Options:
+   --sing_path or -sp <STR> path of singularity on the host [mandatory]
    --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam or -b <STR>        input bam file [mandatory]
    --sample_name or -sn <STR> sample name (if not specified, sample name is taken from the prefix of bam file name)
@@ -41,6 +45,7 @@ pod2usage(-verbose => 0) if $help;
    
 =cut
 
+die "singularity path on the host is not specified:\n" if ($singularity_path eq '');
 die "sif file is not specified: or does not exist\n" if ($sif_file eq '') or (!-f $sif_file);
 die "bam is not specified:\n" if ($bam eq '');
 die "config file is not specified:\n" if ($config eq '');
@@ -57,15 +62,15 @@ my $target_chr = 'ALL';
 my $non_human = 0;
 my $run_svcaller_dir = '/opt/local/tools/MOPline/scripts/run_SVcallers';
 
-my $bind_dir2 = $temp_dir;
+my $bind_dir2 = $singularity_path;
+$bind_dir2 = $1 if ($singularity_path =~ /(.+)\/singularity$/);
+$bind_dir2 .= ",$temp_dir";
 my $bind_dir3 = `pwd`;
 chomp $bind_dir3;
 $bind_dir2 .= ",$bind_dir3";
 $bind_dir2 .= ",$bind_dir" if ($bind_dir ne '');
 
-my $singularity_path = `which singularity`;
-chomp $singularity_path;
-print STDERR "singularity path: $singularity_path\n";
+$singularity_path .= '/singularity' if ($singularity_path !~ /\/singularity$/);
 
 my @tools;
 
