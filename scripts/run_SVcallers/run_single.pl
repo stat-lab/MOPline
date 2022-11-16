@@ -120,6 +120,7 @@ foreach my $tool_name (@tools){
 	if ($target_chr ne 'ALL'){
 		$opt_str .= " -c $target_chr";
 	}
+	print STDERR "$tool_name\n";
 	my $command = "$run_script $opt_str";
 	my $comman_log = "$sample_name.command.log";
 	my $error_log = "$sample_name.error.log";

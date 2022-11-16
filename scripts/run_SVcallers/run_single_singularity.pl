@@ -140,6 +140,7 @@ foreach my $tool_name (@tools){
 	if ($target_chr ne 'ALL'){
 		$opt_str .= " -c $target_chr";
 	}
+	print STDERR "$tool_name\n";
 	my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
 	$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 	if ($tool_name =~ /MELT/){
