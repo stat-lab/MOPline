@@ -91,6 +91,8 @@ while (my $line = <FILE>){
 	if ($line =~ /^(\S+)\s*=\s*(\S+)\s*;/){
 		my $opt1 = $1;
 		my $arg = $2;
+		$opt1 =~ s/[\'\"]// if ($opt1 =~ /[\'\"']/);
+		$arg =~ s/[\'\"]// if ($arg =~ /[\'\"']/);
 		if ($tool eq 'general'){
 			if ($opt1 eq 'ref'){
 				$ref = $arg;
@@ -109,6 +111,8 @@ while (my $line = <FILE>){
 			if ($line =~ /\[\s*(\S+)\s+(\S+)\s*\]/){
 				my $run_script = $1;
 				my $opt2 = $2;
+				$run_script =~ s/[\'\"]// if ($run_script =~ /[\'\"']/);
+				$opt2 =~ s/[\'\"]// if ($opt2 =~ /[\'\"']/);
 				${$tool_opt{$tool}}{$opt1} = "$opt2 $arg";
 				$tool_script{$tool} = "$run_svcaller_dir/$run_script" if ($run_svcaller_dir ne '');
 			}

@@ -21,7 +21,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'command_path|cp=s' => \$cnvnator_path,
     'root_dir|rd=s' => \$root_dir,
     'prefix|p=s' => \$out_prefix,
@@ -109,6 +109,8 @@ else{
         $chr_list = join (' ', @chr);
     }
 }
+
+print STDERR "gap-bed: $gap_bed\n";
 
 if ($target_chr ne 'ALL'){
     my @tchr = split (/,/, $target_chr);

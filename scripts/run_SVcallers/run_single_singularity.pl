@@ -63,6 +63,10 @@ chomp $bind_dir3;
 $bind_dir2 .= ",$bind_dir3";
 $bind_dir2 .= ",$bind_dir" if ($bind_dir ne '');
 
+my $singularity_path = `which singularity`;
+chomp $singularity_path;
+print STDERR "singularity path: $singularity_path\n";
+
 my @tools;
 
 my %tool_opt;
@@ -84,6 +88,8 @@ while (my $line = <FILE>){
 	if ($line =~ /^(\S+)\s*=\s*(\S+)\s*;/){
 		my $opt1 = $1;
 		my $arg = $2;
+		$opt1 =~ s/[\'\"]// if ($opt1 =~ /[\'\"']/);
+		$arg =~ s/[\'\"]// if ($arg =~ /[\'\"']/);
 		if ($tool eq 'general'){
 			if ($opt1 eq 'ref'){
 				$ref = $arg;
@@ -105,6 +111,8 @@ while (my $line = <FILE>){
 			if ($line =~ /\[\s*(\S+)\s+(\S+)\s*\]/){
 				my $run_script = $1;
 				my $opt2 = $2;
+				$run_script =~ s/[\'\"]// if ($run_script =~ /[\'\"']/);
+				$opt2 =~ s/[\'\"]// if ($opt2 =~ /[\'\"']/);
 				${$tool_opt{$tool}}{$opt1} = "$opt2 $arg";
 				$tool_script{$tool} = "$run_svcaller_dir/$run_script" if ($run_svcaller_dir ne '');
 			}
@@ -129,8 +137,8 @@ foreach my $tool_name (@tools){
 	$opt_str =~ s/\s$//;
 	$opt_str = "-b $bam -p $sample_name " . $opt_str if ($tool_name eq 'CNVnator');
 	$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str if ($tool_name ne 'CNVnator');
-	my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
-	$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
+	my $command = "$singularity_path exec --bind $bind_dir2 $sif_file $run_script $opt_str";
+	$command = "$singularity_path exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 	if ($tool_name =~ /MELT/){
 		$command = "$run_script $opt_str";
 	}
