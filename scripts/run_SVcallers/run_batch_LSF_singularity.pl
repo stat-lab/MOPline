@@ -37,8 +37,8 @@ pod2usage(-verbose => 0) if $help;
    --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam_list or -b <STR>   bam list file [mandatory]
    --config or -c <STR>     config file [mandatory]
-   --temp_dir or -td <STR>  tmp directory on the host [mandatory]
-   --bind_dir or -bd <STR>  comma-separated list of path (except for the working directory: sample directory) on the host to be added to singularity container (optional)
+   --temp_dir or -td <STR>  absolute tmp directory on the host [mandatory]
+   --bind_dir or -bd <STR>  comma-separated list of absolute path (except for the working directory) on the host to be added to singularity container (optional)
    --no_home or -noh <BOOLEAN>  do not add $HOME on the host to singularity container [default: false]
    --queue or -q            The partition that this job will run on [mandatory]
    --memory or -m <INT>     minimum amount of real memory in KB [default: 30000000]
@@ -88,8 +88,8 @@ while (my $line = <FILE>){
 	if ($line =~ /^(\S+)\s*=\s*(\S+)\s*;/){
 		my $opt1 = $1;
 		my $arg = $2;
-		$opt1 =~ s/[\'\"]// if ($opt1 =~ /[\'\"']/);
-		$arg =~ s/[\'\"]// if ($arg =~ /[\'\"']/);
+		$opt1 =~ s/[\'\"]//g if ($opt1 =~ /[\'\"']/);
+		$arg =~ s/[\'\"]//g if ($arg =~ /[\'\"']/);
 		if ($tool eq 'general'){
 			if ($opt1 eq 'ref'){
 				$ref = $arg;
@@ -108,8 +108,8 @@ while (my $line = <FILE>){
 			if ($line =~ /\[\s*(\S+)\s+(\S+)\s*\]/){
 				my $run_script = $1;
 				my $opt2 = $2;
-				$run_script =~ s/[\'\"]// if ($run_script =~ /[\'\"']/);
-				$opt2 =~ s/[\'\"]// if ($opt2 =~ /[\'\"']/);
+				$run_script =~ s/[\'\"]//g if ($run_script =~ /[\'\"']/);
+				$opt2 =~ s/[\'\"]//g if ($opt2 =~ /[\'\"']/);
 				${$tool_opt{$tool}}{$opt1} = "$opt2 $arg";
 				$tool_script{$tool} = "$run_svcaller_dir/$run_script" if ($run_svcaller_dir ne '');
 			}

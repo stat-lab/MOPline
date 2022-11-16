@@ -3,7 +3,7 @@
 
 <general>
 ref = ;			[-r]	# reference fasta file path
-target = ALL		[-c]	# target chromosome(s), commma-separated
+target = ALL;		[-c]	# target chromosome(s), commma-separated
 non_human = 0;		[-nh]	# specify 1 if samples is non-human species
 run_svcaller_dir = ;		# run_SVcallers directory path of MOPline package unless this directory is set in $PATH
 

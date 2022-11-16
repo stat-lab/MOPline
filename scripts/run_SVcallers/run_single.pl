@@ -6,13 +6,13 @@ use Pod::Usage;
 use File::Spec;
 
 my $bam = '';
-my $sample_name = '';
+my $sample_dir_name = '';
 my $config = '';
 my $help;
  
 GetOptions(
     'bam|b=s' => \$bam,
-    'sample_name|sn=s' => \$sample_name,
+    'sample_name|sn=s' => \$sample_dir_name,
     'config|c=s' => \$config,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
@@ -24,7 +24,7 @@ pod2usage(-verbose => 0) if $help;
 
   Options:
    --bam or -b <STR>        input bam file [mandatory]
-   --sample_name or -sn <STR> sample name (if not specified, sample name is taken from the prefix of bam file name)
+   --sample_name or -sn <STR> sample directory name where tool directories are created (if not specified, sample directory is not created and tools directories are created in the working directory)
    --config or -c <STR>     config file [mandatory]
    --help or -h             output help message
    
@@ -34,7 +34,8 @@ die "bam is not specified:\n" if ($bam eq '');
 die "config file is not specified:\n" if ($config eq '');
 
 my $bam_base = basename ($bam);
-$sample_name = $1 if ($sample_name eq '') and ($bam_base =~ /(.+?)\./);
+my $sample_name = $sample_dir_name if ($sample_dir_name ne '');
+$sample_name = $1 if ($sample_dir_name eq '') and ($bam_base =~ /(.+?)\./);
 
 my $abs_bam = File::Spec->rel2abs($bam);
 $bam = $abs_bam;
@@ -98,8 +99,10 @@ while (my $line = <FILE>){
 }
 close (FILE);
 
-system ("mkdir $sample_name") if (!-d $sample_name);
-chdir $sample_name;
+if ($sample_dir_name ne ''){
+	system ("mkdir $sample_dir_name") if (!-d $sample_dir_name);
+	chdir $sample_dir_name;
+}
 print STDERR "Sample: $sample_name\n";
 foreach my $tool_name (@tools){
 	next if ($tool_name eq 'general');

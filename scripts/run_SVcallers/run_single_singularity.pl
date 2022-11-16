@@ -7,7 +7,7 @@ use File::Spec;
 
 my $sif_file = '';
 my $bam = '';
-my $sample_name = '';
+my $sample_dir_name = '';
 my $config = '';
 my $temp_dir = '';
 my $bind_dir = '';
@@ -17,7 +17,7 @@ my $help;
 GetOptions(
 		'sif|s=s' => \$sif_file,
     'bam|b=s' => \$bam,
-    'sample_name|sn=s' => \$sample_name,
+    'sample_name|sn=s' => \$sample_dir_name,
     'config|c=s' => \$config,
     'temp_dir|td=s' => \$temp_dir,
     'bind_dir|bd=s' => \$bind_dir,
@@ -33,10 +33,10 @@ pod2usage(-verbose => 0) if $help;
   Options:
    --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam or -b <STR>        input bam file [mandatory]
-   --sample_name or -sn <STR> sample name (if not specified, sample name is taken from the prefix of bam file name)
+   --sample_name or -sn <STR> sample directory name where tool directories are created (if not specified, sample directory is not created and tools directories are created in the working directory)
    --config or -c <STR>     config file [mandatory]
-   --temp_dir or -td <STR>  tmp directory on the host [mandatory]
-   --bind_dir or -bd <STR>  comma-separated list of path (except for the working directory: sample directory) on the host to be added to singularity container (optional)
+   --temp_dir or -td <STR>  absolute path of tmp directory on the host [mandatory]
+   --bind_dir or -bd <STR>  comma-separated list of absolute path (except for the working directory) on the host to be added to singularity container (optional)
    --no_home or -noh <BOOLEAN>  do not add $HOME on the host to singularity container [default: false]
    --help or -h             output help message
    
@@ -48,7 +48,8 @@ die "config file is not specified:\n" if ($config eq '');
 die "tmp directory not specified:\n" if ($temp_dir eq '');
 
 my $bam_base = basename ($bam);
-$sample_name = $1 if ($sample_name eq '') and ($bam_base =~ /(.+?)\./);
+my $sample_name = $sample_dir_name if ($sample_dir_name ne '');
+$sample_name = $1 if ($sample_dir_name eq '') and ($bam_base =~ /(.+?)\./);
 
 my $abs_bam = File::Spec->rel2abs($bam);
 $bam = $abs_bam;
@@ -85,8 +86,8 @@ while (my $line = <FILE>){
 	if ($line =~ /^(\S+)\s*=\s*(\S+)\s*;/){
 		my $opt1 = $1;
 		my $arg = $2;
-		$opt1 =~ s/[\'\"]// if ($opt1 =~ /[\'\"']/);
-		$arg =~ s/[\'\"]// if ($arg =~ /[\'\"']/);
+		$opt1 =~ s/[\'\"]//g if ($opt1 =~ /[\'\"']/);
+		$arg =~ s/[\'\"]//g if ($arg =~ /[\'\"']/);
 		if ($tool eq 'general'){
 			if ($opt1 eq 'ref'){
 				$ref = $arg;
@@ -108,8 +109,8 @@ while (my $line = <FILE>){
 			if ($line =~ /\[\s*(\S+)\s+(\S+)\s*\]/){
 				my $run_script = $1;
 				my $opt2 = $2;
-				$run_script =~ s/[\'\"]// if ($run_script =~ /[\'\"']/);
-				$opt2 =~ s/[\'\"]// if ($opt2 =~ /[\'\"']/);
+				$run_script =~ s/[\'\"]//g if ($run_script =~ /[\'\"']/);
+				$opt2 =~ s/[\'\"]//g if ($opt2 =~ /[\'\"']/);
 				${$tool_opt{$tool}}{$opt1} = "$opt2 $arg";
 				$tool_script{$tool} = "$run_svcaller_dir/$run_script" if ($run_svcaller_dir ne '');
 			}
@@ -118,8 +119,10 @@ while (my $line = <FILE>){
 }
 close (FILE);
 
-system ("mkdir $sample_name") if (!-d $sample_name);
-chdir $sample_name;
+if ($sample_dir_name ne ''){
+	system ("mkdir $sample_dir_name") if (!-d $sample_dir_name);
+	chdir $sample_dir_name;
+}
 print STDERR "Sample: $sample_name\n";
 foreach my $tool_name (@tools){
 	next if ($tool_name eq 'general');
