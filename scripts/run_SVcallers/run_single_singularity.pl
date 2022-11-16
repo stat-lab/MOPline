@@ -49,6 +49,9 @@ die "tmp directory not specified:\n" if ($temp_dir eq '');
 my $bam_base = basename ($bam);
 $sample_name = $1 if ($sample_name eq '') and ($bam_base =~ /(.+?)\./);
 
+my $abs_bam = File::Spec->rel2abs($bam);
+$bam = $abs_bam;
+
 my $ref = '';
 my $target_chr = 'ALL';
 my $non_human = 0;
@@ -128,6 +131,9 @@ foreach my $tool_name (@tools){
 	$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str if ($tool_name ne 'CNVnator');
 	my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
 	$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
+	if ($tool_name =~ /MELT/){
+		$command = "$run_script $opt_str";
+	}
 	my $comman_log = "$sample_name.command.log";
 	my $error_log = "$sample_name.error.log";
 	open (OUT, "> $comman_log");

@@ -3,6 +3,7 @@ use strict;
 use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
+use File::Spec;
 
 my $bam = '';
 my $sample_name = '';
@@ -34,6 +35,9 @@ die "config file is not specified:\n" if ($config eq '');
 
 my $bam_base = basename ($bam);
 $sample_name = $1 if ($sample_name eq '') and ($bam_base =~ /(.+?)\./);
+
+my $abs_bam = File::Spec->rel2abs($bam);
+$bam = $abs_bam;
 
 my $ref = '';
 my $target_chr = 'ALL';

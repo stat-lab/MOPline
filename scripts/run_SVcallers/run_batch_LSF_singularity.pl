@@ -188,6 +188,9 @@ while (my $line = <FILE>){
 		my $out_log = "$ID.out.log";
 		my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
 		$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
+		if ($tool_name =~ /MELT/){
+			$command = "$run_script $opt_str";
+		}
 		open (OUT, "> run.sh");
 		print OUT "#! /usr/bin/bash\n\n";
 		print OUT "$command\n";
