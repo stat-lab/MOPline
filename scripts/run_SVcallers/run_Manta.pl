@@ -14,7 +14,7 @@ my $out_prefix = '';
 my $manta_script = '';
 my $cores = 1;
 my $non_human = 0;
-my $build = 37;
+my $build = '37';
 my $MOP_dir = '';
 
 my $help;

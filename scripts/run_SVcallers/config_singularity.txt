@@ -34,18 +34,18 @@ matchclip_path = matchclips;	[run_MATCHCLIP.pl -cp]	# file path of MATCHCLIP exe
 threads = 4;				[run_MATCHCLIP.pl -n]		# number of threads
 
 <Wham>
-wham_path = whamg;	[run_Wham.pl -cp]		# file path of Wham executable whamg [Do not change]
+wham_path = whamg;			[run_Wham.pl -cp]		# file path of Wham executable whamg [Do not change]
 picard_jar = /opt/local/tools/picard.jar;	[run_Wham.pl -pj]	# picard jar path, to use AddOrReplaceReadGroups function, if the input bam has no RG tag [Do not change]
 threads = 1;				[run_Wham.pl -n]		# number of threads
 
 #<DELLY>
-delly_path = delly;	[run_DELLY.pl -cp]		# file path of DELLY executable [Do not change]
+delly_path = delly;			[run_DELLY.pl -cp]		# file path of DELLY executable [Do not change]
 exclude_tsv = ;				[run_DELLY.pl -ex]		# tsv file indicating exclude regions if any
 
 #<Lumpy>
-lumpy_path = lumpy;	[run_Lumpy.pl -cp]				# file path of Lumpy executable [Do not change]
+lumpy_path = lumpy;			[run_Lumpy.pl -cp]				# file path of Lumpy executable [Do not change]
 lumpy_scripts = /opt/local/src/lumpy-sv/scripts;	[run_Lumpy.pl -ls]		# Lumpy scripts directory [Do not change]
 
 #<SoftSV>
-softsv_path = SoftSV;	[run_SoftSV.pl -cp]		# file path of SoftSV executable [Do not change]
-
+softsv_path = SoftSV;			[run_SoftSV.pl -cp]		# file path of SoftSV executable [Do not change]
+build = 37;				[run_SoftSV.pl -build]		# specify 38 if bam files are based on human build38 reference

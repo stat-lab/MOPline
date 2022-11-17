@@ -7,6 +7,9 @@ my $non_human = 0;
 
 $non_human = shift @ARGV if (@ARGV > 0);
 
+my $build = '37';
+$build = shift @ARGV if (@ARGV > 0);
+
 my $target_chr = 'ALL';
 
 $target_chr = shift @ARGV if (@ARGV > 0);
@@ -32,6 +35,9 @@ foreach my $var_file (@files){
 		}	
 		my @line = split (/\t/, $line);
 		my $chr = $line[0];
+		if (($non_human == 0) and ($build eq '37') and ($chr =~ /^chr/)){
+			$chr =~ s/^chr//;
+		}
 		if ($target_chr eq 'ALL'){
 			next if ($chr =~ /^c*h*r*Mit$|^c*h*r*Mt$|^chrM$/i) and ($exclude_mit == 1);
 			next if ($non_human == 0) and ($chr !~ /^c*h*r*[\dXYMT]+$/);

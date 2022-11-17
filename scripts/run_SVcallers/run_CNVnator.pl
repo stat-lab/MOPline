@@ -12,7 +12,7 @@ my $out_prefix = '';
 my $cnvnator_path = '';
 my $root_dir = '';
 my $non_human = 0;
-my $build = 37;
+my $build = '37';
 my $gap_bed = '-';
 my $MOP_dir = '';
 

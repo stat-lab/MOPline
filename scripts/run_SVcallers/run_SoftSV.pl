@@ -12,6 +12,7 @@ my $out_prefix = '';
 my $softsv_path = '';
 my $bamtools_lib = '';
 my $non_human = 0;
+my $build = '37';
 my $MOP_dir = '';
 
 my $cores = 1;
@@ -25,6 +26,7 @@ GetOptions(
     'command_path|cp=s' => \$softsv_path,
     'bamtools_lib|bl=s' => \$bamtools_lib,
     'non_human|nh=i' => \$non_human,
+    'build=s' => \$build,
     'mopdir|md=s' => \$MOP_dir,
     'prefix|p=s' => \$out_prefix,
     'help' => \$help
@@ -42,6 +44,7 @@ pod2usage(-verbose => 0) if $help;
    --command_path or -cp <STR> SoftSV executable path (e.g., ..../SoftSV_1.4.2/SoftSV) [mandatory]
    --bamtools_lib or -bl <STR> bamtools lib path unless bamtools lib directory is set in $LD_LIBRARY_PATH
    --non_human or -nh <INT>   samples are non-human species (0: human, 1: non-human) [default: 0]
+   --build <STR>              reference build (GRCh37, GRCh38, T2T-CHM13) number (37, 38, or T2T) when sample is human [default: 37]
    --mopdir or -md <STR>      MOPline install directory (optional)
    --prefix or -p <STR>       outpout prefix [mandatory]
    --help or -h               output help message
@@ -81,10 +84,10 @@ push @out, 'tandems.txt' if (-f 'tandems.txt');
 my $file_str = join (',', @out);
 
 if ($MOP_dir ne ''){
-    system ("$MOP_dir/scripts/run_SVcallers/convert_SoftSV_vcf.pl $file_str $non_human $target_chr > SoftSV.$out_prefix.vcf");
+    system ("$MOP_dir/scripts/run_SVcallers/convert_SoftSV_vcf.pl $file_str $non_human $build $target_chr > SoftSV.$out_prefix.vcf");
 }
 else{
-  system ("$Bin/convert_SoftSV_vcf.pl $file_str $non_human $target_chr > SoftSV.$out_prefix.vcf");
+  system ("$Bin/convert_SoftSV_vcf.pl $file_str $non_human $build $target_chr > SoftSV.$out_prefix.vcf");
 }
 
 

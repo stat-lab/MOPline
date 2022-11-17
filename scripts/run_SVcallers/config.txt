@@ -28,7 +28,7 @@ ingap_jar = ... /inGAP_3_1_1/inGAP.jar;	[run_inGAP.pl -ij]		# inGAP-sv jar path
 
 <Manta>
 manta_path = ... /manta-1.6.0.centos6_x86_64/bin/configManta.py;	[run_Manta.pl -cp]		# file path of Manta configManta.py script
-build = 37;				[run_Manta.pl -build]	# specify 38 if bam files are based on human build38 reference
+build = 37;				[run_Manta.pl -build]		# specify 38 if bam files are based on human build38 reference
 threads = 3;				[run_Manta.pl -n]		# number of threads
 
 <MATCHCLIP>
@@ -63,3 +63,4 @@ samtools_path = ;			[run_Lumpy.pl -sp]		# directory path containing samtools exu
 #<SoftSV>
 softsv_path = ... /SoftSV_1.4.2/SoftSV;	[run_SoftSV.pl -cp]		# file path of SoftSV executable
 bamtools_lib = ;			[run_SoftSV.pl -bl]		# directory path containing bamtools libraries unless bamtools libraries are set in $LD_LIBRARY_PATH
+build = 37;				[run_SoftSV.pl -build]		# specify 38 if bam files are based on human build38 reference
