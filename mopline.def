@@ -20,7 +20,6 @@ From: centos:7.9.2009
     yum -y install cmake cmake3 java-11-openjdk
     yum -y install lzma-sdk-devel xz-devel ncurses-devel bzip2-devel libzstd-devel pcre2-devel
     yum -y install libcurl-devel zlib-devel readline-devel freetype-devel openssl-devel boost-devel
-    yum -y install openssl-devel libuuid-devel libseccomp-devel squashfs-tools
 
     export SRCDIR=/opt/local/src
     export TOOLDIR=/opt/local/tools
@@ -32,17 +31,6 @@ From: centos:7.9.2009
     cd R-4.2.1
     ./configure --prefix=/opt/local/R --with-x=no
     make && make install && make clean
-
-　　 # install singularity -------
-    cd ${SRCDIR}
-    yum -y install golang
-    git clone https://github.com/sylabs/singularity.git
-    cd singularity
-    go get -u -v github.com/golang/dep/cmd/dep
-    ./mconfig
-    make -C builddir
-    make -C builddir install
-    ln -s ${SRCDIR}/singularity/singularity ${TOOLDIR}/singularity
 
     # MELT - (need to register and download manually) -------
     # https://melt.igs.umaryland.edu/downloads.php
@@ -62,7 +50,7 @@ From: centos:7.9.2009
     wget -O - https://github.com/PapenfussLab/gridss/releases/download/v2.13.2/gridss-2.13.2.tar.gz | tar xzf -
     perl -pi -e 's/^ulimit/#ulimit/' gridss
     ln -s ${SRCDIR}/gridss/gridss ${TOOLDIR}/gridss
-    ln -s ${SRCDIR}/gridss-2.13.2-gridss-jar-with-dependencies.jar ${TOOLDIR}/gridss-2.13.2-gridss-jar-with-dependencies.jar
+    ln -s ${SRCDIR}/gridss/gridss-2.13.2-gridss-jar-with-dependencies.jar ${TOOLDIR}/gridss-2.13.2-gridss-jar-with-dependencies.jar
 #    cp -a gridss ${TOOLDIR}/.
 
     # install DELLY -------
@@ -153,9 +141,6 @@ From: centos:7.9.2009
     git clone https://github.com/stat-lab/MOPline.git
     cd MOPline && chmod +x mopline scripts/*.pl scripts/run_SVcallers/*.pl
     ln -s $(pwd)/mopline /opt/local/tools/mopline
-    ln -s $(pwd)/scripts/run_SVcallers/run_single_singularity.pl /opt/local/tools/run_single_singularity.pl
-    ln -s $(pwd)/scripts/run_SVcallers/run_batch_slurm_singularity.pl /opt/local/tools/run_batch_slurm_singularity.pl
-    ln -s $(pwd)/scripts/run_SVcallers/run_batch_LSF_singularity.pl /opt/local/tools/run_batch_LSF_singularity.pl
 
 %runscript
     echo "This is what happens when you run the container..."
