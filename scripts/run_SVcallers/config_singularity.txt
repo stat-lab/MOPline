@@ -33,15 +33,6 @@ threads = 3;				[run_Manta.pl -n]		# number of threads
 matchclip_path = matchclips;	[run_MATCHCLIP.pl -cp]	# file path of MATCHCLIP executable, matchclips [Do not change]
 threads = 4;				[run_MATCHCLIP.pl -n]		# number of threads
 
-#<MELT>		# This tool is not implemented in singularity due to liccense restriction.
-melt_jar = ... /MELTv2.2.2/MELT.jar;	[run_MELT.pl -mj]		# MELT jar path
-melt_lib = ... /MELTv2.2.2/me_refs/1KGP_Hg37;			[run_MELT.pl -ml]			# MELT mobile element reference data directory containing *_MELT.zip files
-melt_target = ALU,LINE1,SVA,HERVK;	[run_MELT.pl -mt]		# comma-separated list of MELT mobile element or other sequence target
-melt_gene = ... /MELTv2.2.2/add_bed_files/Hg37/hg37.genes.bed;	[run_MELT.pl -mg]			# MELT gene annotation file
-java_path = ;				[run_MELT.pl -jp]		# directory path containing java executable (1.8 or later) unless the corrsponding version of java is set in $PATH
-bowtie_path = ;				[run_MELT.pl -bp]		# directory path containing bowtie2 executable unless bowtie2 is set in $PATH
-threads = 1;				[run_MELT.pl -n]		# number of threads
-
 <Wham>
 wham_path = whamg;	[run_Wham.pl -cp]		# file path of Wham executable whamg [Do not change]
 picard_jar = /opt/local/tools/picard.jar;	[run_Wham.pl -pj]	# picard jar path, to use AddOrReplaceReadGroups function, if the input bam has no RG tag [Do not change]
