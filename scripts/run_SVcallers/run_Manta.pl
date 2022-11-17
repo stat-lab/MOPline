@@ -22,7 +22,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'command_path|cp=s' => \$manta_script,
     'prefix|p=s' => \$out_prefix,
     'non_human|nh=i' => \$non_human,

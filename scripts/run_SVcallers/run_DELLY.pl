@@ -20,7 +20,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'command_path|cp=s' => \$delly_path,
     'exclude|ex=s' => \$exclude_list_file,
     'bcftools_path|bp=s' => \$bcftools_path,

@@ -18,7 +18,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'ingap_jar|ij=s' => \$inGAP_jar,
     'prefix|p=s' => \$out_prefix,
     'non_human|nh=i' => \$non_human,

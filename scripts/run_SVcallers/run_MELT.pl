@@ -28,7 +28,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'melt_jar|mj=s' => \$melt_jar,
     'melt_lib|ml=s' => \$melt_lib,
     'melt_gene|mg=s' => \$melt_gene,

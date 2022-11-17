@@ -25,7 +25,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'gridss_jar|gj=s' => \$gridss_jar,
     'gridss_sh|gs=s' => \$gridss_sh,
     'black_list|bl=s' => \$black_list,

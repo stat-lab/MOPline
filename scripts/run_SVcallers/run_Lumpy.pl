@@ -20,7 +20,7 @@ my $help;
 GetOptions(
     'bam|b=s' => \$input_bam,
     'ref|r=s' => \$ref,
-    'target|c' => \$target_chr,
+    'target|c=s' => \$target_chr,
     'command_path|cp=s' => \$lumpy_path,
     'lumpy_scripts|ls=s' => \$lumpy_scripts,
     'samtools_path|sp=s' => \$samtools_path,
