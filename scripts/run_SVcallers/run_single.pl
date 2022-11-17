@@ -12,7 +12,7 @@ my $help;
  
 GetOptions(
     'bam|b=s' => \$bam,
-    'sample_name|sn=s' => \$sample_dir_name,
+    'sample_dir|sd=s' => \$sample_dir_name,
     'config|c=s' => \$config,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
@@ -24,7 +24,7 @@ pod2usage(-verbose => 0) if $help;
 
   Options:
    --bam or -b <STR>        input bam file [mandatory]
-   --sample_name or -sn <STR> sample directory name where tool directories are created (if not specified, sample directory is not created and tools directories are created in the working directory)
+   --sample_dir or -sd <STR> sample directory name where tool directories are created (if not specified, sample directory is not created and tools directories are created in the working directory)
    --config or -c <STR>     config file [mandatory]
    --help or -h             output help message
    

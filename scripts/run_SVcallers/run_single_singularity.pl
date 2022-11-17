@@ -17,7 +17,7 @@ my $help;
 GetOptions(
 		'sif|s=s' => \$sif_file,
     'bam|b=s' => \$bam,
-    'sample_name|sn=s' => \$sample_dir_name,
+    'sample_dir|sd=s' => \$sample_dir_name,
     'config|c=s' => \$config,
     'temp_dir|td=s' => \$temp_dir,
     'bind_dir|bd=s' => \$bind_dir,
@@ -33,7 +33,7 @@ pod2usage(-verbose => 0) if $help;
   Options:
    --sif or -s <STR>        absolute path of mopline sif file generated with MOPline-Definition.txt [mandatory]
    --bam or -b <STR>        input bam file [mandatory]
-   --sample_name or -sn <STR> sample directory name where tool directories are created (if not specified, sample directory is not created and tools directories are created in the working directory)
+   --sample_dir or -sd <STR> sample directory name where tool directories are created (if not specified, sample directory is not created and tools directories are created in the working directory)
    --config or -c <STR>     config file [mandatory]
    --temp_dir or -td <STR>  absolute path of tmp directory on the host [mandatory]
    --bind_dir or -bd <STR>  comma-separated list of absolute path (except for the working directory) on the host to be added to singularity container (optional)
