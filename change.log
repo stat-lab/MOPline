@@ -1,4 +1,5 @@
 (1) Enabled to automatically select the T2T-CHM13.v2.0 human reference data by specifying the --build option (-b T2T) in any scripts.
 (2) Modified the code of genotype_SV_SMC_7.4.pl for SMC with changing the setting of flanking coverage of DEL and DUP.
 (3) For >= 1 Kb DELs, the DPR calculated with all reads was used if the DPR was greater than 1.0.
-(4) For human references, modified low confidence region files (Low_confidence.bed, Low_confidence.b38.bed, and Low_confidence.T2T-chm13.v2.0.bed) to be exluded.
+(4) For human references, modified low confidence region files (Low_confidence.bed, Low_confidence.b38.bed, and Low_confidence.T2T-chm13.v2.0.bed) for filtering are provided.
+(5) Singularity Definition file (mopline.def) for executing SV calling with multiple SV detection algorithms is provided.
