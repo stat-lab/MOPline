@@ -59,7 +59,15 @@ From: centos:7.9.2009
     cp delly_v1.1.5_linux_x86_64bit ${TOOLDIR}/delly
     chmod +x ${TOOLDIR}/delly
 
+    # install bwa -------
+    cd ${SRCDIR}
+    wget -O - https://github.com/lh3/bwa/releases/download/v0.7.17/bwa-0.7.17.tar.bz2 | tar xjf -
+    cd bwa-0.7.17
+    make
+    cp bwa /usr/local/bin/
+
     # install SAMTOOLS & CERN root -------
+    cd ${SRCDIR}
     wget -O - https://root.cern/download/root_v6.24.06.Linux-centos7-x86_64-gcc4.8.tar.gz | tar xzf -
     export CERNROOT=${SRCDIR}/root
     wget -O - https://github.com/samtools/samtools/releases/download/1.13/samtools-1.13.tar.bz2 | tar xjf -
