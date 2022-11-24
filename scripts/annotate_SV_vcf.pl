@@ -628,6 +628,7 @@ print STDERR "Missing ORF $gid\n" if (!exists $ORF{$gid});
 		}
 		my $svann_str = '';
 		foreach my $gid (sort keys %SVANN){
+			# when an SV overlaps multiple genic regions of a gene, select the region with the highest hierarchy
 			foreach my $grade (sort {$a <=> $b} keys %{$SVANN{$gid}}){
 				my $region = '';
 				if ($grade == 1){

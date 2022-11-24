@@ -5,6 +5,8 @@ use Pod::Usage;
 use FindBin qw($Bin);
 use File::Basename;
 
+# Joint calling SVs from multiple sample vcf files
+
 my $sample_list = '';
 
 my $out_prefix = 'MOPline';
@@ -282,19 +284,19 @@ foreach my $id (@sample_id){
 		    $dr = $1;
 		    $ds = $2;
 		    $sr = $3;
-		    if (($type eq 'DEL') and ($len >= 1000)){
+		    if (($type eq 'DEL') and ($len >= 1000)){	# filter >= 1 Kb DELs with >= 0.9 DPR or >= 0.5 DPS
 		    	next if ($dr >= 0.9);
 		    	next if ($ds >= 0.5);
 		    }
-		    if (($type eq 'DEL') and ($len >= 100000)){
+		    if (($type eq 'DEL') and ($len >= 100000)){	# filter >= 100 Kb DELs with >= 0.8 DPR or >= 0.35 DPS
 		    	next if ($dr >= 0.8);
 		    	next if ($ds >= 0.35);
 		    }
-		    if (($type eq 'DUP') and ($len >= 1000)){
+		    if (($type eq 'DUP') and ($len >= 1000)){	# filter >= 1 Kb DUPs with <= 1.1 DPR or < 10 Kb DUPs with >= 0.5 DPS
 		    	next if ($dr <= 1.1);
 		    	next if ($len < 10000) and ($ds >= 0.5);
 		    }
-		    if (($type eq 'DUP') and ($len >= 10000)){
+		    if (($type eq 'DUP') and ($len >= 10000)){	# filter >= 10 Kb DUPs with >= 0.3 DPS
 		    	next if ($ds >= 0.3);
 		    }
 		}
@@ -304,7 +306,7 @@ foreach my $id (@sample_id){
     close (FILE);
 }
 
-foreach my $type (keys %call){			# clustering DEL/DUP/INV exhibiting > 2-fold larger or smaller size of the averaged length at the same called positions
+foreach my $type (keys %call){			# clustering DEL/DUP/INV with 0.5- to 2.0-fold difference in size at the same called positions
     foreach my $chr (keys %{$call{$type}}){
 		foreach my $pos (sort {$a <=> $b} keys %{${$call{$type}}{$chr}}){
 		    my @len = ();
@@ -512,7 +514,7 @@ foreach my $type (keys %call_diverged){			# reassign the above extracted diverge
 %call_diverged_ave = ();
 print STDERR "1st step completed:\n";
 
-foreach my $type (keys %call_cons){	# merge posiotions present within 30-bp of consensus pos
+foreach my $type (keys %call_cons){	# merge positions present within 30-bp of consensus pos
     foreach my $chr (keys %{$call_cons{$type}}){
 		foreach my $pos (sort {$a <=> $b} keys %{${$call_cons{$type}}{$chr}}){
 		    next if (!exists ${${$call_cons{$type}}{$chr}}{$pos});
@@ -548,7 +550,7 @@ foreach my $type (keys %call_cons){	# merge posiotions present within 30-bp of c
     }
 }
 
-foreach my $type (keys %call_cons){	# merge posiotions present within 100-bp of consensus pos
+foreach my $type (keys %call_cons){	# merge positions present within 100-bp of consensus pos
     foreach my $chr (keys %{$call_cons{$type}}){
 		foreach my $pos (sort {$a <=> $b} keys %{${$call_cons{$type}}{$chr}}){
 		    next if (!exists ${${$call_cons{$type}}{$chr}}{$pos});
@@ -604,7 +606,7 @@ foreach my $type (keys %call_cons){	# merge posiotions present within 100-bp of 
     }
 }
 
-foreach my $type (keys %call_cons){		# assign a median position from multiple sample-positions to the pos
+foreach my $type (keys %call_cons){		# assign a median position from multiple sample-positions as a consensus pos
     foreach my $chr (keys %{$call_cons{$type}}){
 		foreach my $pos (sort {$a <=> $b} keys %{${$call_cons{$type}}{$chr}}){
 		    my $sample_num = @{${${$call_cons{$type}}{$chr}}{$pos}};
@@ -689,7 +691,7 @@ foreach my $type (keys %call_cons){		# assign median SV length for each consensu
     }
 }
 
-foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 200 bp distance for INS and reciprocal 50%-overlap for the other types of SVs
+foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 200 bp distance for INS or with 50%-reciprocal overlap for the other types of SVs
     foreach my $chr (keys %{$call_cons{$type}}){
 		my %pre_info;
 		foreach my $pos (sort {$a <=> $b} keys %{${$call_cons{$type}}{$chr}}){
@@ -878,7 +880,7 @@ foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 20
 				    my $ovAovB = abs ($ave_overlap_pos - $ave_overlap_pre_pos);
 				    my $AB_len = abs ($ave_len - $ave_pre_len);
 				    my $ovAovB_len = abs ($ave_overlap_len - $ave_overlap_pre_len);
-				    if ($type eq 'INS'){	# compare absolute distances between SV positions/lengths for overlapped and non-overlapped IDs
+				    if ($type eq 'INS'){	# compare absolute distances between SV positions/lengths for overlapped and non-overlapped sample IDs
 						if ($AB < $ovAovB){
 						    $overlap_flag = 1;
 						}
@@ -894,7 +896,7 @@ foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 20
 						    $overlap_flag = 0;
 						}
 				    }
-				    if ($overlap_flag == 1){		# re-assign unoverlapped items of pre-pos and pos to overlapped pre-pos and overlapped pos
+				    if ($overlap_flag == 1){		# re-assign non-overlapped items of pre-pos and pos to overlapped pre-pos and overlapped pos
 						foreach my $item (@item){
 						    my ($id, $pos1, $len1) = split (/=/, $item);
 						    if (abs ($pos1 - $ave_overlap_pos) <= abs ($pos1 - $ave_overlap_pre_pos)){
@@ -1224,7 +1226,7 @@ foreach my $type (keys %call_cons){
 
 print STDERR "3rd step completed:\n";
 
-foreach my $type (keys %vcf_type){              # adjust sample variants between neighboring positions
+foreach my $type (keys %vcf_type){              # adjust variants for each sample between neighboring positions
 	next if ($type eq 'INS');
     foreach my $chr (keys %{$vcf_type{$type}}){
         my $pre_pos = 0;
@@ -1340,7 +1342,7 @@ foreach my $type (keys %vcf_type){              # adjust sample variants between
     }
 }
 
-foreach my $type (keys %vcf_type){                  # merge overlapping variants
+foreach my $type (keys %vcf_type){                  # merge overlapping variants again
 	next if ($type eq 'INS');
     foreach my $chr (keys %{$vcf_type{$type}}){
         my $pre_pos = 0;
@@ -1428,7 +1430,7 @@ foreach my $type (keys %vcf_type){                  # merge overlapping variants
     }
 }
 
-foreach my $chr (keys %{$vcf_type{'INS'}}){				# merge proximal INS and DUP to DUP
+foreach my $chr (keys %{$vcf_type{'INS'}}){				# merge proximal INS and DUP to DUP again
 	my $chr2 = $chr;
     $chr2 =~ s/^0*//;
 	foreach my $pos (keys %{${$vcf_type{'INS'}}{$chr}}){
@@ -1635,7 +1637,7 @@ close (OUT);
 %vcf_cons = ();
 
 
-sub cons_len{
+sub cons_len{	# determine consensus length of SV
     my ($ref_len, $len) = @_;
     my $num = scalar @{$ref_len};
     my %len;

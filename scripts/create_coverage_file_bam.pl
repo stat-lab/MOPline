@@ -164,6 +164,7 @@ foreach my $bam (@bam_files){
 
 print STDERR "Coverage calculation completed:\n";
 
+# record coverage and the number of split reads in a 50-bp window size for a single chromosome
 sub cal_cov{
     my ($sample_dir, $sample_name, $bam, $chr) = @_;
     my $command = "$Bin/create_coverage_file_bam_chr.pl -b $bam -c $chr -rl $read_length -r $ref -sn $sample_name -sd $sample_dir -bs $bin_size -rl $read_length -q $min_MAPQ";

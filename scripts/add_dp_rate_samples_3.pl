@@ -3,7 +3,7 @@ use strict;
 use File::Basename;
 use FindBin qw($Bin);
 
-# script for add_dp_rate subroutine of merge_SV_calls_Missing_calls_mthreads_2.pl
+# script for add_dp_rate subroutine of genotype_SV_SMC_7.4.pl
 
 my $sample_list = shift @ARGV;
 my $out_file = shift @ARGV;

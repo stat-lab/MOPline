@@ -5,6 +5,8 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
 
+# add SV coverage rate (DPR) and split read rate (SR) to an input vcf file
+
 my $vcf = '';
 my $cov_dir = '';
 my $flank_len = 1000;
@@ -237,6 +239,7 @@ while (my $line = <FILE>){
     my $type = $1 if ($line[7] =~ /SVTYPE=(.+?);/);
     die "No match with $chr between the reference index file and the input vcf file\n" if (!exists $chrlen{$chr});
     if ($pre_chr ne $chr){
+        # collect coverage and split read data for a chromosome from a cov file
         my $cov_sum = 0;
         my $cov_sum2 = 0;
         %cov = ();
@@ -285,6 +288,7 @@ while (my $line = <FILE>){
         next;
     }
 =cut
+    # calculate SR for any type of SV at a called SV site using the split read data in 150 bp (50 bp window * 3) regions around the breakpoints
     my $len = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
     my $end = $pos + $len - 1;
     $end = $pos if ($type eq 'INS');
@@ -459,6 +463,7 @@ while (my $line = <FILE>){
         $split_rate = $ave_split_rate;
     }
     if ($type =~ /DEL|DUP/){
+        # calculate DPR for DEL or DUP at a called SV site using the covergae between the breakpoints and the coverage outsides the breakpoints
         my $CNVnator_flag = 0;
         my $pos2 = $pos - 1;
         $CNVnator_flag = 1 if ($pos2 % 1000 <= 1) and ($len >= 2000);
@@ -483,7 +488,6 @@ while (my $line = <FILE>){
         $ref_cov = \%cov2 if ($type eq 'DEL');
         while (1){
             if (exists ${$ref_cov}{$start}){
-    #print STDERR "$start\t${$cov{$chr}}{$start}\n" if ($chr eq '19') and ($pos == 54727001);
                 push @sv_cov, ${$ref_cov}{$start};
                 if (($type eq 'DEL') and ($len >= 1000)){
                     push @sv_cov2, $cov{$start};
@@ -529,7 +533,6 @@ while (my $line = <FILE>){
                 else{
                     $left_start -= $bin_size if ($left_start > $pos - 10000);
                 }
-    #print STDERR "Left: $left_start\t${$cov{$chr}}{$left_start}\n" if (!exists ${$cnv{$chr}}{$left_start}) and ($chr eq '19') and ($pos == 54727001);
             }
             else{
                 $left_start -= $bin_size if ($left_start > $pos - 10000);
@@ -552,7 +555,6 @@ while (my $line = <FILE>){
                 else{
                     $right_end += $bin_size if ($right_end < $end + 10000);
                 }
-    #print STDERR "Right: $right_start\t${$cov{$chr}}{$right_start}n" if (!exists ${$cnv{$chr}}{$right_start}) and ($chr eq '19') and ($pos == 54727001);
             }
             else{
                 $right_end += $bin_size if ($right_end < $end + 10000);
@@ -601,6 +603,7 @@ while (my $line = <FILE>){
             }
         }
         my $incons_cov = 0;
+        # inconsistent coverage corresponds to >= 0.91 DPR for DEL and <= 1.1 DPR for DUP in a 50-bp window size
         if ($ave_flank > 0){
             foreach (@sv_cov){
                 if ($type eq 'DEL'){
@@ -611,54 +614,9 @@ while (my $line = <FILE>){
                 }
             }
         }
+        # inconsistent coverage rate (DS) is the rate of the window with inconsistent coverage in all the number of window within DEL or DUP
         $incons_cov_rate = int ($incons_cov / @sv_cov * 100 + 0.5) / 100;
     }
-=pod
-    if ($type eq 'INS'){
-        my $gt = '0/1';
-        if ($split_rate >= $min_hom_ins_split_rate){
-            $gt = '1/1';
-        }
-        if (@line > 8){
-            my $orig_gt = $1 if ($line[9] =~ /(.+?):/);
-            if (($orig_gt ne './.') and ($orig_gt ne $gt) and ($split_rate >= $min_hom_ins_split_rate * 0.9) and ($split_rate <= $min_hom_ins_split_rate * 1.1)){
-                $gt = $orig_gt;
-            }
-            $line[9] =~ s/^$orig_gt/$gt/;
-        }
-        else{
-            if ($line[7] =~ /GT=([^;].+)/){
-                my $orig_gt = $1;
-                if (($orig_gt ne './.') and ($orig_gt ne $gt) and ($split_rate >= $min_hom_ins_split_rate * 0.9) and ($split_rate <= $min_hom_ins_split_rate * 1.1)){
-                    $gt = $orig_gt;
-                }
-                $line[7] =~ s/GT=$orig_gt/GT=$gt/;
-            }
-        }
-    }
-    elsif ($type eq 'INV'){ 
-        my $gt = '0/1';
-        if ($split_rate >= $min_hom_inv_split_rate){
-            $gt = '1/1';
-        }
-        if (@line > 8){
-            my $orig_gt = $1 if ($line[9] =~ /(.+?):/);
-            if (($orig_gt ne './.') and ($orig_gt ne $gt) and ($split_rate >= $min_hom_inv_split_rate * 0.9) and ($split_rate <= $min_hom_inv_split_rate * 1.1)){
-                $gt = $orig_gt;
-            }
-            $line[9] =~ s/^$orig_gt/$gt/;
-        }
-        else{
-            if ($line[7] =~ /GT=([^;].+)/){
-                my $orig_gt = $1;
-                if (($orig_gt ne './.') and ($orig_gt ne $gt) and ($split_rate >= $min_hom_inv_split_rate * 0.9) and ($split_rate <= $min_hom_inv_split_rate * 1.1)){
-                    $gt = $orig_gt;
-                }
-                $line[7] =~ s/GT=$orig_gt/GT=$gt/;
-            }
-        }
-    }
-=cut
     if (@line > 8){
         $line[9] .= ":$cov_rate:$incons_cov_rate:$split_rate";
     }

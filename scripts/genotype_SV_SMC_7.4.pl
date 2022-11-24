@@ -58,7 +58,7 @@ my $min_split_diff_dup = 4;
 my $min_split_diff_del = 4;
 my $min_ref_sample = 10;
 my $min_ref_sf = 0.01;
-my $min_split_filt_rate = 0.9; # minimum rate of samples with ref allele, that had been assigned due to biased direction (> $min_split_diff-fold difference) of split-alignment reads
+my $min_split_filt_rate = 0.9; # minimum rate of samples with ref allele, that had been assigned due to biased direction (> $min_split_diff-fold difference) of 5'-end and 3'-end of split-alignment reads
 
 my $data_dir = "$Bin/../Data";
 
@@ -451,7 +451,6 @@ while (my $line = <FILE>){
 				my ($group, $id) = split (/:/, $_) if ($_ =~ /:/);
 				$id = $_ if ($_ !~ /:/);
 				$group = '' if ($_ !~ /:/);
-#print STDERR "NA12878: $count\n" if ($id eq 'NA12878');
 				$group{$id} = $group if ($group ne '');
 				$order_sample{$id} = $count;
 			}
@@ -670,7 +669,7 @@ print STDERR "1st step completed:\n";
 
 my @jobs;
 my @out_files;
-foreach my $dnum (sort {$a <=> $b} keys %div_samples){
+foreach my $dnum (sort {$a <=> $b} keys %div_samples){      # recover SV calls (discarded SV calls) from the original SV detection algorithms used in the MOPline high condidence SV selection step (genotype_SV_SMC_7.4.pl), corresponding to Ref allele of a sample at an SV site
     my ($thread_t) = threads->new(\&collect_call, $dnum, \@{$div_samples{$dnum}});
     push @jobs, $thread_t;
 }
@@ -721,7 +720,7 @@ foreach my $chr (keys %select){
     }
 }
 
-print STDERR "MC: $Missed_calls\tCorrected MC: $correct_calls\n";
+print STDERR "Missing calls (MC): $Missed_calls\tMC recovered from the original SV calls: $correct_calls\n";
 
 print STDERR "3rd step completed:\n";
 
@@ -864,6 +863,9 @@ foreach my $chr (sort keys %vcf){
 				    else{
 #						if (($_ =~ /^0\/0/) and ((($type eq 'DUP') and ($SF >= $min_SF)) or (($type ne 'DUP') and ($SF >= $min_SF2)))){
 #						if (($_ =~ /^0\/0/) and ($type eq 'DUP') and ($SF >= $min_SF)){
+                        # assign Ref alleles used for SMC at DEL/DUP site if the site has >= $min_SC_DEL sample count (SC) and the consensus length has >= $min_SMC_DEL bp
+                        # assign Ref alleles used for SMC at INV site if the site has >= $min_SC SC and >= $min_SF2 site frequency (SF) and the consensus length has >= 1000 bp
+                        # assign Ref alleles used for SMC at INS site if the site has >= $min_SC SC and >= $min_SF SF
 						if (($disable_SMC_2nd == 0)  and ($_ =~ /^0\/0/) and ($sample_num2 >= $min_SC_DEL) and ($newlen >= $min_SMC_DEL) and ($type =~ /DEL|DUP/)){
 							${${$vcf_dr{$id2}}{$chr2}}{$medpos} = "$newlen\t$type";
 							$line[$count - 1] = "0/0:0:$medpos:$newlen:1:0:0:2";
@@ -924,6 +926,9 @@ foreach my $chr (sort keys %vcf){
 				    $id2 = $gid if ($gid !~ /:/);
 #				    if (($_ =~ /^0\/0/) and ((($type eq 'DUP') and ($SF >= $min_SF)) or (($type ne 'DUP') and ($SF >= $min_SF2)))){
 #				    if (($_ =~ /^0\/0/) and ($type eq 'DUP') and ($SF >= $min_SF)){
+                    # assign Ref alleles used for SMC at DEL/DUP site if the site has >= $min_SC_DEL sample count (SC) and the consensus length has >= $min_SMC_DEL bp
+                    # assign Ref alleles used for SMC at INV site if the site has >= $min_SC SC and >= $min_SF2 site frequency (SF) and the consensus length has >= 1000 bp
+                    # assign Ref alleles used for SMC at INS site if the site has >= $min_SC SC and >= $min_SF SF
 					if (($disable_SMC_2nd == 0)  and ($_ =~ /^0\/0/) and ($sample_num2 >= $min_SC_DEL) and ($newlen >= $min_SMC_DEL) and ($type =~ /DEL|DUP/)){
 						${${$vcf_dr{$id2}}{$chr2}}{$medpos} = "$newlen\t$type";
 						$line[$count - 1] = "0/0:0:$medpos:$newlen:1:0:0:2";
@@ -980,7 +985,7 @@ foreach my $id (sort keys %vcf_dr){
 
 my @out_files2;
 my @jobs2;
-foreach my $dnum (sort {$a <=> $b} keys %div_samples){
+foreach my $dnum (sort {$a <=> $b} keys %div_samples){      # collect alignemnt statistics (DPR and SR) for Ref alleles used for SMC
     my ($thread_t) = threads->new(\&add_dp_rate, $dnum, \@{$div_samples{$dnum}});
     push @jobs2, $thread_t;
 }
@@ -1060,7 +1065,7 @@ foreach my $chr (sort keys %vcf){
             my $SF = int ($SN / $total_samples * 1000 + 0.5) / 1000;
             my $len = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
 		    my $type3 = $type;
-		    if ($type eq 'DEL'){
+		    if ($type eq 'DEL'){      # classify DEL/DUP based on size and repeat-overlap
 				if ($len <= 150){
 				    $type3 = $type . '3';
 				}
@@ -1158,22 +1163,21 @@ foreach my $chr (sort keys %vcf){
 				if (($_ =~ /^0\/0:/) and (!exists ${${${$dp_rate{$id2}}{$chr2}}{$tpos}}{$type})){
 				    $line[$count - 1] = "0/0:0:0:0:0:0:0:0";
 				}
-				else{
+				else{       # pre-assign alleles with too weak signal of DPR and SR as Ref
 				    $gq = 99 if ($tpos > 0);
 				    ($dr, $ds, $sr, $sr_diff) = split (/=/, ${${${$dp_rate{$id2}}{$chr2}}{$tpos}}{$type}) if (exists ${${${$dp_rate{$id2}}{$chr2}}{$tpos}}{$type});
-                    if (($type eq 'INS') and ($sr_diff >= $min_split_diff)){
+                    if (($type eq 'INS') and ($sr_diff >= $min_split_diff)){                            # assign the alleles of INSs as Ref if the rate of 5'- and 3'-split reads is >= 8 by default
                         $line[$count - 1] = "0/0:0:0:0:$dr:$ds:0:3";
 						next;
                     }
-                    elsif (($type eq 'DUP') and ($len <= 200) and ($sr_diff >= $min_split_diff_dup)){
+                    elsif (($type eq 'DUP') and ($len <= 200) and ($sr_diff >= $min_split_diff_dup)){   # assign the alleles of <= 200 bp DUPs as Ref if the rate of 5'- and 3'-split reads is >= 4 by default
                     	$line[$count - 1] = "0/0:0:0:0:$dr:$ds:0:3";
 						next;
                     }
-                    elsif (($type eq 'DEL') and ($len <= 500) and ($sr_diff >= $min_split_diff_del)){
+                    elsif (($type eq 'DEL') and ($len <= 500) and ($sr_diff >= $min_split_diff_del)){   # assign the alleles of <= 500 bp DELs as Ref if the rate of 5'- and 3'-split reads is >= 4 by default
                     	$line[$count - 1] = "0/0:0:0:0:$dr:$ds:0:3";
 						next;
                     }
-#print STDERR "$count\t$id2\t$gt\t$tpos\t$dr\t$sr\t$MCtag\n";
 				    if ($tpos == 0){
 						$tpos = $pos;
 						$tlen = $len;
@@ -1356,7 +1360,7 @@ foreach my $chr (sort keys %vcf){
     print OUT6R "GT\tSR\tMSR\tPOS\n";
     print OUT7R "GT\tDR\tSR\tMDR\tMSR\tPOS\n";
     print OUT8R "GT\tDR\tSR\tMDR\tMSR\tPOS\n";
-    foreach my $type2 (keys %gt_pred){
+    foreach my $type2 (keys %gt_pred){      # predict genotypes (Ref, Het, or Hom) of SV alleles including the selected Ref alleles using the nnet multinominal logistic regression R module
 		my %test_order;
 		my $count = 0;
 		foreach my $pos2 (sort {$a <=> $b} keys %{$gt_pred{$type2}}){
@@ -1486,7 +1490,6 @@ foreach my $chr (sort keys %vcf){
 		    $test_file = $inv_pred_inputR;
 		    $out_file = $inv_pred_outR;
 		}
-	#print STDERR "chr$chr: $type2\t$model_file $test_file $out_file\n";
 		system ("Rscript --vanilla $rscript $model_file $test_file $out_file");
 		if (-f $out_file){
 		    if (scalar keys %test_order > 1){
@@ -1622,7 +1625,7 @@ $GQ2 = $GQ;
     close (OUT7R);
     close (OUT8R);
     
-    foreach my $pos (sort {$a <=> $b} keys %new_line){
+    foreach my $pos (sort {$a <=> $b} keys %new_line){       # genotype SVs based the nnet prediction results (the probability for each genotype) and the genotype information from the original SV calling data
 		foreach my $type (keys %{$new_line{$pos}}){
 		    my @line = split (/\t/, ${$new_line{$pos}}{$type});
 		    my $len = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
@@ -1645,7 +1648,6 @@ $GQ2 = $GQ;
 		    my $ave_sr = 0;
 		    $ave_dr = ${$DR_ave{$type}}{$pos} if (exists ${$DR_ave{$type}}{$pos});
 		    $ave_sr = ${$SR_ave{$type}}{$pos} if (exists ${$SR_ave{$type}}{$pos});
-	#print STDERR "$pos\t$type\tDR_av: $ave_dr\tSR_ave: $ave_sr\n";
 		    my $mc = 0;
 		    my $mc_gq_sum = 0;
 		    my @gqM0;
@@ -1658,8 +1660,6 @@ $GQ2 = $GQ;
 				    my ($gt2, $prob, $gt3, $qual, $qual2) = split (/=/, ${${$pred{$pos}}{$type}}{$count});
 				    $gq = $qual;
 				    if ($gt eq '0/0'){
-		#print STDERR "$count\t$_\n";
-		#print STDERR "${${$pred{$pos}}{$type}}{$count}\n";
 						if ($MC == 0){
 						    $line[$count - 1] = "0/0:$gq:0:0:$dr:$ds:$sr:0";
 						}
@@ -1766,7 +1766,6 @@ $GQ2 = $GQ;
 						$line[$count - 1] = "$gt:$gq:$vp:$vl:$dr:$ds:$sr:$MC" if ($gt ne '0/0');
 						$line[$count - 1] = "0/0:$gq:0:0:$dr:$ds:$sr:0" if ($gt eq '0/0');
 				    }
-		#print STDERR "GT: $gt\n";
 				    if (($MC >= 1) and ($gt ne '0/0')){
 						$mc ++;
 						$mc_gq_sum += $gq;
@@ -2183,7 +2182,6 @@ foreach my $chr (sort keys %INS){		# mergeing overlapped DUP-INS
 						my $new_dupline = join ("\t", @dup_line);
 						${${$vcf2{'DUP'}}{$chr}}{$dpos} = $new_dupline;
 						$ins_dup_merge ++;
-#print STDERR "Merged INS to DUP: $chr $ipos-$dpos\t$duplen\tld: $hit_ld\tSC: $sn\n";
 				    }
 				    else{
 						foreach (@ins_line){
@@ -2211,7 +2209,6 @@ foreach my $chr (sort keys %INS){		# mergeing overlapped DUP-INS
 						my $new_insline = join ("\t", @ins_line);
 						${${$vcf2{'INS'}}{$chr}}{$ipos} = $new_insline;
 						$ins_dup_merge ++;
-#print STDERR "Merged DUP to INS: $chr $dpos-$ipos\t$duplen\tld: $hit_ld\tSC: $sn\n";
 				    }
 				}
 		    }
@@ -2293,7 +2290,7 @@ foreach my $type (sort keys %vcf2){		# delete either SVs of overlapping sample S
 }
 
 my %sv_len;
-foreach my $type (keys %vcf2){
+foreach my $type (keys %vcf2){      # adjust genotype based on the allelic values, the averaged values, the minimal/mamimal values, and the standard deviations of SR and DPR, depending on the SV length
     foreach my $chr (keys %{$vcf2{$type}}){
     	my $chr2 = $chr;
     	$chr2 =~ s/^0*//;
@@ -2431,7 +2428,6 @@ foreach my $type (keys %vcf2){
 				map{$sum_sr_het_diff += ($ave_sr_het - $_) ** 2} @sr_het_2;
 				my $sr_sd = int (($sum_sr_het_diff / @sr_het_2) ** 0.5 * 100 + 0.5) / 100;
 				my $count1 = 0;
-#print STDERR "$sf\tHet: $ave_sr_het\tHom: $ave_sr_hom\tSD: $sr_sd\tMin-Het: $min_sr_het\n";
 				foreach (@line){
                     $count1 ++;
                     next if ($count1 <= 9);
@@ -2466,48 +2462,6 @@ foreach my $type (keys %vcf2){
 	                }
                 }
 	        }
-=pod
-	        if ((@sr_hom >= 5) and ($sf >= 0.8) and ($type eq 'INS')){
-	        	my $sum_sr_het = 0;
-				my $sum_sr_hom = 0;
-				my $sum_sr_hom_diff = 0;
-				my $max_sr_het = 0;
-				my $min_sr_hom = 1;
-				foreach (@sr_het){
-					$max_sr_het = $_ if ($_ > $max_sr_het);
-					$sum_sr_het += $_;
-				}
-				foreach (@sr_het){
-					$min_sr_hom = $_ if ($_ < $min_sr_hom);
-					$sum_sr_hom += $_;
-				}
-				my $ave_sr_het = 0;
-				$ave_sr_het = int ($sum_sr_het / @sr_het * 100 + 0.5) / 100 if (@sr_het > 0);
-				my $ave_sr_hom = int ($sum_sr_hom / @sr_hom * 100 + 0.5) / 100;
-				map{$sum_sr_hom_diff += ($ave_sr_hom - $_) ** 2} @sr_hom;
-				my $sr_sd = int (($sum_sr_hom_diff / @sr_hom) ** 0.5 * 100 + 0.5) / 100;
-				my $count1 = 0;
-				foreach (@line){
-                    $count1 ++;
-                    next if ($count1 <= 9);
-                    my ($gt, $gq, $vp, $vl, $dr, $ds, $sr, $mc) = split (/:/, $_);
-                    next if ($gt eq '0/0') and ($sr == 0);
-                    next if ($gt eq '0/1') or ($gt eq '1/1');
-                    if (($gt eq '0/0') and ($sr >= 0.3) and ($sr >= $min_sr_hom) and ($sr >= $ave_sr_hom - $sr_sd * 2.5)){
-                    	$mc = 2;
-                    	$mc = 3 if (exists ${${$LR_overlap{$chr2}}{$pos}}{$type});
-						$line[$count1 - 1] = "1/1:$gq:$vp:$vl:$dr:$ds:$sr:$mc";
-						$sn ++;
-                    }
-                    elsif (($gt eq '0/0') and ($sr >= 0.2) and ($sr < $min_sr_hom) and ($sr >= $ave_sr_het)){
-                    	$mc = 2;
-                    	$mc = 3 if (exists ${${$LR_overlap{$chr2}}{$pos}}{$type});
-						$line[$count1 - 1] = "0/1:$gq:$vp:$vl:$dr:$ds:$sr:$mc";
-						$sn ++;
-                    }
-                }
-			}
-=cut
 			if (((@dr_het > 0) or (@dr_hom > 0)) and ($sn >= $min_SC_DEL) and ($type =~ /DEL|DUP/)){
 				my $sum_dr_het = 0;
 				my $sum_dr_hom = 0;
@@ -2638,7 +2592,7 @@ foreach my $type (keys %vcf2){
 my %merge_str_sv;
 my %str_overlap;
 
-foreach my $chr (sort keys %vcf){
+foreach my $chr (sort keys %vcf){   # select SVs overlapping with >= 500 bp STRs
 	my $chr2 = $chr;
 	$chr2 =~ s/^0*//;
 	foreach my $pos (sort {$a <=> $b} keys %{$vcf{$chr}}){
@@ -2747,7 +2701,7 @@ foreach my $chr (sort keys %vcf){
 	}
 }
 
-foreach my $chr (keys %str_overlap){
+foreach my $chr (keys %str_overlap){    # merge multiple SVs overlapping with an STR region with >= 500 bp in size
 	foreach my $str_pos (keys %{$str_overlap{$chr}}){
         foreach my $type (keys %{${$str_overlap{$chr}}{$str_pos}}){
         	next if (scalar keys %{${${$str_overlap{$chr}}{$str_pos}}{$type}} <= 1);
@@ -2826,85 +2780,10 @@ foreach my $chr (keys %str_overlap){
     }
 }
 
-print STDERR "#Merged SVs within STRs (<= $max_STR bp)\n";
+print STDERR "#Merged STR SVs: multiple SVs within an STR (<= $max_STR bp)\n";
 foreach my $type (sort keys %merge_str_sv){
 	print STDERR "$type\t$merge_str_sv{$type}\n";
 }
-
-=pod
-foreach my $chr (sort keys %vcf){
-    foreach my $pos (sort {$a <=> $b} keys %{$vcf{$chr}}){
-		foreach my $type (keys %{${$vcf{$chr}}{$pos}}){
-		    next if ($type ne 'INS');
-		    my $line = ${${$vcf{$chr}}{$pos}}{$type};
-            my @line = split (/\t/, $line);
-            my $count = 0;
-            my @sr_het;
-            my @sr_hom;
-            my $ac = 0;
-            my $sn = 0;
-            my $flag = 0;
-		    foreach (@line){
-                $count ++;
-                next if ($count <= 9);
-                next if ($_ =~ /^0\/0/);
-				my ($gt, $gq, $vp, $vl, $dr, $ds, $sr, $mc) = split (/:/, $_);
-                $sn ++;
-                $ac ++ if ($gt eq '0/1');
-                $ac += 2 if ($gt eq '1/1');
-                push @sr_het, $sr if ($gt eq '0/1');
-                push @sr_hom, $sr if ($gt eq '1/1');
-            }
-            my $af = int ($ac / $total_samples * 0.5 * 1000 + 0.5) / 1000;
-            next if ($af < $min_SF);
-            next if (@sr_het == 0) or (@sr_hom == 0);
-            my $sum_sr_het = 0;
-            my $sum_sr_hom = 0;
-            my $sum_het_diff = 0;
-            my $sum_hom_diff = 0;
-            my $max_het = 0;
-            my $min_hom = 2;
-            foreach (@sr_het){
-            	$sum_sr_het += $_;
-            	$max_het = $_ if ($_ > $max_het);
-            }
-            foreach (@sr_hom){
-            	$sum_sr_hom += $_;
-            	$min_hom = $_ if ($_ < $min_hom);
-            }
-            my $ave_het = int ($sum_sr_het / @sr_het * 100 + 0.5) / 100;
-            my $ave_hom = int ($sum_sr_hom / @sr_hom * 100 + 0.5) / 100;
-            map{$sum_het_diff += ($_ - $ave_het) ** 2} @sr_het;
-            map{$sum_hom_diff += ($_ - $ave_hom) ** 2} @sr_hom;
-            my $sd_het = int (($sum_het_diff / @sr_het) ** 0.5 * 100 + 0.5) / 100;
-            my $sd_hom = int (($sum_hom_diff / @sr_hom) ** 0.5 * 100 + 0.5) / 100;
-            $count = 0;
-            foreach (@line){
-                $count ++;
-                next if ($count <= 9);
-                next if ($_ =~ /^0\/0/);
-				my ($gt, $gq, $vp, $vl, $dr, $ds, $sr, $mc) = split (/:/, $_);
-				if (($gt eq '0/1') and ($sr >= $min_hom)){
-					$line[$count - 1] = "1/1:$gq:$vp:$vl:$dr:$ds:$sr:$mc";
-					$ac ++;
-					$flag = 1;
-				}
-				elsif (($gt eq '1/1') and ($sr <= $max_het) and ($sr <= $ave_hom - $sd_hom * 2.5)){
-					$line[$count - 1] = "0/1:$gq:$vp:$vl:$dr:$ds:$sr:$mc";
-					$ac --;
-					$flag = 1;
-				}
-			}
-			if ($flag == 1){
-				$af = int ($ac / $total_samples * 0.5 * 1000 + 0.5) / 1000;
-				$line[7] =~ s/AF=[\d\.]+/AF=$af/ if ($line[7] =~ /AF=/);
-				my $new_line = join ("\t", @line);
-	            ${${$vcf{$chr}}{$pos}}{$type} = $new_line;
-			}
-		}
-    }
-}
-=cut
 
 my @chr;
 
@@ -2931,6 +2810,7 @@ $version = $1 if ($Bin =~ /MOPline[_\-\.](v[\d\.]+)/i);
 open (OUT, "> $out_vcf");
 my $alt_flag = 0;
 my $contig_flag = 0;
+my $SMC_call = 0;
 foreach (@header){
 	if ($_ =~ /##fileDate=/){
 		print OUT "##fileDate=$time\n";
@@ -2991,6 +2871,7 @@ foreach my $chr (@chr){
                 $sum_dpr += $dr;
                 $sum_dps += $ds;
                 $sum_sr += $sr;
+                $SMC_call ++ if ($mc > 0);
                 if ($vp == 0){
                 	my $info = "$gt:$gq:$pos:$len:$dr:$ds:$sr:$mc";
                 	$line[$count - 1] = $info;
@@ -3003,6 +2884,7 @@ foreach my $chr (@chr){
                 		if ($sex eq 'F'){
                 			my $info = "0:$gq:$vp:$vl:$dr:$ds:$sr:0";
                 			$line[$count - 1] = $info;
+                            $SMC_call -- if ($mc > 0);
                 		}
                 		else{
                 			my $info = "1:$gq:$vp:$vl:$dr:$ds:$sr:$mc";
@@ -3027,8 +2909,8 @@ foreach my $chr (@chr){
 	            my $ref_sf = int ($ref / $total_samples * 1000 + 0.5) / 1000;
 	            if (($ref >= $min_ref_sample) and ($ref_sf >= $min_ref_sf)){
 	            	my $ref_mc3_rate = int ($ref_mc3 / $ref * 100 + 0.5) / 100;
-	        		if ($ref_mc3_rate >= $min_split_filt_rate){
-	        			next;   		# >= 90% of ref alleles are derived from biased direction of split reads for INSs
+	        		if ($ref_mc3_rate >= $min_split_filt_rate){      # remove the INS site if >= 90% of the ref alleles are derived from biased direction of split reads
+	        			next;
 	        		}
 	            }
 	        }
@@ -3067,14 +2949,13 @@ if ($DP_filter == 1){
 
 #system ("rm -r $temp_dir");
 
-my $correct_rate = int ($correct_calls / $Missed_calls * 1000) / 10;
+my $correct_rate = int ($SMC_call / $Missed_calls * 1000) / 10;
 print STDERR "Total Sample Calls:    $total_calls\n";
-print STDERR "Total Missing Calls:   $Missed_calls\n";
-print STDERR "Total Corrected Calls from reference alleles: $ref_correct_calls\n";
-print STDERR "Total Corrected Calls: $correct_calls ($correct_rate%)\n";
+print STDERR "Total Ref alleles:   $Missed_calls\n";
+print STDERR "Total SMC calls recovered from reference alleles: $SMC_call ($correct_rate%)\n";
 
 
-sub cons_len{
+sub cons_len{   # determine consensus SV length
     my ($ref_len, $len) = @_;
     my $num = scalar @{$ref_len};
     my %len;
@@ -3140,7 +3021,7 @@ sub cons_len{
     return ($new_len);
 }
 
-sub collect_call{
+sub collect_call{   # recover SV calls (discarded SV calls) from the original SV detection algorithms used in the MOPline high condidence SV selection step (genotype_SV_SMC_7.4.pl), corresponding to Ref allele of a sample at an SV site
     my ($dnum, $ref_samples) = @_;
     my $select_out = "$temp_dir/select.$dnum.txt";
     my %MC3;
@@ -3334,7 +3215,7 @@ print STDERR "$dnum: $id re-searching completed:\n";
     return ($select_out);
 }
 
-sub add_dp_rate{
+sub add_dp_rate{    # collect alignemnt statistics (DPR and SR) for Ref alleles used for SMC using cov files
     my ($dnum, $ref_samples) = @_;
     my $sample_out = "$temp_dir/Sample_list.$dnum.txt";
     open (OUT2, "> $sample_out");

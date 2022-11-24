@@ -5,14 +5,12 @@ use Pod::Usage;
 use File::Basename;
 use FindBin qw($Bin);
 
-# merge SV calls from multiple SV sets and remove redundant SV calls
+# merge SV calls from vcf files of multiple types of SV
 
 
 my @var_file;
 
-my $min_sv_len = 10;
-
-my $read_length = 125;
+my $read_length = 150;
 my $var_sd = 125;
 my $ins_sd = 200;
 my $ins_sd2 = 30;
@@ -34,8 +32,6 @@ my $help;
 GetOptions(
     'var|v=s{,}' => \@var_file,
     'var_sd|vsd=i' => \$var_sd,
-    'tra_sd|tsd=i' => \$ctx_sd,
-    'min_tra|mt=i' => \$min_ctx,
     'read_len|rl=i' => \$read_length,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
@@ -43,15 +39,12 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  merge_SV_calls_ALLtype.pl
+  merge_SV_calls_ALLtype.pl -v <INS.vcf DEL.vcf DUP.vcf INV.vcf>  > [output vcf]
 
   Options:
-   --var or -v <STR>        list of vcf files
-   --min_size or -s <INT>   minimum size (bp) of SV [default: 10]
+   --var or -v <STR>        list (space-delimited) of vcf files
    --var_sd or -vsd <INT>   standard deviation of break points [default: 125]
-   --tra_sd or -tsd <INT>   standard deviation of break points of translocations [default: 1000]
-   --min_tra or -mt <INT>   minimum size of translocations [default: 20000]
-   --read_len or -rl <INT>  read length [default: 125]
+   --read_len or -rl <INT>  read length [default: 150]
    --help or -h             output help message
    
 =cut
@@ -156,7 +149,7 @@ foreach my $var_file (@var_file){
     }
 }
 
-foreach my $chr (keys %var){        # filter SV with diverged lengths called from multiple tools
+foreach my $chr (keys %var){        # filter SV with inconsistent lengths called from multiple tools
     foreach my $pos (keys %{$var{$chr}}){
         foreach my $type (keys %{${$var{$chr}}{$pos}}){
             next if ($type eq 'INS');
@@ -318,7 +311,6 @@ foreach my $chr (sort keys %var){
                         $overlap = $len if ($end < $pre_end);
                         if (($overlap < $pre_len * $min_overlap_ratio) and ($overlap < $len * $min_overlap_ratio)){
                             delete ${$vcf{$chr02d}}{$pre_pos};
-        #                            delete ${$vcf{$chr02d}}{$pos};
                         }
                     }
                 }
@@ -350,7 +342,6 @@ foreach my $chr (sort keys %var){
                         my $overlap = $pre_end - $pos + 1;
                         $overlap = $len if ($end < $pre_end);
                         if (($overlap < $pre_len * $min_overlap_ratio) and ($overlap < $len * $min_overlap_ratio)){
-        #                    delete ${$vcf{$chr02d}}{$pre_pos};
                             delete ${$vcf{$chr02d}}{$pos};
                         }
                     }

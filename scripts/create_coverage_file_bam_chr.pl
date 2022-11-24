@@ -4,6 +4,8 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
 
+# record coverage and the number of split reads in a 50-bp window size for the specified chromosome in bam file
+
 my $bam = '';
 
 my $sample_name = '';
@@ -123,7 +125,6 @@ while (my $line = <FILE>){
     my $Bpos_div = int ($Mpos / $bin_size);
     my $Bpos = $Mpos % $bin_size;
     my $count = 0;
-#print STDERR "$chr:$pos\t$Mpos_div-$Mpos\t$Bpos_div-$Bpos\n";
     while (1){
         my $Bpos_e = $bin_size - $Bpos;
         $count ++;

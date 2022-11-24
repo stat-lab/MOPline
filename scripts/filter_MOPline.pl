@@ -5,8 +5,6 @@ use FindBin qw($Bin);
 use Getopt::Long;
 use Pod::Usage;
 
-# merge_SV_calls_overlap_site_sample.pl + filter_sv_MOPline_DR-DRS.pl
-
 my $vcf = '';
 
 my $non_human = 0;
@@ -31,8 +29,6 @@ my $min_dup_len3 = 5000;
 my $max_del_dprate1 = 0.85;
 my $max_del_dprate2 = 0.75;
 
-#my $min_dup_dprate = 1.25;
-#my $min_dup_dprate3 = 1.2;
 my $min_dup_dprate1 = 1.25;
 my $min_dup_dprate2= 1.35;
 
@@ -348,7 +344,7 @@ foreach my $type (keys %sv){
             my $len = $1 if ($line[7] =~ /SVLEN=-*(\d+)/);
             my $end = $pos + $len - 1;
 
-            if (($type eq 'DUP') and ($len >= 150)){
+            if (($type eq 'DUP') and ($len >= 150)){        # filter DUPs that are located in the flanking regions of gaps
                 my $pos_f1 = $pos - $len * 1.2;
                 my $pos_f2 = $pos - $len * 0.2;
                 my $end_f1 = $end + $len * 1.2;
@@ -365,33 +361,15 @@ foreach my $type (keys %sv){
                         $flank_gap += $gend - $gstart + 1 if ($gend < $end_f1);
                         $flank_gap += $end_f1 - $gstart + 1 if ($gend >= $end_f1);
                     }
-#print STDERR "$gstart-$gend\t$flank_gap\n" if ($chr eq '21') and ($pos1 == 14338001);
                 }
                 if (($flank_gap / $len >= 0.5) or ($flank_gap >= 20000)){
                     my $chr_pos = "$chr:$pos";
                     $gap_dup{$chr_pos} = $len;
                     ${${$delete{$type}}{$chr}}{$pos} = 1;
-#print STDERR "${${$sv{$type}}{$chr}}{$pos1}\n";
                     next;
                 }
-=pod
-                if ($flank_gap / $len >= 0.8){
-                    my $chr_pos = "$chr:$pos";
-                    $gap_dup{$chr_pos} = $len;
-                    ${${$delete{$type}}{$chr}}{$pos} = 1;
-#print STDERR "${${$sv{$type}}{$chr}}{$pos1}\n";
-                    next;
-                }
-                elsif (($flank_gap / $len >= 0.7) and ($len >= 100000)){
-                    my $chr_pos = "$chr:$pos";
-                    $gap_dup{$chr_pos} = $len;
-                    ${${$delete{$type}}{$chr}}{$pos} = 1;
-#print STDERR "${${$sv{$type}}{$chr}}{$pos1}\n";
-                    next;
-                }
-=cut
             }
-            if (($type eq 'DEL') and ($len >= 10000)){
+            if (($type eq 'DEL') and ($len >= 10000)){      # filter DELs whose breakpoints oveerlap a gap
                 my $gap_flag = 0;
                 foreach my $gstart (sort {$a <=> $b} keys %{$gap{$chr}}){
                     my $gend = ${$gap{$chr}}{$gstart};
@@ -410,7 +388,7 @@ foreach my $type (keys %sv){
                     $del_filt ++;
                 }
             }
-            if (($type eq 'DUP') and ($len >= $min_dup_len3) and ($segDup_filt == 1)){
+            if (($type eq 'DUP') and ($len >= $min_dup_len3) and ($segDup_filt == 1)){  # filter DUPs overlapping SegDups with > 2 copies in the genome
                 my $Mbin_start = int ($pos / $Mbin_size);
                 my $Mbin_end = int ($end / $Mbin_size);
                 my $flag = 0;
@@ -541,7 +519,7 @@ if ($total_sample <= 1){
                 my $dlen = $1 if ($dline =~ /SVLEN=(\d+)/);
                 my $dend = $dpos + $dlen - 1;
                 next if ($dend < $ipos - $ins_sd);
-                if ((abs ($ipos - $dpos) <= $ins_sd) or (abs ($ipos = $dend) <= $ins_sd)){
+                if ((abs ($ipos - $dpos) <= $ins_sd) or (abs ($ipos = $dend) <= $ins_sd)){  # remove either INS or DUP if they are located in close proximity
                     if ($dlen >= 100){
                         delete ${${$vcf{$chr}}{$ipos}}{'INS'};
                         $ins_filt ++;
@@ -696,7 +674,7 @@ foreach my $chr (sort keys %vcf){
                 }
                 if ($flag == 0){
                     if ($len >= $min_del_len){
-                        if (($DPR > $max_del_dprate2) and ($DSR > $max_del_dsr2)){
+                        if (($DPR > $max_del_dprate2) and ($DSR > $max_del_dsr2)){      # filter DELs based on DPR, DPS, and size in non repeat regions
                             push @filt_sv, $line;
                             $del_filt ++;
                             next;
@@ -704,7 +682,7 @@ foreach my $chr (sort keys %vcf){
                     }
                 }
                 if ($len >= $min_del_len){
-                    if (($DPR > $max_del_dprate1) or ($DSR > $max_del_dsr)){
+                    if (($DPR > $max_del_dprate1) or ($DSR > $max_del_dsr)){            # filter DELs based on DPR, DPS, and size
                         push @filt_sv, $line;
                         $del_filt ++;
                         next;
@@ -733,18 +711,18 @@ foreach my $chr (sort keys %vcf){
             }
 =cut
             if (($type eq 'DUP') and ($len >= $min_dup_len2)){
-                if (($DPR < $min_dup_dprate2) and ($DSR > $max_dup_dsr)){
+                if (($DPR < $min_dup_dprate2) and ($DSR > $max_dup_dsr)){               # filter DUPs based on DPR, DPS, and size
                     push @filt_sv, $line;
                     $dup_filt ++;
                     next;
                 }
             }
-            if (($type eq 'DUP') and ($len >= $min_dup_len1) and ($DPR < $min_dup_dprate1)){
+            if (($type eq 'DUP') and ($len >= $min_dup_len1) and ($DPR < $min_dup_dprate1)){    # filter DUPs based on DPR and size in non repeat regions
                 push @filt_sv, $line;
                 $dup_filt ++;
                 next;
             }
-            if ((exists ${$ambiguous{$type}}{$chr2}) and ($af >= $min_AF_lowconf)){
+            if ((exists ${$ambiguous{$type}}{$chr2}) and ($af >= $min_AF_lowconf)){     # filter DELs/DUPs/INSs in low confidence regions specific to SV type, based on AF
                 my $match = 0;
                 foreach my $apos (sort {$a <=> $b} keys %{${$ambiguous{$type}}{$chr2}}){
                     last if ($apos > $end);
@@ -875,16 +853,3 @@ print STDERR "Total DUP num: $dup_num\tFiltered: $dup_filt ($dup_filt_rate%)\n";
 print STDERR "Total INS num: $ins_num\tFiltered: $ins_filt ($ins_filt_rate%)\n";
 print STDERR "Total INV num: $inv_num\tFiltered: $inv_filt ($inv_filt_rate%)\n";
 
-=pod
-my $vcf_base = basename ($vcf);
-
-$vcf_base = $1 if ($vcf_base =~ /(.+)\.vcf$/);
-
-my $sv_filt_out = "$vcf_base.FilteredSV.vcf";
-
-open (OUT, "> $sv_filt_out");
-foreach (@filt_sv){
-    print OUT "$_\n";
-}
-close (OUT);
-=cut

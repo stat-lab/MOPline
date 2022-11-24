@@ -4,16 +4,13 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
 
-# merge SV calls from multiple SV sets (i.e., MEI, VEI, NUMT call sets) and remove redundant SV calls
-
+# select high quality SVs (overlap calls and single calls) based on the specified list of algorithms and RSS
 
 my $help;
 
 my $sv_type = 'ALL';
 
 my $vcf = '';
-
-my $vcf_del = '';
 
 my @del;
 my @dup;
@@ -47,19 +44,33 @@ GetOptions(
     'inv_m=s{,}' => \@inv_m,
     'inv_l=s{,}' => \@inv_l,
     'sv_type|t=s' => \$sv_type,
-    'vcf_del|vd=s' => \$vcf_del,
     'help' => \$help
 ) or pod2usage(-verbose => 0);
 pod2usage(-verbose => 0) if $help;
 
 
 =head1 SYNOPSIS
-
-  evaluate_concordance_SVcallers_VarSim.pl
+  
+  # Example for DEL
+  merge_SV_calls_multi_tools_filter.pl -v <input merged vcf file> -t DEL --del_s <list of tool name:RSS psir(s)> --del_m <list of tool name:RSS psir(s)> --del_l <list of tool name:RSS psir(s)>  > [output vcf]
 
   Options:
-   --del <STR>       list of tool name:RSS psir(s) to select overlap calls (e.g., Pindel:3=Delly:5 CNVnator:3=Lumpy:7)
-   --sv_type or -t <STR>   SV type, DEL|DUP|INS|INV|TRA|MEI|VEI|NUMT|ALL [default: all]
+   --vcf or -v <STR>        input vcf file (generated with merge_SV_calls_multi_tools.pl or merge_SV_calls_multi_tools_eachSize.pl)
+   --del <STR>              list (space-delimited) of tool name:RSS psir(s) to select overlap DEL calls (e.g., Pindel:3=Delly:5 CNVnator:3=Lumpy:7)
+   --dup <STR>              list (space-delimited) of tool name:RSS psir(s) to select overlap DUP calls
+   --ins <STR>              list (space-delimited) of tool name:RSS psir(s) to select overlap INS calls
+   --inv <STR>              list (space-delimited) of tool name:RSS psir(s) to select overlap INV calls
+   --del_ss <STR>           list (space-delimited) of tool name:RSS psir(s) to select tiny size (<= 100 bp) of overlap DEL calls
+   --del_s <STR>            list (space-delimited) of tool name:RSS psir(s) to select small size (50-1000 bp) of overlap DEL calls
+   --del_m <STR>            list (space-delimited) of tool name:RSS psir(s) to select midlde size (1-100 Kb) of overlap DEL calls
+   --del_l <STR>            list (space-delimited) of tool name:RSS psir(s) to select large size (> 100 Kb) of overlap DEL calls
+   --dup_s <STR>            list (space-delimited) of tool name:RSS psir(s) to select small size (50-1000 bp) of overlap DUP calls
+   --dup_m <STR>            list (space-delimited) of tool name:RSS psir(s) to select midlde size (1-100 Kb) of overlap DUP calls
+   --dup_l <STR>            list (space-delimited) of tool name:RSS psir(s) to select large size (> 100 Kb) of overlap DUP calls
+   --inv_s <STR>            list (space-delimited) of tool name:RSS psir(s) to select small size (50-1000 bp) of overlap INV calls
+   --inv_m <STR>            list (space-delimited) of tool name:RSS psir(s) to select midlde size (1-100 Kb) of overlap INV calls
+   --inv_l <STR>            list (space-delimited) of tool name:RSS psir(s) to select large size (> 100 Kb) of overlap INV calls
+   --sv_type or -t <STR>    SV type, DEL|DUP|INS|INV|TRA|MEI|VEI|NUMT|ALL [default: all]
    --help or -h             output help message
    
 =cut
@@ -74,7 +85,6 @@ foreach my $type_size (keys %svtype){
     if (@{$svtype{$type_size}} > 0){
         foreach (@{$svtype{$type_size}}){
             push @{${$tool_pairs{$type}}{$size}}, $_;
-#print STDERR "$type $size $_\n";
         }
     }
 }
@@ -148,7 +158,8 @@ while (my $line = <FILE>){
     my $overlap_tools = $1 if ($line =~ /TOOLS=([^\;]+)/);
     my @tool_set = split (/,/, $overlap_tools);
     my %tool_RSS;
-    if (@tool_set >= 1){
+
+    if (@tool_set >= 1){        # select SVs based on the specified algorithm's pairs and RSS
         foreach (@tool_set){
             my $tool = $1 if ($_ =~ /(.+?):/);
             my $rss = $1 if ($_ =~ /:(\d+)$/);
@@ -163,7 +174,6 @@ while (my $line = <FILE>){
                 if ($tpair !~ /=/){
                     ($tool1, $rss1) = split (/:/, $tpair);
                     if (exists $tool_RSS{$tool1}){
-#print STDERR "$tpair\t$tool_RSS{$tool1}\n" if ($chr eq '1') and ($pos == 20257098);
                         if ($rss1 <= $tool_RSS{$tool1}){
                             $hit_flag = 1;
                             if (($tool1 eq 'CNVnator') and ($type eq 'DEL') and ($size eq 'M') and ($len < 4000)){
@@ -189,7 +199,6 @@ while (my $line = <FILE>){
                     }
                     elsif ((exists $tool_RSS{$tool1}) and (exists $tool_RSS{$tool2})){
                         if (($rss1 <= $tool_RSS{$tool1}) and ($rss2 <= $tool_RSS{$tool2})){
-#print STDERR "$tpair\t$tool1-$rss1\t$tool2-$rss2\n";
                             $hit_flag = 1;
                             last;
                         }
@@ -198,7 +207,6 @@ while (my $line = <FILE>){
             }
         }
         if ($hit_flag == 1){
-#            print "$line\n";
             ${${$vcf{$type}}{$chr}}{$pos} = $line;
         }
         elsif ($size ne $size2){
@@ -235,7 +243,6 @@ while (my $line = <FILE>){
                 }
             }
             if ($hit_flag == 1){
-#                print "$line\n";
                 ${${$vcf{$type}}{$chr}}{$pos} = $line;
             }
         }
@@ -360,7 +367,6 @@ foreach my $type (keys %vcf){   #merge adjacent SVs with distance of < 1% of bot
                             $pre_line =~ s/SVLEN=\d+/SVLEN=$new_len/ if ($pre_end < $end);
                             $pre_line =~ s/READS=\d+/READS=$new_read/;
                             $pre_line =~ s/TOOLS=.+/TOOLS=$pre_tools/;
-#print STDERR "$chr:$pre_pos-$pos\t$pre_len-$len\t$new_len\t$distance\n";
                             ${${$vcf{$type}}{$chr}}{$pre_pos} = $pre_line;
                             $pre_len = $new_len;
                             next;

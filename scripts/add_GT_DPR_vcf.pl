@@ -149,6 +149,7 @@ sub addGT_cov {
     my $merged_vcf_base = $1 if ($merged_vcf =~ /(.+)\.vcf$/);
     my $merged_vcf_dir = $1 if ($merged_vcf =~ /(.+)\//);
     if ($disable_genotype == 0){
+        # add SV genotypes from the tools used in the MOP merge/selection step to the input SV vcf
         system ("$Bin/add_genotype_SV_callers_vcf.pl -v $merged_vcf -sn $ID -ms $min_score -ts $tool_set > $merged_vcf.gt");
         if ((-f "$merged_vcf.gt") and (!-z "$merged_vcf.gt")){
             system ("mv -f $merged_vcf.gt $merged_vcf");
@@ -160,6 +161,7 @@ sub addGT_cov {
         }
     }
     
+    # add coverage rate (DPR) and split read rate (SR) from the cov files generated with create_coverage_file_bam.pl to the input vcf file
     my $dp_command = "$Bin/add_coverage_rate_vcf.pl -v $merged_vcf -cd $cov_dir -sn $ID -nh $non_human -b $bin_size -f $flank_len -ri $ref_index";
     $dp_command = "$Bin/add_coverage_rate_vcf.pl -v $merged_vcf -cd $cov_dir -sn $ID -nh $non_human -b $bin_size -f $flank_len -ri $ref_index -gap $gap_bed" if ($gap_bed ne '');
     system ("$dp_command");

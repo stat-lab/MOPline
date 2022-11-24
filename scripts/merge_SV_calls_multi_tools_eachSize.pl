@@ -5,7 +5,7 @@ use Pod::Usage;
 use FindBin qw($Bin);
 use File::Basename;
 
-# merge SV calls from multiple SV sets (i.e., MEI, VEI, NUMT call sets) and remove redundant SV calls
+# merge SV calls from multiple SV sets and remove redundant SV calls
 
 
 my @tools = ();
@@ -24,11 +24,9 @@ my $max_inv_size = 200000;
 
 my $sv_type = 'ALL';
 
-my $ref_sv = 'N';
-
 my $non_human = 0;
 
-my $read_length = 100;
+my $read_length = 150;
 my $var_sd = 125;
 my $ins_sd = 200;
 my $ins_sd2 = 100;
@@ -51,8 +49,6 @@ my $help;
 GetOptions(
     'tool|t=s{,}' => \@tools,
     'sv_type|st=s' => \$sv_type,
-    'ref|r=s' => \$ref_sv,
-    'min_read|m=i{,}' => \@min_read,
     'len|l=i' => \$min_sv_len,
     'xlen|xl=i' => \$max_sv_len,
     'var_sd|vsd=i' => \$var_sd,
@@ -66,22 +62,18 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  evaluate_concordance_SVcallers_VarSim.pl
+  merge_SV_calls_multi_tools_eachSize.pl -t <tool name list> -s <sample name> -st <SV type>  > [output vcf]
 
   Options:
-   --tools or -t <STR>      list of tool names, contained in vcf files
-   --id or -i <STR>         list of name/id corresponding to vcf files (use Merge1, Merge2, Merge3 when using merged inputs)
-   --sv_type or -st <STR>   SV type, DEL|DUP|INS|INV|TRA|MEI|VEI|NUMT|ALL [default: all]
-   --ref_sv or -r <STR>     ref SV class, N|S|M|L|T [default: N]
-   --min_read or -m <INT>   list of minimum number of supporting reads correspinding to vcf files [default: based on SV_reads_list.txt]
-   --len or -l <INT>        minimum length (bp) of SV [default: 30]
-   --xlen or -x <INT>       maximum length (bp) of SV [default: 2,000,000]
-   --var_sd or -vsd <INT>   standard deviation of break points [default: 125]
-   --tra_sd or -tsd <INT>   standard deviation of break points of translocations [default: 1000]
-   --min_tra or -mt <INT>   minimum size of translocations [default: 20000]
-   --read_len or -rl <INT>  read length [default: 125]
+   --tools or -t <STR>      list (space-delimited) of tool names
+   --sample or -s <STR>     sample name/ID
    --dir or -d <STR>        directory of input vcf files [default: ./]
-   --sample or -s <STR>     sample ID
+   --sv_type or -st <STR>   SV type, DEL|DUP|INS|INV|ALL [default: ALL]
+   --read_len or -rl <INT>  read length [default: 150]
+   --len or -l <INT>        minimum length (bp) of SV [default: 50]
+   --xlen or -x <INT>       maximum length (bp) of SV [default: 30,000,000]
+   --var_sd or -vsd <INT>   standard deviation of break points [default: 150]
+
    --non_human or -nh <INT> species is non-human (human: 0, non-human: 1) [default: 0];
    --help or -h             output help message
    
@@ -122,12 +114,15 @@ my %tool_preci;
 my $data_dir = "$Bin/../Data";
 $data_dir = "$ENV{MOPLINE_DIR}/Data" if (exists $ENV{MOPLINE_DIR});
 
-my $sv_min_read_file = "$data_dir/SV_min_read_list.txt";
+#my $sv_min_read_file = "$data_dir/SV_min_read_list.txt";
 
-my $SDlen_rank_file = "$data_dir/SV_SDlen_rank_list.txt";
+# the data of these files are used for the determination of breakpoints and sizes of SVs overlapping between algorithms
 
-my $tool_eval_file = "$data_dir/NA78_data1.eval3.txt"; # generated with abc_opt5.pl and evaluate_common_VarSIm_mRead_mSize_3.3.inv.pl
+my $SDlen_rank_file = "$data_dir/SV_SDlen_rank_list.txt";   # file showing breakpoint accuracy for existing SV detection algorithms
 
+my $tool_eval_file = "$data_dir/NA78_data1.eval3.txt";      # file showing precision and recall of SV calls detected with NA12878 WGS data, which was generated with evaluate_SV_callers.pl in https://github.com/stat-lab/EvalSVcallers
+
+=pod
 open (FILE, $sv_min_read_file) or die "$sv_min_read_file is not found: $!\n";
 while (my $line = <FILE>){
     chomp $line;
@@ -145,6 +140,7 @@ while (my $line = <FILE>){
     ${${$SRR{$type}}{$size}}{$tool} = $srr;
 }
 close (FILE);
+=cut
 
 open (FILE, $SDlen_rank_file) or die ("$SDlen_rank_file is not found: $!\n");
 while (my $line = <FILE>){
@@ -340,7 +336,6 @@ foreach my $id (keys %var_file){
                 my $pre_read = 0;
                 foreach my $pos (sort {$a <=> $b} keys %{${${${$tool_sv{$id}}{$type}}{$size}}{$chr}}){
                     my $line = ${${${${$tool_sv{$id}}{$type}}{$size}}{$chr}}{$pos};
-#print STDERR "$id\t$line\n" if ($type eq 'DEL') and ($size eq 'L') and ($chr eq '19');
                     my $len = 0;
                     $len = $1 if ($line =~ /SVLEN=-*(\d+)/);
                     my $end = $pos + $len - 1;
@@ -458,8 +453,7 @@ foreach my $id (keys %tool_sv){
                             $tsize_all = 1 if ($tsize eq 'ALL');
                         }
                     }
-                    next if ($tsize_flag == 1) and ($tsize_all == 0) and (!exists $tsize{$size});
-    #print STDERR "$chr:$pos\t$size $len\n" if ($id eq 'Pindel') and ($chr eq '7');        
+                    next if ($tsize_flag == 1) and ($tsize_all == 0) and (!exists $tsize{$size});      
                     ${${$call_count{$id}}{$type}}{$size} = 0 if (!exists ${${$call_count{$id}}{$type}}{$size});
                     my $reads = 3;
                     $reads = $1 if ($line[7] =~ /READS=(\d+)/);
@@ -467,9 +461,11 @@ foreach my $id (keys %tool_sv){
                     if ($id =~ /Sniffles|PBHoney/){
                         $min_read2 = 2;
                     }
+=pod
                     if (exists ${${$SRR{$type}}{$size}}{$id}){
-    #            $min_read2 = ${${$SRR{$type}}{$size}}{$id};
+                        $min_read2 = ${${$SRR{$type}}{$size}}{$id};
                     }
+=cut
                     next if ($reads < $min_read2);
                     $reads = 30 if ($reads > 30);
                     my $chr2 = '';
@@ -635,69 +631,6 @@ foreach my $type (keys %call){
         }
     }
 }
-=pod
-foreach my $type (keys %call){
-    foreach my $chr (keys %{$call{$type}}){
-        my $pre_pos = 0;
-        my $pre_len = 0;
-        foreach my $pos (sort {$a <=> $b} keys %{${$call{$type}}{$chr}}){
-            my $sum_len = 0;
-            my @len;
-            foreach (@{${${$call{$type}}{$chr}}{$pos}}){
-                my ($id, $pos1, $len) = split (/=/, $_);
-                push @len, $len;
-            }
-            map{$sum_len += $_} @len;
-            my $avelen = int ($sum_len / @len + 0.5);
-            if ($pre_pos > 0){
-                if ($type eq 'INS'){
-                    if ($pos - $pre_pos <= $var_sd){
-                        my $pre_num = scalar @{${${$call{$type}}{$chr}}{$pre_pos}};
-                        my $num = scalar @{${${$call{$type}}{$chr}}{$pos}};
-                        my $new_pos = int (($pre_pos * $pre_num + $pos * $num) / ($pre_num + $num) + 0.5);
-                        my @new_info = (@{${${$call{$type}}{$chr}}{$pre_pos}}, @{${${$call{$type}}{$chr}}{$pos}});
-                        delete ${${$call{$type}}{$chr}}{$pre_pos};
-                        delete ${${$call{$type}}{$chr}}{$pos};
-                        push @{${${$call{$type}}{$chr}}{$new_pos}}, @new_info;
-                        $pre_pos = $new_pos;
-                        next;
-                    }
-                }
-                else{
-                    my $end = $pos + $avelen - 1;
-                    my $pre_end = $pre_pos + $pre_len - 1;
-                    if ($pos < $pre_end){
-                        my $overlap = $pre_end - $pos + 1;
-                        $overlap = $avelen if ($end < $pre_end);
-                        if (($overlap >= $avelen * $min_overlap_ratio3) and ($overlap >= $pre_len * $min_overlap_ratio3)){
-                            my $pre_num = scalar @{${${$call{$type}}{$chr}}{$pre_pos}};
-                            my $num = scalar @{${${$call{$type}}{$chr}}{$pos}};
-                            my $new_pos = int (($pre_pos * $pre_num + $pos * $num) / ($pre_num + $num) + 0.5);
-                            my @new_info = (@{${${$call{$type}}{$chr}}{$pre_pos}}, @{${${$call{$type}}{$chr}}{$pos}});
-                            my @new_len;
-                            my $sum_len2 = 0;
-                            foreach (@new_info){
-                                my ($id, $pos1, $len) = split (/=/, $_);
-                                push @new_len, $len;
-                            }
-                            map{$sum_len2 += $_} @new_len;
-                            my $new_len = int ($sum_len2 / @new_len + 0.5);
-                            delete ${${$call{$type}}{$chr}}{$pre_pos};
-                            delete ${${$call{$type}}{$chr}}{$pos};
-                            push @{${${$call{$type}}{$chr}}{$new_pos}}, @new_info;
-                            $pre_pos = $new_pos;
-                            $pre_len = $new_len;
-                            next;
-                        }
-                    }
-                }
-            }
-            $pre_len = $avelen;
-            $pre_pos = $pos;
-        }
-    }
-}
-=cut
 
 my %call_merge;
 
@@ -790,7 +723,6 @@ foreach my $type (keys %call){
                         $top_bp_tool = $top_tool;
                         $top_len_tool = $top_tool;
                     }
-    #print STDERR "$top_tool-$sec_tool-$top_bp_tool\t$type\t@{${${$call{$type}}{$chr}}{$pos}}\n" if (!exists $tool_info{$top_bp_tool});
                     my ($tool1, $tpos1, $tlen1, $tread1) = split (/=/, $tool_info{$top_bp_tool});
                     my ($tool2, $tpos2, $tlen2, $tread2) = split (/=/, $tool_info{$top_len_tool}) if ($type ne 'INS');
                     $select_pos = $tpos1;
@@ -801,12 +733,10 @@ foreach my $type (keys %call){
                     foreach my $tool (sort {"\L$a" cmp "\L$b"} keys %tool_info){
                         my ($tool1, $tpos, $tlen, $tread) = split (/=/, $tool_info{$tool});
                         $tool_set .= "$tool1:$tpos:$tlen:$tread,";
-    #print STDERR "$type\t$chr:$pos\t$tool1\n" if ($chr eq '1') and ($pos > 99179744) and ($pos < 99180000);
                     }
                     $tool_set =~ s/,$//;
                     ${${${$call_merge{$type}}{$size}}{$chr}}{$select_pos} = "$tool_set=$select_pos=$select_len=$select_read" if ($type ne 'INS');
                     ${${${$call_merge{$type}}{$size}}{$chr}}{$select_pos} = "$tool_set=$select_pos=$select_len=$select_read=$ins_subtype" if ($type eq 'INS');
-    #print STDERR "$type\t$tool_set=$select_pos=$select_len=$select_read\n";
                 }
             }
         }
@@ -819,18 +749,15 @@ foreach my $type (keys %call_merge){
         foreach my $chr (keys %{${$call_merge{$type}}{$size}}){
             my $count = 0;
             my %skip;
-    #print STDERR "$type\tchr$chr\t";
             while (1){
                 my $delete = 0;
                 $count ++;
-    #print STDERR "$count\t";
                 my $pre_pos = 0;
                 my $pre_len = 0;
                 my @merge;
                 my $match_count = 0;
                 foreach my $pos (sort {$a <=> $b} keys %{${${$call_merge{$type}}{$size}}{$chr}}){
                     my ($tool, $tpos, $len) = split (/=/, ${${${$call_merge{$type}}{$size}}{$chr}}{$pos});
-#print STDERR "$pos\t${${${$call_merge{$type}}{$size}}{$chr}}{$pos}\n" if ($type eq 'DEL') and ($size eq 'L') and ($chr eq '14');
                     my $end = $tpos + $len - 1;
                     $end = $tpos if ($type eq 'INS');
                     if ($pre_pos == 0){
@@ -927,82 +854,6 @@ foreach my $type (keys %call_merge){
                                     $match_count ++;
                                     next;
                                 }
-=pod
-                                elsif (($overlap >= $len * $min_overlap_ratio2) or ($overlap >= $pre_len * $min_overlap_ratio2)){
-                                    my ($toolset1) = split (/=/, ${${${$call_merge{$type}}{$size}}{$chr}}{$pos});
-                                    my @toolset1 = split (/,/, $toolset1);
-                                    my $tool_num = scalar @toolset1;
-                                    my $pre_tool_num = 0;
-                                    foreach (@merge){
-                                        my ($pre_toolset) = split (/=/, ${${${$call_merge{$type}}{$size}}{$chr}}{$_});
-                                        my @pre_toolset = split (/,/, $pre_toolset);
-                                        $pre_tool_num += @pre_toolset;
-                                    }
-                                    if ($overlap >= $len * $min_overlap_ratio2){
-                                        if (($pre_len <= 1000) and ($pre_len / $len <= 3)){
-                                            push @merge, $pos;
-                                            $match_count ++;
-                                            next;
-                                        }
-                                        elsif (($tool_num == 1) and ($pre_tool_num > 2) and ($len <= 1000)){
-                                            delete ${${${$call_merge{$type}}{$size}}{$chr}}{$pos};
-                                            $delete ++;
-                                            $match_count ++;
-                                            next;
-                                        }
-                                        elsif (($pre_tool_num == 1) and (2 < $tool_num) and ($pre_len <= 1000)){
-                                            foreach my $pos1 (@merge){
-                                                delete ${${${$call_merge{$type}}{$size}}{$chr}}{$pos1};
-                                            }
-                                            $delete ++;
-                                            @merge = ();
-                                            push @merge, $pos;
-                                            $pre_pos = $tpos;
-                                            $pre_len = $len;
-                                            $match_count ++;
-                                            next;
-                                        }
-                                        elsif (exists ${$skip{$type}}{$pos}){
-                                        }
-                                        else{
-                                            ${$skip{$type}}{$pos} = 1;
-                                            push @merge, $pos;
-                                            next;
-                                        }
-                                    }
-                                    elsif ($overlap >= $pre_len * $min_overlap_ratio2){
-                                        if (($len <= 1000) and ($len / $pre_len <= 3)){
-                                            push @merge, $pos;
-                                            $match_count ++;
-                                            next;
-                                        }
-                                        elsif (($pre_tool_num == 1) and (2 < $tool_num) and ($pre_len <= 1000)){
-                                            foreach my $pos1 (@merge){
-                                                delete ${${${$call_merge{$type}}{$size}}{$chr}}{$pos1};
-                                            }
-                                            $delete ++;
-                                            @merge = ();
-                                            push @merge, $pos;
-                                            $pre_pos = $tpos;
-                                            $pre_len = $len;
-                                            $match_count ++;
-                                            next;
-                                        }
-                                        elsif (($tool_num == 1) and ($pre_tool_num > 2) and ($len <= 1000)){
-                                            delete ${${${$call_merge{$type}}{$size}}{$chr}}{$pos};
-                                            $delete ++;
-                                            next;
-                                        }
-                                        elsif (exists ${$skip{$type}}{$pos}){
-                                        }
-                                        else{
-                                            ${$skip{$type}}{$pos} = 1;
-                                            push @merge, $pos;
-                                            next;
-                                        }
-                                    }
-                                }
-=cut
                             }
                             
                             my %toolset;
@@ -1153,7 +1004,6 @@ foreach my $type (keys %call_merge){
                             if ($select_pos > 0){
                                 $delete ++ if (@merge - $skip_num > 1);
                                 ${${${$call_merge{$type}}{$size}}{$chr}}{$select_pos} = "$tool_set=$select_pos=$select_len=$select_read";
-    #print STDERR "$chr:$select_pos\t${${$call_merge{$type}}{$chr}}{$select_pos}\n" if ($chr eq '7') and ($tool_set =~ /Pindel/);
                             }
                             @merge = ();
                             push @merge, $pos;
@@ -1312,7 +1162,6 @@ foreach my $type (keys %call_merge){
                         }
                     }
                     foreach my $pos1 (@merge){
-    #print STDERR "Deleted2: $type\t$chr:$pos1\t${${$call_merge{$type}}{$chr}}{$pos1}\n" if ($chr eq '1') and ($pos1 > 99179744) and ($pos1 < 99180000);
                         delete ${${${$call_merge{$type}}{$size}}{$chr}}{$pos1};
                     }
                     if ($select_pos > 0){
@@ -1322,10 +1171,8 @@ foreach my $type (keys %call_merge){
                     }
                     @merge = ();
                 }
-    #print STDERR "$delete\n";
                 last if ($delete == 0);
             }
-    #print STDERR "\n";
         }
     }
 }
@@ -1337,9 +1184,6 @@ my @size = ('S', 'M', 'L');
 
 foreach my $type (keys %call_merge){
     next if ($type eq 'INS');
-#    foreach my $pos1 (keys %{${${$call_merge{'DEL'}}{'L'}}{'14'}}){
-#print STDERR "$pos1\t${${${$call_merge{'DEL'}}{'L'}}{'14'}}{$pos1}\n";
-#    }
     if ((exists ${$call_merge{$type}}{'S'}) and (exists ${$call_merge{$type}}{'M'})){
         foreach my $chr (keys %{${$call_merge{$type}}{'S'}}){
             next if (!exists ${${$call_merge{$type}}{'M'}}{$chr});
@@ -1496,7 +1340,6 @@ foreach my $type (keys %call_merge){
             foreach my $pos (keys %{${${$call_merge{$type}}{$size}}{$chr}}){
                 next if (exists ${${${$duplicate{$type}}{$size}}{$chr}}{$pos});
                 my ($toolset, $pos1, $len, $read, $subtypeset) = split (/=/, ${${${$call_merge{$type}}{$size}}{$chr}}{$pos});
-    #print STDERR "$chr:$pos1\t$len\t$toolset\n" if ($chr eq '7') and ($toolset =~ /Pindel/);
                 my %toolset;
                 my %toolinfo;
                 my %subtype;
@@ -1521,7 +1364,6 @@ foreach my $type (keys %call_merge){
                     my $MEI_flag = 0;
                     foreach my $stype (@subtype){
                         next if ($stype eq 'INS');
-    #print STDERR "$chr:$pos\t$stype\n";
                         $stype = 'L1' if ($stype eq 'LINE1');
                         $subtype{$stype} = 1;
                     }

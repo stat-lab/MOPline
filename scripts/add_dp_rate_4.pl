@@ -2,7 +2,7 @@
 use strict;
 use File::Basename;
 
-# script for add_dp_rate_samples.pl in add_dp_rate subroutine of merge_SV_calls_Missing_calls_mthreads_2.pl
+# script for add_dp_rate_samples_3.pl in add_dp_rate subroutine of genotype_SV_SMC_7.4.pl
 
 my $id = shift @ARGV;
 my $pos_file = shift @ARGV;
@@ -20,6 +20,7 @@ my %pos_info;
 my $cov2_flag = 0;
 my $split_flag = 0;
 
+# collect the information for SVs that DPR and SR are added to
 open (FILE, $pos_file) or die "$pos_file is not found: $!\n";
 while (my $line = <FILE>){
     chomp $line;
@@ -33,6 +34,7 @@ while (my $line = <FILE>){
 }
 
 foreach my $chr (keys %pos_info){
+    # collect coverage and split read data for a chromosome from a cov file
     my $cov_file = "$cov_dir/$id.chr$chr.cov.gz";
     $cov_file = "$cov_dir/$id.$chr.cov.gz" if (!-f $cov_file);
     my %cov_info;
@@ -43,6 +45,8 @@ foreach my $chr (keys %pos_info){
         $cov_info{$cpos} = "$cov1=$cov2=$split1=$split2";
     }
     close (FILE);
+    # calculate SR for any type of SV at an SV site using the split read data in 150 bp (50 bp window * 3) regions around the breakpoints
+    # calculate DPR for DEL or DUP at an SV site using the covergae between the breakpoints and the coverage outsides the breakpoints
     foreach my $pos (sort {$a <=> $b} keys %{$pos_info{$chr}}){
         my ($len, $type) = split (/=/, ${$pos_info{$chr}}{$pos});
         my $end = $pos + $len - 1;
@@ -183,7 +187,7 @@ foreach my $chr (keys %pos_info){
         elsif ($ave_right_flank == 0){
             $ave_flank = $ave_left_flank;
         }
-        else{
+        else{   # for DEL/DUP with imbalanced coverage of upstream and downstream flanking regions, use the lower and higher coverage as flanking coverage for DEL and DUP, respectively
             if (($ave_left_flank / $ave_right_flank >= 1.2) or ($ave_left_flank / $ave_right_flank <= 0.83)){
                 if ($type eq 'DEL'){
                     if ($ave_left_flank < $ave_right_flank){
@@ -374,6 +378,7 @@ foreach my $chr (keys %pos_info){
                 $ave_split_rate = int (($split_rate + $split_rate2) * 0.5 * 100 + 0.5) / 100;
             }
             $split_rate = $ave_split_rate;
+            # calculate the rate of split reass with 5'-split end and 3'-split end
             my $split1_num = $top_num + $sec_num;
             my $split2_num = $top_num2 + $sec_num2;
             if (($split1_num >= 4) or ($split2_num >= 4)){

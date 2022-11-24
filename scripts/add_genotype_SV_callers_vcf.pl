@@ -4,6 +4,8 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
 
+# add SV genotypes from the tools used in MOPline to an input vcf file
+
 my $vcf = '';
 my $tool_set = '7tools';
 my $tool_custom = '';
@@ -12,6 +14,7 @@ my $sample_dir = '';
 my $min_score = 85;
 my $help;
 
+# pre-defined genotyping scores specific to the tools used in MOPline
 my @pre_tool_set = ('CNVnator:DEL:96', 'CNVnator:DUP:93', 'DELLY:DEL:94', 'DELLY:INV:80', 'Lumpy:DEL:92', 'Lumpy:INV:80', 'Manta:DEL:94', 'Manta:INV:80', 'Manta:INS:98', 'MELT:INS:70');
 #my @pre_tool_set = ('CNVnator:DEL:96', 'CNVnator:DUP:93', 'Manta:DEL:94', 'Manta:INV:80', 'Manta:INS:98', 'MELT:INS:70');
 
@@ -246,10 +249,11 @@ while (my $line = <FILE>){
             $GT = 'HT' if ($gt eq '1/0') or ($gt eq '0/1');
             my $score = 0;
             $score = ${$tools{$tool}}{$type} if (exists ${$tools{$tool}}{$type});
+            # add pre-defined genotyping score specific to tools
             $GT_score{$GT} += $score if ($GT ne '');
-#print STDERR "$pos1\t$len1\t$tool\t$gt\t$score\n" if ($chr eq '1') and ($pos1 == 21399001) and ($type eq 'DUP');
         }
         if (scalar keys %GT_score > 0){
+            # select genotype with the highest score
             foreach my $gt2 (sort {$GT_score{$b} <=> $GT_score{$a}} keys %GT_score){
                 $top_GT = $gt2;
                 $top_score = $GT_score{$gt2};
