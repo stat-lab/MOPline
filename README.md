@@ -71,7 +71,8 @@ The Data folder in the MOPline folder contains parameter files, multinomial logi
 
 ## <a name="composition"></a>Composition of required directories (sample directory and tool directory)
 
-MOPline assumes a directory structure of sample_directory/tool_directory under the working directory, where the sample directory has the sample name or sample ID, Under the sample directory, there are the tool directories with the names of algorithms, such as Manta and inGAP, which is case-sensitive. Under each sample directory, there are also should be bam and its index files. For convenience, when running against a sample (sample name: Sample123), the working directory should contain a Sample123 directory, under which the Sample123.bam and Sample123.bam.bai or their symbolic links should exists. When running with the 7tool preset, seven tool directories (CNVnator, GRIDSS, inGAP, Manta, MATCHCLIP, MELT, and Wham) must exist under the Sample123 directory. In the tool directories, the runs of the corresponding tools are performed.
+MOPline assumes a directory structure of sample_directory/tool_directory under the working directory, where the sample directory has the sample name or sample ID, Under the sample directory, there are the tool directories with the names of algorithms, such as Manta and inGAP, which is case-sensitive. Under each sample directory, there are also should be bam and its index files. For convenience, when running against a sample (sample name: Sample123), the working directory should contain a Sample123 directory, under which the Sample123.bam and Sample123.bam.bai or their symbolic links should exists. When running with the 7tool preset, seven tool directories (CNVnator, GRIDSS, inGAP, Manta, MATCHCLIP, MELT, and Wham) must exist under the Sample123 directory. In the tool directories, the runs of the corresponding tools are performed.  
+![fig.1](image/Dir.Struc.pdf)
 
 ## <a name="hdata"></a>Human and Non-human Data
 
