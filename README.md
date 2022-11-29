@@ -10,7 +10,7 @@ Detection and Genotyping of Structural Variants
 - [General Usage](#gusage)
 	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
-		- Run with singularity (#singularity)
+		- [Run with singularity](#singularity)
 		- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
