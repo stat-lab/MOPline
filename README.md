@@ -104,7 +104,7 @@ In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl scri
 
 For convenience, we have provided scripts to run the selected algorithms in the ‘run_SVcallers’ folder. A run the script with the ‘-h’ option informs us the required arguments and options. We also provide a script for sequential execution of multiple algorithms for a single sample (run_single.pl) and batch scripts for multiple samples using Slurm and LSF job managers (run_batch_slurm.pl, run_batch_LSF.pl). To run these three scripts, specify a configure file that describes the parameters for each algorithm, using a template configure file (MOPline/scripts/run_SVcallers/config.txt) (an example config file is also provided in the sample data [Sample_data_output/yeast_run]). A tool directory with the name of the algorithm specified in the configure file is automatically created in the sample directories under the working directory, and the algorithm is executed under the tool directory.  
   
-**Example using run_single.pl**  
+Example using run_single.pl  
 ```
 run_single.pl -b <input bam> -c <config file> -sd <sample directory>
 ```
