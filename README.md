@@ -81,7 +81,7 @@ By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) 
 
 ## <a name="gusage"></a>General Usage
 
-### <a name="step0"></a><div style="color:#191970;"></div>[Step-0]  Preparation of input files
+### <a name="step0"></a>[Step-0]  <span style="color:#191970;">Preparation of input files>/span>
 
 ### <a name="run_sv"></a>(1) Run SV detection tools
 
