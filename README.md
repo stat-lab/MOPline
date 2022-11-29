@@ -70,7 +70,7 @@ The Data folder in the MOPline folder contains parameter files, multinomial logi
 ### Sample data
 [Sample datasets](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
 
-## <a name="composition"></a>Composition of required directories (sample directory and tool directory)
+## <a name="composition"></a>Directory structure required (sample directory and tool directory)
 
 MOPline assumes a directory structure of sample_directory/tool_directory under the working directory, where the sample directory has the sample name or sample ID, Under the sample directory, there are the tool directories with the names of algorithms, such as Manta and inGAP, which is case-sensitive. Under each sample directory, there are also should be bam and its index files. For convenience, when running against a sample (sample name: Sample_ID1), the working directory should contain a Sample_ID1 directory, under which the Sample_ID1.bam and Sample_ID1.bam.bai or their symbolic links should exists. When running with the 7tool preset, seven tool directories (CNVnator, GRIDSS, inGAP, Manta, MATCHCLIP, MELT, and Wham) must exist under the Sample_ID1 directory. In the tool directories, the runs of the corresponding tools are performed. In addition, Cov and Merge_7tools folders will be created under each sample directory in Step-0 and Step-1, as described below.  
 ![image](https://github.com/stat-lab/MOPline/files/10089928/Dir_Struc.pdf)
