@@ -43,7 +43,7 @@ Alignment bam/cram file (only bam file is permitted for several SV detection too
 Gender list file (optional, 1st column: sample name, 2nd column: M|F, separated by tab)
 
 ### SV detection tools (algorithms)  
-The tools required depend on the tool presets used in MOPline or the tool sets customized by the user.  
+The tools required depend on the tool presets used in MOPline or the tool sets customized by the user. The necessary SV detection tools must be installed by the user, but it is possible to use tools other than MELT using the singularity definition file provided in this package, as described below.   
 The presets customized in this MOPline package are follows:  
 - **Preset: 7tools (MOPline-7t)**  
 	- [CNVnator](https://github.com/abyzovlab/CNVnator)  
