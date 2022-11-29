@@ -124,7 +124,7 @@ To run the run_single_singularity.pl script for a single sample, install this MO
 ```
 ~/MOPline_v1.#/scripts/SV_callers/run_single_singularity.pl -s <mopline.sif file path> -b <input bam> -c <config_singularity.txt> -td <temp direcory> -bd <bind directories> -sd <sample directory> 
 ```
-The sif file must be specified as an absolute path. The config_singularity.txt provided in this package can be used for the template, but the lines 'Do not change' indicating the path in the singularity container, must not be changed. The temp direcory corresponds to /tmp on the host or a temporary directory specified with the environmental variable TMPDIR. The bind directories are the paths on the host to add to the singularity container. If the input files used by run_single_singularity.pl are located in a directory other than the working directory, the path to the corresponding directory must be specified with the -bd option (multiple paths separated by commas).
+The sif file must be specified as an absolute path. The config_singularity.txt provided in this package can be used for the template, but the lines 'Do not change' indicating the path in the singularity container, must not be changed. The temp directory corresponds to /tmp on the host or a temporary directory specified with the environmental variable TMPDIR. The bind directories are the paths on the host to add to the singularity container. If the input files used by run_single_singularity.pl are located in a directory other than the working directory, the path to the corresponding directory must be specified with the -bd option (multiple paths separated by commas).
 
 ### <a name="notes"></a>Notes on SV calling and input bam
 
