@@ -10,7 +10,7 @@ Detection and Genotyping of Structural Variants
 - [General Usage](#gusage)
 	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
-			- [Run with tools installed by the user](#user_install)
+			- [Run user-installed tools](#user_install)
 			- [Run with singularity](#singularity)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
@@ -103,7 +103,7 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 
 In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtained at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
 
-### <a name="user_install"></a>Run with tools installed by the user
+### <a name="user_install"></a>Run user-installed tools
 
 For convenience, we have provided scripts to run the selected algorithms in the ‘run_SVcallers’ folder. A run the script with the ‘-h’ option informs us the required arguments and options. We also provide a script for sequential execution of multiple algorithms for a single sample (run_single.pl) and batch scripts for multiple samples using Slurm and LSF job managers (run_batch_slurm.pl, run_batch_LSF.pl). To run these three scripts, specify a configure file that describes the parameters for each algorithm, using a template configure file (MOPline/scripts/run_SVcallers/config.txt) (an example config file is also provided in the sample data [Sample_data_output/yeast_run]). A tool directory with the name of the algorithm specified in the configure file is automatically created in the sample directories under the working directory, and the algorithm is executed under the tool directory.  
   
