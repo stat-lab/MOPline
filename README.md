@@ -38,9 +38,9 @@ R 3.0 or later
 java 1.8 or later (for GRIDSS and MELT)
 
 #### General input file
-Reference fasta file  
-Alignment bam/cram file (only bam file is permitted for several SV detection tools)  
-Gender list file (optional, 1st column: sample name, 2nd column: M|F, separated by tab)
+- Reference fasta file & its index file  
+- Alignment bam/cram file & its index file (only bam file is permitted for several SV detection tools)  
+- Gender list file (optional, 1st column: sample name, 2nd column: M|F, separated by tab)
 
 #### SV detection tools (algorithms)  
 The tools required depend on the tool presets used in MOPline or the tool sets customized by the user. The necessary SV detection tools must be installed by the user, but it is possible to use tools other than MELT using the singularity definition file provided in this package, as described below.   
