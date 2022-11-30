@@ -84,7 +84,7 @@ By default, MOPline treats WGS alignment data (bam/cram) and SV call data (vcf) 
 
 ### <a name="run_sv"></a>(1) Run SV detection tools
 
-The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline-specific vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). Because many short read-based SV detection algorithms, including MOPline, cannot determine the length of INSs, the length of the INS is recorded as 0 or 1 in many INS calls.The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
+The preset algorithms are a combination of tools that have been evaluated for precision and recall, but the user may use a different combination or use other algorithms not listed here. The final output file from each algorithm must be converted to a MOPline-specific vcf file using the conversion script in ‘run_SVcallers’ folder of this package. The converted vcf file should contain ‘SVTYPE’, ‘SVLEN’, and ‘READS’ keys in the INFO field, where the READS key represents RSS (reads supporting SV). Because many short read-based SV detection algorithms, including MOPline, cannot determine the length of INSs, the length of the INS is recorded as 0 or 1 in many INS calls. The conversion scripts, the corresponding algorithms, and their output files are indicated in the table below.
 
 **Table 1.** Conversion scripts for 10 SV detection algorithms
 |Algorithm|Command using a conversion script (for a sample name, AB)                      |
@@ -170,7 +170,7 @@ For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can
 
 ### <a name="step1"></a>[Step-1]  Select overlap calls (high-confidence calls) from SV call sets
 
-Once the MOPline-specific vcf files for each algorith and for each sample are created, selection of overlapping SV calls is first performed. Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
+Once the MOPline-specific vcf files for each algorithm and for each sample are created, selection of overlapping SV calls is first performed. Use the merge_SV_vcf.*tools.pl script in the scripts folder to select overlap calls and high-confidence calls from the SV call sets (vcf files) generated in Step-0 and to merge the selected calls of each SV type and size-ranges for each sample. For high coverage (30x or more) bam files, use mopline subcommands, merge_7tools, merge_6tools_1, merge_6tools_2, or merge_9tools. When using bam files with ~20x coverage, use the subcommand with a ‘_lc’ at the end.
 ```
 mopline merge_7tools -s <sample-list-file or a sample name> -rl <read length> 
 ```
@@ -196,7 +196,7 @@ Using the coverage files you created, add alignment statistics to each SV site i
 mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
 ```
 (--build 38 for human build38, -nh 1 -ri <ref.index> -gap <gap_bed> for non-human species)  
-**sample_list:** A sample list file showing sample names per line. A sample directoy with the same names as the specified sample list must exist under the working directory.  
+**sample_list:** A sample list file showing sample names per line. A sample directory with the same names as the specified sample list must exist under the working directory.  
 **tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
 
