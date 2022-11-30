@@ -31,7 +31,7 @@ MOPline accurately and sensitively detects structural variations (SVs) in whole 
 ## Requirements
 
 perl 5 or later versions  
-R 3.0 or later: required library: [nnet](https://cran.r-project.org/web/packages/nnet)  
+R 3.0 or later (required library: [nnet](https://cran.r-project.org/web/packages/nnet))  
 [samtools](https://github.com/samtools/samtools) (v1.13 or later is required for GRIDSS v2.13-)  
 [vcftools](https://vcftools.github.io/index.html) (v0.1.15 or later)  
 java 1.8 or later (for GRIDSS and MELT)
