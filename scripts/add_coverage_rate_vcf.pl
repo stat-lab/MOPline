@@ -599,7 +599,7 @@ while (my $line = <FILE>){
         if ($ave2 > 0){
             my $cov_rate2 = 0;
             $cov_rate2 = int ($ave2 / $ave_flank * 100 + 0.5) / 100 if ($ave_flank > 0);
-            if ($cov_rate2 > 1){
+            if ((defined $cov_rate2) and ($cov_rate2 > 1)){
                 $cov_rate = $cov_rate2;
             }
         }
