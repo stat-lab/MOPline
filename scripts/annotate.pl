@@ -104,6 +104,13 @@ if ($max_flank3 != 50000){
 	$arg .= "-f3 $max_flank3 ";
 }
 
+if (($non_human == 0) and ($ref_gff eq '')){
+	$ref_gff = "$data_dir/Homo_sapiens.GRCh37.87.gff3.gz";
+	$ref_gff = "$data_dir/Homo_sapiens.GRCh38.104.gff3.gz" if ($build eq '38');
+	$ref_gff = "$data_dir/Homo_sapience.T2T-chm13v2.0.ensemble.gff3.gz" if ($build eq 'T2T');
+}
+print STDERR "Ref gff3 annotation file: $ref_gff\n";
+
 if (($cores == 1) or ($target_chr ne 'ALL')){
 	system ("$Bin/annotate_SV_vcf.pl $arg");
 	if ($target_chr ne 'ALL'){
