@@ -68,7 +68,7 @@ pod2usage(-verbose => 0) if $help;
    
 =cut
 
-if ($non_human == 0){
+if (($non_human == 0) and ($ref_gff eq '')){
 	$ref_gff = "$data_dir/Homo_sapiens.GRCh37.87.gff3.gz";
 	$ref_gff = "$data_dir/Homo_sapiens.GRCh38.104.gff3.gz" if ($build eq '38');
 	$ref_gff = "$data_dir/Homo_sapience.T2T-chm13v2.0.ensemble.gff3.gz" if ($build eq 'T2T');
