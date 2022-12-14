@@ -135,7 +135,10 @@ if ($non_human == 0){
         $exclude_cen = "$data_dir/chm13.v2.0.centromere.bed" if ($build eq 'T2T');
     }
 }
-print STDERR "exlude SV: $exclude_bed\n";
+print STDERR "gap bed: $gap_bed\n" if ($gap_bed ne '');
+print STDERR "segDup bed: $segdup_file\n" if ($segdup_file ne '');
+print STDERR "centromere bed: $exclude_cen" if ($exclude_cen ne '');
+print STDERR "exlude SV bed: $exclude_bed\n" if ($exclude_bed ne '');
 
 my $del_num = 0;
 my $dup_num = 0;
