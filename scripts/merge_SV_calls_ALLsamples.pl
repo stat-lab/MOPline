@@ -444,8 +444,13 @@ foreach my $type (keys %call_diverged){			# reassign the above extracted diverge
 						    $len_diff{$pos2} = $diff;
 						}
 				    }
-				    elsif (($pos >= $pos2) and ($pos <= $end2)){
+				    elsif (($pos <= $end2) and ($end >= $end2)){
 						if (($end2 - $pos > $avelen * 0.5) and ($end2 - $pos > $len2 * 0.5)){
+						    $len_diff{$pos2} = $diff;
+						}
+				    }
+				    elsif (($pos <= $pos2) and ($end >= $pos2)){
+						if (($end - $pos2 > $avelen * 0.5) and ($end - $pos2 > $len2 * 0.5)){
 						    $len_diff{$pos2} = $diff;
 						}
 				    }
@@ -596,9 +601,14 @@ foreach my $type (keys %call_cons){	# merge positions present within 100-bp of c
 						${${$used_pos{$type}}{$chr}}{$i} = 1;
 					}
 					else{
-						if (($type eq 'INS') and ($chr eq '1')){
-
-						}
+						foreach my $info (@{${${$call_cons{$type}}{$chr}}{$i}}){
+			    			my ($id, $pos1, $len1) = split (/==/, $info);
+			    			if (!exists $ids{$id}){
+			    				push @{${${$call_cons{$type}}{$chr}}{$pos}}, $info;
+			    			}
+			    		}
+			    		delete ${${$call_cons{$type}}{$chr}}{$i};
+						${${$used_pos{$type}}{$chr}}{$i} = 1;
 				    }
 				}
 		    }
@@ -674,15 +684,9 @@ foreach my $type (keys %call_cons){		# assign median SV length for each consensu
 				    $new_len = int ($sum_len / $num + 0.5);
 				}
 				elsif ($num >= 3){
-				    my $num_half = int ($num * 0.5 + 0.5);
-				    my $count = 0;
-				    my $median = 0;
-				    foreach my $len (sort {$a <=> $b} @len){
-						$count ++;
-						if ($count == $num_half){
-						    $median = $len;
-						}
-				    }
+				    my $hn = int ($num * 0.5);
+				    @len = sort {$a <=> $b} @len;
+				    my $median = $len[$hn];
 				    ($new_len) = &cons_len (\@len, $median);
 				}
 		    }
@@ -706,6 +710,7 @@ foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 20
 				next if (exists ${${$used_pos{$type}}{$chr}}{$pos2});
 				my $len2 = $pre_info{$pos2};
 				my $end2 = $pos2 + $len2 - 1;
+				$end2 = $pos2 if ($type eq 'INS');
 				last if ($pos - $pos2 > 20000000);
 				next if ($end2 + $ins_sd < $pos);
 				my $ovlrate = 0;
@@ -717,29 +722,26 @@ foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 20
 				    }
 				}
 				else{
-				    if ((abs ($pos - $pos2) <= $var_sd) and (abs ($end - $end2) <= $var_sd)){
+				    my $overlap = 0;
+					if (($pos2 <= $pos) and ($end2 >= $end)){
+						$overlap = $len;
+					}
+					elsif (($pos2 >= $pos) and ($pos2 <= $end)){
+						$overlap = $end - $pos2 + 1;
+						$overlap = $len2 if ($end2 < $end);
+					}
+					elsif (($end2 >= $pos) and ($end2 <= $end)){
+						$overlap = $end2 - $pos + 1;
+						$overlap = $len2 if ($pos2 > $pos);
+					}
+					if (($overlap >= $len * $min_overlap_ratio) and ($overlap >= $len2 * $min_overlap_ratio)){
 						if ($len >= $len2){
 						    $ovlrate = $len2 / $len;
 						}
 						else{
 						    $ovlrate = $len / $len2;
 						}
-				    }
-				    elsif (($pos >= $pos2) and ($pos <= $end2)){
-						if ($end <= $end2){
-						    if ($len >= $len2 * $min_overlap_ratio){
-								$ovlrate = $len / $len2;
-						    }
-						}
-						else{
-						    my $overlen = $end2 - $pos + 1;
-						    if (($overlen >= $len * $min_overlap_ratio) and ($overlen >= $len2 * $min_overlap_ratio)){
-								my $ovlrate1 = $overlen / $len;
-								my $ovlrate2 = $overlen / $len2;
-								$ovlrate = ($ovlrate1 + $ovlrate2) / 2;
-						    }
-						}
-				    }
+					}
 				}
 				if ($ovlrate > 0){
 				    push @match, "$pos2=$len2=$ovlrate";
@@ -1132,6 +1134,7 @@ foreach my $type (keys %call_cons){
 				}
 				last if ($gstart > $end);
 		    }
+		    next if ($gap_overlap == 1);
 		    foreach my $item (@{${${$call_cons{$type}}{$chr}}{$pos}}){
 				my ($id, $pos2, $len2) = split (/=/, $item);
 				my $group = '';
@@ -1166,8 +1169,6 @@ foreach my $type (keys %call_cons){
                     }
                 }
             }
-		    
-		    next if ($gap_overlap == 1);
 		    
 		    if ($type eq 'INS'){
 				if (scalar keys %ins_subtype == 0){
