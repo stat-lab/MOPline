@@ -30,6 +30,7 @@ foreach my $file (@ARGV){
 		my $read1 = $1 if ($line[7] =~ /LP=(\d+)/);
 		my $read2 = $1 if ($line[7] =~ /RP=(\d+)/);
 		my $gt = $1 if ($line[9] =~ /^(.+?):/);
+		next if ($gt eq '0/0');
 		$reads = int (($read1 + $read2) * 0.5);
 		next if ($type eq 'SVA') and ($reads < 8);
 		my $class = $type;
