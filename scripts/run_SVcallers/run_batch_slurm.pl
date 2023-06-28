@@ -70,6 +70,10 @@ my $target_chr = 'ALL';
 my $non_human = 0;
 my $run_svcaller_dir = '';
 
+my $script_dir = '';
+$script_dir = $1 if ($0 =~ /(.+)\//);
+$run_svcaller_dir = $script_dir;
+
 my @tools;
 
 my %tool_opt;

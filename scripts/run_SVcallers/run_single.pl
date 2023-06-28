@@ -33,6 +33,9 @@ pod2usage(-verbose => 0) if $help;
 die "bam is not specified:\n" if ($bam eq '');
 die "config file is not specified:\n" if ($config eq '');
 
+my $script_dir = '';
+$script_dir = $1 if ($0 =~ /(.+)\//);
+
 my $bam_base = basename ($bam);
 my $sample_name = $sample_dir_name if ($sample_dir_name ne '');
 $sample_name = $1 if ($sample_dir_name eq '') and ($bam_base =~ /(.+?)\./);
@@ -43,7 +46,7 @@ $bam = $abs_bam;
 my $ref = '';
 my $target_chr = 'ALL';
 my $non_human = 0;
-my $run_svcaller_dir = '';
+my $run_svcaller_dir = $script_dir;
 
 my @tools;
 
