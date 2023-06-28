@@ -4,6 +4,7 @@ Detection and Genotyping of Structural Variants
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
+- [Citation](#citation)
 - [Install](#install)
 - [Composition of Required Directories](#composition)
 - [Human and Non-human Data](#hdata)
@@ -36,6 +37,12 @@ R 3.0 or later (required library: [nnet](https://cran.r-project.org/web/packages
 [samtools](https://github.com/samtools/samtools) (v1.13 or later is required for GRIDSS v2.13-)  
 [vcftools](https://vcftools.github.io/index.html) (v0.1.15 or later)  
 java 1.8 or later (for GRIDSS and MELT)
+
+## Citation
+
+Please cite the following paper.
+
+Kosugi et al. Detection of trait-associated structural variations using short-read sequencing. Cell Genomics 3, 100328 (2023). https://doi.org/10.1016/j.xgen.2023.100328
 
 #### General input file
 - Reference fasta file & its index file  
