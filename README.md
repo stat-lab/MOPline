@@ -38,12 +38,6 @@ R 3.0 or later (required library: [nnet](https://cran.r-project.org/web/packages
 [vcftools](https://vcftools.github.io/index.html) (v0.1.15 or later)  
 java 1.8 or later (for GRIDSS and MELT)
 
-## Citation
-
-Please cite the following paper.
-
-Kosugi et al. Detection of trait-associated structural variations using short-read sequencing. Cell Genomics 3, 100328 (2023). https://doi.org/10.1016/j.xgen.2023.100328
-
 #### General input file
 - Reference fasta file & its index file  
 - Alignment bam/cram file & its index file (only bam file is permitted for several SV detection tools)  
@@ -66,6 +60,12 @@ The presets customized in this MOPline package are follows:
 	- MELT is excluded from 7tools  
 - **Preset: 9tools (MOPline-9t)**  
 	- DELLY, Lumpy, SoftSV are added to 6tools_1
+
+## Citation
+
+Please cite the following paper.
+
+Kosugi et al. Detection of trait-associated structural variations using short-read sequencing. Cell Genomics 3, 100328 (2023). https://doi.org/10.1016/j.xgen.2023.100328
 
 ## Install
 
