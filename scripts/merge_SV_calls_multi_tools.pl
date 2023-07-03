@@ -163,6 +163,9 @@ while (my $line = <FILE>){
     elsif ($sd_len_rank eq 'L'){
         $lenrank = 3;
     }
+    elsif ($sd_len_rank eq 'LL'){
+        $lenrank = 4;
+    }
     ${$SDbp{$type}}{$id} = $bprank;
     ${$SDlen{$type}}{$id} = $lenrank;
 }
