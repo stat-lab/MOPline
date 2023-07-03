@@ -12,7 +12,7 @@ Detection and Genotyping of Structural Variants
 	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
 			- [(a) Run user-installed tools using wrapper scripts](#user_install)
-			- [(b) Run using singularity](#singularity)
+                	- [(b) Run using singularity](#singularity)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
@@ -44,9 +44,9 @@ java 1.8 or later (for GRIDSS and MELT)
 - Gender list file (optional, 1st column: sample name, 2nd column: M|F, separated by tab)
 
 #### SV detection tools (algorithms)  
-The tools required depend on the tool presets used in MOPline or the tool sets customized by the user. The necessary SV detection tools must be installed by the user, but it is possible to use tools other than MELT using the singularity definition file provided in this package, as described below.   
+The tools required depend on the tool presets used in MOPline or the tool sets customized by the user. The necessary SV detection tools must be installed by the user, but it is possible to use tools other than MELT using the singularity definition file provided in this package, as described below.  
 The presets customized in this MOPline package are follows:  
-- **Preset: 7tools (MOPline-7t)**  
+- **Preset: 8tools (MOPline-8t)**  
 	- [CNVnator](https://github.com/abyzovlab/CNVnator)  
 	- [GRIDSS](https://github.com/PapenfussLab/gridss)  
 	- [inGAP](https://sourceforge.net/projects/ingap/files/ingap)  
@@ -54,10 +54,17 @@ The presets customized in this MOPline package are follows:
 	- [MATCHCLIP](https://github.com/yhwu/matchclips2)  
 	- [MELT](https://melt.igs.umaryland.edu)  
 	- [Wham](https://github.com/zeeev/wham)  
+        - [INSurVeylor](https://github.com/kensung-lab/INSurVeyor)
+- **Preset: 7tools (MOPline-7t)**  
+        - INSurVeylor is excluded from 8tools
+- **Preset: 7tools_1 (MOPline-7t-1)**  
+	- GRIDSS is excluded from 8tools  
+- **Preset: 7tools_2 (MOPline-7t-2)**  
+	- MELT is excluded from 8tools  
 - **Preset: 6tools_1 (MOPline-6t-1)**  
-	- GRIDSS is excluded from 7tools  
+	- GRIDSS and INSurVeylor are excluded from 8tools  
 - **Preset: 6tools_2 (MOPline-6t-2)**  
-	- MELT is excluded from 7tools  
+	- MELT and INSurVeylor are excluded from 8tools  
 - **Preset: 9tools (MOPline-9t)**  
 	- DELLY, Lumpy, SoftSV are added to 6tools_1
 
@@ -80,7 +87,7 @@ The Data folder in the MOPline folder contains parameter files, multinomial logi
 ## <a name="composition"></a>Directory structure required (sample directory and tool directory)
 
 MOPline assumes a directory structure of sample_directory/tool_directory under the working directory, where the sample directory has the sample name or sample ID, Under the sample directory, there are the tool directories with the names of algorithms, such as Manta and inGAP, which is case-sensitive. Under each sample directory, there are also should be bam and its index files. For convenience, when running against a sample (sample name: Sample_ID1), the working directory should contain a Sample_ID1 directory, under which the Sample_ID1.bam and Sample_ID1.bam.bai or their symbolic links should exist. When running with the 7tools preset, seven tool directories (CNVnator, GRIDSS, inGAP, Manta, MATCHCLIP, MELT, and Wham) must exist under the Sample_ID1 directory. In the tool directories, the runs of the corresponding tools are performed. In addition, Cov and Merge_7tools folders will be created under each sample directory in Step-0 and Step-1, as described below.  
-![image](https://github.com/stat-lab/MOPline/files/10089928/Dir_Struc.pdf)
+![image](https://github.com/stat-lab/MOPline/files/10089842/Dir_Struc.pdf)
 
 ## <a name="hdata"></a>Human and Non-human Data
 
@@ -107,6 +114,7 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 |MELT     |convert_MELT_vcf.pl ALU.final_comp.vcf LINE1.final_comp.vcf SVA.final_comp.vcf <br>HERVK.final_comp.vcf > MELT.AB.vcf|
 |SoftSV   |convert_SoftSV_vcf.pl deletions_small.txt insertion_small.txt tandems_small.txt<br> inversions_small.txt deletions.txt tandems.txt inversions.txt > SoftSV.AB.vcf
 |Wham     |convert_Wham_vcf.pl AB.vcf > Wham.AB.vcf                                       |
+|INSurVeylor|convert_INSurVeylor_vcf.pl AB.vcf > INSurVeylor.AB.vcf                       |
 
 In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtained at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
 
@@ -122,7 +130,7 @@ This command creates SV calling results from the SV detection algorithms specifi
 
 ### <a name="singularity"></a>(b) Run using singularity
 
-Other than MELT, which has license restrictions, the above 9 SV detection algorithms can be run using a singularity image container built using the Definition file (mopline.def) included in the package.  
+Other than MELT and INSurVeylor (MELT has license restrictions) the above 9 SV detection algorithms can be run using a singularity image container built using the Definition file (mopline.def) included in the package. We expect to be run INSurVeylor using singularity image file (https://github.com/kensung-lab/INSurVeyor/releases) specific to INSurVeylor or installed using conda   
 An image file (e.g., mopline.sif) is generated by the following command:  
 ```
 singularity build --fakeroot mopline.sif mopline.def
@@ -147,10 +155,13 @@ In GRIDSS, accidental errors can occur, primarily due to the java heap memory si
 When an input bam is generated with a reference containing many decoy sequences such as GRCh38+decoy, it often takes longer time to complete run. In this case, runtime can be shortened by using the –callRegions option, which specifies a bgzip-compressed bed file indicating only target chromosomes (i.e., chr1, … chrY).
 #### MELT
 MELT often takes much longer, especially for GRCh38-based alignment data, without MC/MQ tag in the input bam. Also, when using a reference that contains many decoy sequences such as GRCh38+decoy, the -b option can be used a list of chromosomes to exclude (> 1 Mb chr) to reduce execution time. For non-human species, MELT can be run by preparing species-specific mobile element data, as described in the MELT documentation.
+#### INSurVeylor
+INSurVeylor needs an input BAM/CRAM file containing MC and MQ tags, which can be added to BAM/CRAM using samtools fixmate or picard.jar FixMateInformation command.
+
 #### Input bam
 Trimming the read sequence in the fastq file (e.g. using Trimomatic) or removing PCR duplicates in the bam file is recommended, especially if the reads are of low quality. If there are 'N' bases or low quality bases in the terminal regions of the reads, these reads often generate soft clipping alignments in the bam file, which can cause some algorithms to call the wrong breakpoints. Also, when PCR-duplicate reads are present, some algorithms may call wrong SVs. GRIDSS is an SV detection algorithm that is highly sensitive to split-read alignments. if GRIDSS generates tens of thousands of SV calls and takes several days to complete execution (usually completed within a day for 30x human WGS data), it would be an indication that the sequencing data contains many low-quality reads.
 
-The samtools fixmate command can be used to add MC/MQ tags, which is useful for reducing MELT run time and removing PCR duplicates. Example commands using bwa and samtools fixmate are shown below.
+The samtools fixmate command can be used to add MC and MQ tags, which is useful for reducing MELT run time, running INSurVeylor, and removing PCR duplicates. Example commands using bwa and samtools fixmate are shown below.
 (bwa → bam with MC/MQ tags)
 ```
 bwa mem <ref index> <read_1> <read_2> -M -R “read group header specification” -t <num threads> | samtools view -uShb - | samtools fixmate -um - [out.fm.bam]
@@ -199,7 +210,7 @@ If the -tc option is not specified in the above command, the tool configuration 
 
 ### <a name="step2"></a>[Step-2]  Add alignment statistics to SV sites
 
-In this step, alignment statistics such as DPR, SRR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SRR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample (see [create coverage files](#create_cov)), recording the read depth and the number of soft-clipped ends for each 50-bp window.
+In this step, alignment statistics such as DPR, SR, and DPS are added to each SV site in every sample. DPR is the ratio of the depth of the region inside the SV to the adjacent depth, and DPS is the deviation rate of DPR measured in a 50-bp window. SR is the ratio of soft-clipped read ends around the breakpoint to the outside area. To measure these values, a coverage file must first be created for each sample (see [create coverage files](#create_cov)), recording the read depth and the number of soft-clipped ends for each 50-bp window.
 
 Using the coverage files you created, add alignment statistics to each SV site in the `${sample_name}.Merge.ALL.vcf` file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
 ```
@@ -243,7 +254,7 @@ mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_
 **STR_file:** A simple/short tandem repeat file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) or [Tandem Repeats Finder](https://tandem.bu.edu/trf/trf.html) output (only for non-human species, can be unspecified)  
 **SD_file:** A segmental duplication file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) (only for non-human species, can be unspecified)
 
-The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to the FORMAT/SAMPLE fields of the output vcf file. The MC tag represents the level of SMC; the lower the MC value, the higher the confidence level. The genotyping step requires a parameter file indicating the minimum RSS for each SV type and algorithm. MOPline provides a default parameter file for 14 pre-selected algorithms, which is automatically selected during this step. If additional algorithms are to be used that are not listed in this parameter file, the user can edit the parameter file by adding parameters of those algorithms (if not edited, all algorithms not present in the parameter file will have a minimum RSS of 3).
+The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to the FORMAT/SAMPLE fields of the output vcf file. The MC tag represents the level of SMC; the lower the MC value, the higher the confidence level. The genotyping step requires a parameter file indicating the minimum SRR for each SV type and algorithm. MOPline provides a default parameter file for 14 pre-selected algorithms, which is automatically selected during this step. If additional algorithms are to be used that are not listed in this parameter file, the user can edit the parameter file by adding parameters of those algorithms (if not edited, all algorithms not present in the parameter file will have a minimum RSS of 3).
 
 This step takes longer to perform as the sample size increases and the genome size increases. For human samples larger than 1,500, it is recommended that this step is performed for each chromosome, which can be done using the -c option (default: ALL).
 
@@ -258,7 +269,7 @@ This command generates two output vcf files, `${out_prefix}.annot.vcf` and `${ou
 
 ### <a name="step6"></a>[Step-6]  Filter (optional)
 
-This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human reference builds 37, 38, and T2T-CHM13 that indicate regions where SVs are always indeterminately called due to low quality alignments of short reads. The total lengths of the excluding regions of build 37 and 38 are 26 Mb and 16 Mb, respectively. In addition, SVs within the centromere regions for the human builds 38 and T2T-CHM13 are removed. By default, the bed files of these regions are automatically selected for human but user-provided files can be specified with the -ex and -ec options. If you do not prefer to use these filtering, specify any letter (e.g., -ex 0 or -ec 0) for the options. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR (SRR), and DPS in the INFO field. As input vcf file, an output vcf file from step2, step3, step4, or step5 can be used.
+This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human reference builds 37, 38, and T2T-CHM13 that indicate regions where SVs are always indeterminately called due to low quality alignments of short reads. The total lengths of the excluding regions of build 37 and 38 are 26 Mb and 16 Mb, respectively. In addition, SVs within the centromere regions for the human builds 38 and T2T-CHM13 are removed. By default, the bed files of these regions are automatically selected for human but user-provided files can be specified with the -ex and -ec options. If you do not prefer to use these filtering, specify any letter (e.g., -ex 0 or -ec 0) for the options. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field. As input vcf file, an output vcf file from step2, step3, step4, or step5 can be used.
 ```
 mopline filter -v <input vcf> > [output vcf]
 ```

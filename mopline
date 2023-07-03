@@ -28,6 +28,22 @@ if ($command =~ /merge_7tools/){
         $script = "$script_dir/merge_SV_vcf.7tools.pl";
     }
 }
+elsif ($command =~ /merge_7tools_1/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.7tools_1.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.7tools_1.pl";
+    }
+}
+elsif ($command =~ /merge_7tools_2/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.7tools_2.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.7tools_2.pl";
+    }
+}
 elsif ($command =~ /merge_6tools_1/){
     if ($command =~ /_lc/){
         $script = "$script_dir/merge_SV_vcf.6tools_1.20x.pl";
@@ -42,6 +58,14 @@ elsif ($command =~ /merge_6tools_2/){
     }
     else{
         $script = "$script_dir/merge_SV_vcf.6tools_2.pl";
+    }
+}
+elsif ($command =~ /merge_8tools/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.8tools.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.8tools.pl";
     }
 }
 elsif ($command =~ /merge_9tools/){
@@ -92,14 +116,19 @@ else{
   commands:
    merge_7tools           Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, and MELT, followed by MOP-based selection of overlap calls (high coverage version: > 25x)
    merge_7tools_lc        Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, and MELT, followed by MOP-based selection of overlap calls (low coverage version: 15x~25x)
+   merge_7tools_1 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, INSurVeylor, and MELT, followed by MOP-based selection of overlap calls
+   merge_7tools_2 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, INSurVeylor, and GRIDSS2, followed by MOP-based selection of overlap calls
    merge_6tools_1 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, and MELT, followed by MOP-based selection of overlap calls
    merge_6tools_2 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, and GRIDSS2, followed by MOP-based selection of overlap calls
+   merge_8tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, INSurVeylor, and MELT, followed by MOP-based selection of overlap calls
    merge_9tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, and SoftSV, followed by MOP-based selection of overlap calls
    merge_11tools (_lc)    Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, SoftSV, DELLY, and Mobster, followed by MOP-based selection of overlap calls
-   add_cov                Add read coverage and clipped alignment read number at 50-bp window size to input SV vcf. These alignment information must be created with 'create_cov' command before this command run.
+   add_cov                Add read coverage and clipped alignment read number at 50-bp window size to input SV vcf. 
+                          These alignment information must be created with 'create_cov' command before this command run.
                           This command also add genotype data from multiple tools used for original SV calling to input SV vcf.
    joint_call             For vcf files from multiple samples, perform joint call with multiple vcfs to create a single vcf file. Before this, 'add_cov' command must be done foe each vcf file.
-   smc                    Perform SMC for a joint-called SV vcf file. For samples with the reference genotype at an SV site, conversion to non-reference genotype is made when there is evidence to support the presence of SV.
+   smc                    Perform SMC for a joint-called SV vcf file. For samples with the reference genotype at an SV site, 
+                          conversion to non-reference genotype is made when there is evidence to support the presence of SV.
    filter                 Filter SVs mainly based on DPR and SR values, which had been added to the input vcf file with the 'add_cov' command
    annotate               Add the annotation of the genes that overlap SVs to a vcf file. The annotation includes gene ID, gene name, and gene region overlapping the SV.
    create_cov             Create coverage files for each sample, which record read coverage and clipped read number at 50-bp window size in bam file
