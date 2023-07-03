@@ -1,5 +1,1 @@
-(1) Enabled to automatically select the T2T-CHM13.v2.0 human reference data by specifying the --build option (-b T2T) in any scripts.
-(2) Modified the code of genotype_SV_SMC_7.4.pl for SMC with changing the setting of flanking coverage of DEL and DUP.
-(3) For >= 1 Kb DELs, the DPR calculated with all reads was used if the DPR was greater than 1.0.
-(4) For human references, modified low confidence region files (Low_confidence.bed, Low_confidence.b38.bed, and Low_confidence.T2T-chm13.v2.0.bed) for filtering are provided.
-(5) Singularity Definition file (mopline.def) for executing SV calling with multiple SV detection algorithms is provided.
+(1) Three presets (MOPline-8t, MOPline-7t-1, MOPline-7t-2) and the run_INSurVeylor.pl script have been added to allow the use of INS calls from INSurVeylor (Rajaby et al., Nat. Commun. 14, 3243 2023; https://github.com/kensung-lab/INSurVeyor). See README for details. However, we assume that you will run the tool using the singularity sif file provided on INSurVeylor's github site, so our singularity def file (mopline.def) does not include INSurVeylor's installation description.
