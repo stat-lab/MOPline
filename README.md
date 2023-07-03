@@ -54,7 +54,7 @@ The presets customized in this MOPline package are follows:
 	- [MATCHCLIP](https://github.com/yhwu/matchclips2)  
 	- [MELT](https://melt.igs.umaryland.edu)  
 	- [Wham](https://github.com/zeeev/wham)  
-        - [INSurVeylor](https://github.com/kensung-lab/INSurVeyor)
+        - [INSurVeylor](https://github.com/kensung-lab/INSurVeyor)  
 - **Preset: 7tools (MOPline-7t)**  
         - INSurVeylor is excluded from 8tools
 - **Preset: 7tools_1 (MOPline-7t-1)**  
