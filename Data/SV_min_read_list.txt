@@ -169,3 +169,4 @@ Wham	DUP	M	8
 Wham	INV	S	18
 Wham	INV	M	5
 Wham	INV	L	5
+INSurVeylor	INS	ALL	5
