@@ -138,8 +138,8 @@ sudo singularity build mopline.sif mopline.def
 ```
 singularity build --fakeroot mopline.sif mopline.def
 ```
-Or, a mopline.sif (2.3 GB) can be obtained at [Jenger site](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/mopline.sif).  
-
+Alternatively, a mopline.sif (2.3 GB) can be obtained at [Jenger site](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/mopline.sif).  
+  
 To run CNVnator with singularity  
 ```
 singularity exec <mopline.sif file path> /opt/local/tools/MOPline/scripts/run_SVcallers/run_CNVnator.pl -cp <cnvnator command path> -b <input bam> -r <ref directory> -rd <ROOT install directory> -p <output prefix>   # the path of run_CNVnator.pl is the path in the singularity container.
@@ -294,20 +294,20 @@ For non-human species, the following files are required at specific MOPline step
 |Gene  |Gene annotation GFF3 file   |Homo_sapiens.GRCh37.87.gff3.gz|[Ensembl](https://asia.ensembl.org/index.html)|step-5
 |Rindex|Reference fasta index       |hs37.fa.fai                   |samtools faidx|steps-1,2
 
-#### For data unavailable at the public sites
+### For data unavailable at the public sites
 
-Even if Gap, STR, SegDup, Cen files are not available, MOPline can be executed at any steps.  
+Gap bed and STR file can be custom created, But MOPline can be executed at any step, even if Gap, STR, SegDup, or Cen file is not specified.  
 
 **Gap bed:** A gap bed file can be created using scripts/gap_fasta_to_bed.pl in this package.  
 ```
 gap_fasta_to_bed.pl [input genome.fasta] [minimum length of gap, default: 1000 (bp)] > [output bed]
 ```
 **STR (SimpleRepeat) file:** STR/SimpleRepeat file can be created using the [TRF](https://github.com/Benson-Genomics-Lab/TRF) and scripts/convert_TRF_data_to_simpleRepeat.pl.  
-(TRF run)  
+#### TRF run
 ```
 trf409.linux64 [input genome.fasta] 2 7 7 80 10 50 500 -d -l 1
 ```
-(Convert TRF data to UCSC SimpleRepeat format)  
+#### Convert TRF data to UCSC SimpleRepeat format
 ```
 convert_TRF_data_to_simpleRepeat.pl [TRF output *.data file] > [output SimpleRepeat-like file]
 ```
