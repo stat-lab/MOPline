@@ -296,7 +296,7 @@ For non-human species, the following files are required at specific MOPline step
 
 ### For data unavailable at the public sites
 
-Gap bed and STR file can be custom created, But MOPline can be executed at any step, even if Gap, STR, SegDup, or Cen file is not specified.  
+Gap bed and STR file can be custom created. But MOPline can be executed at any step, even if Gap, STR, SegDup, or Cen file is not specified.  
 
 **Gap bed:** A gap bed file can be created using scripts/gap_fasta_to_bed.pl in this package.  
 ```
