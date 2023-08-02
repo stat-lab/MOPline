@@ -303,11 +303,12 @@ Gap bed and STR file can be custom created, But MOPline can be executed at any s
 gap_fasta_to_bed.pl [input genome.fasta] [minimum length of gap, default: 1000 (bp)] > [output bed]
 ```
 **STR (SimpleRepeat) file:** STR/SimpleRepeat file can be created using the [TRF](https://github.com/Benson-Genomics-Lab/TRF) and scripts/convert_TRF_data_to_simpleRepeat.pl.  
-#### TRF run
+  
+(TRF run)  
 ```
 trf409.linux64 [input genome.fasta] 2 7 7 80 10 50 500 -d -l 1
 ```
-#### Convert TRF data to UCSC SimpleRepeat format
+(Convert TRF data to UCSC SimpleRepeat format)  
 ```
 convert_TRF_data_to_simpleRepeat.pl [TRF output *.data file] > [output SimpleRepeat-like file]
 ```
