@@ -140,7 +140,7 @@ sudo singularity build mopline.sif mopline.def
 ```
 singularity build --fakeroot mopline.sif mopline.def
 ```
-Alternatively, a mopline.sif (1.4 GB) can be obtained at [Jenger site](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/mopline.sif).  
+Alternatively, a mopline.sif (v1.8.2 1.4 GB) can be obtained at [Jenger site](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/mopline.sif).  
   
 To run CNVnator with singularity  
 ```
