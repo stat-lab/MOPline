@@ -11,7 +11,7 @@ Detection and Genotyping of Structural Variants
 - [General Usage](#gusage)
 	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
-			- [(a) Run user-installed tools using wrapper scripts](#user_install)  
+			- [(a) Run user-installed tools using wrapper scripts](#user_install)
                 	- [(b) Run using Singularity](#singularity)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
