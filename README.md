@@ -12,7 +12,7 @@ Detection and Genotyping of Structural Variants
 	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
 			- [(a) Run user-installed tools using wrapper scripts](#user_install)
-                	- [(b) Run using Singularity](#singularity)
+			- [(b) Run using Singularity](#singularity)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
@@ -140,7 +140,7 @@ sudo singularity build mopline.sif mopline.def
 ```
 singularity build --fakeroot mopline.sif mopline.def
 ```
-Alternatively, a mopline.sif (2.3 GB) can be obtained at [Jenger site](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/mopline.sif).  
+Alternatively, a mopline.sif (1.4 GB) can be obtained at [Jenger site](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/mopline.sif).  
   
 To run CNVnator with singularity  
 ```
