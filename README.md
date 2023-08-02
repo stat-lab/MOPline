@@ -12,7 +12,7 @@ Detection and Genotyping of Structural Variants
 	- [\[Step-0\] Preparation of input files](#step0)
 		- [(1) Run SV detection tools](#run_sv)
 			- [(a) Run user-installed tools using wrapper scripts](#user_install)
-                	- [(b) Run using singularity](#singularity)
+                	- [(b) Run using Singularity](#singularity)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
@@ -79,7 +79,9 @@ Kosugi et al. Detection of trait-associated structural variations using short-re
 ```
 git clone https://github.com/stat-lab/MOPline
 ```
-The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data files for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.
+The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data files for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.  
+
+MOPline and additional 10 SV detection tools (except for MELT and INSurVeylor) can be executed using [Singularity](#singularity).
 
 ### Sample data
 [Sample datasets](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
@@ -128,9 +130,9 @@ run_single.pl -b <input bam> -c <config file> -sd <sample directory>
 ```
 This command creates SV calling results from the SV detection algorithms specified in the config file, and the results are in the tool directories under the sample directory specified with the -sd option.  
 
-### <a name="singularity"></a>(b) Run using singularity
+### <a name="singularity"></a>(b) Run using Singularity
 
-Other than MELT and INSurVeylor (MELT has license restrictions) the above 9 SV detection algorithms can be run using a singularity image container built using the Definition file (mopline.def) included in the package. We expect to be run INSurVeylor using singularity image file (https://github.com/kensung-lab/INSurVeyor/releases) specific to INSurVeylor or installed using conda   
+Other than MELT and INSurVeylor (MELT has license restrictions) the above 9 SV detection algorithms can be run using a Singularity image container built using the Definition file (mopline.def) included in the package. We expect to be run INSurVeylor using Singularity image file (https://github.com/kensung-lab/INSurVeyor/releases) specific to INSurVeylor or installed using conda   
 An image file (e.g., mopline.sif) can be obtained using one of the following:  
 ```
 sudo singularity build mopline.sif mopline.def
