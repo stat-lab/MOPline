@@ -107,18 +107,18 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 |Algorithm|Command using a conversion script (for a sample name, AB)                      |
 | :------ | :---------------------------------------------------------------------------- |
 |CNVnator |convert_CNVnator_vcf.pl AB.out gap.bed > CNVnator.AB.vcf                       |
-|DELLY    |convert_CNVnator_vcf.pl AB.out > CNVnator.AB.vcf                               |
-|GRIDSS   |convert_GRIDSS_vcf.pl AB.vcf.gz > GRIDSS.AB.vcf                                |
+|DELLY    |convert_CNVnator_vcf.pl AB.out $nh > CNVnator.AB.vcf                               |
+|GRIDSS   |convert_GRIDSS_vcf.pl AB.vcf.gz $nh > GRIDSS.AB.vcf                                |
 |inGAP    |convert_inGAP_vcf.pl AB.chr1.out .... AB.chrY.out > inGAP.AB.vcf               |
-|Lumpy    |convert_Lumpy_vcf.pl AB.vcf > Lumpy.AB.vcf                                     |
-|Manta    |convert_Manta_vcf.pl results/variants/diploidSV.vcf.gz > Manta.AB.vcf          |
-|MATCHCLIP|convert_MATCHCLIP_vcf.pl AB.matchclip.out > MATCHCLIP.AB.vcf                   |
+|Lumpy    |convert_Lumpy_vcf.pl AB.vcf $nh > Lumpy.AB.vcf                                     |
+|Manta    |convert_Manta_vcf.pl results/variants/diploidSV.vcf.gz $nh > Manta.AB.vcf          |
+|MATCHCLIP|convert_MATCHCLIP_vcf.pl AB.matchclip.out $nh > MATCHCLIP.AB.vcf                   |
 |MELT     |convert_MELT_vcf.pl ALU.final_comp.vcf LINE1.final_comp.vcf SVA.final_comp.vcf <br>HERVK.final_comp.vcf > MELT.AB.vcf|
-|SoftSV   |convert_SoftSV_vcf.pl deletions_small.txt insertion_small.txt tandems_small.txt<br> inversions_small.txt deletions.txt tandems.txt inversions.txt > SoftSV.AB.vcf
-|Wham     |convert_Wham_vcf.pl AB.vcf > Wham.AB.vcf                                       |
-|INSurVeylor|convert_INSurVeylor_vcf.pl AB.vcf > INSurVeylor.AB.vcf                       |
+|SoftSV   |convert_SoftSV_vcf.pl deletions_small.txt insertion_small.txt tandems_small.txt<br> inversions_small.txt deletions.txt tandems.txt inversions.txt $nh > SoftSV.AB.vcf
+|Wham     |convert_Wham_vcf.pl AB.vcf $nh > Wham.AB.vcf                                       |
+|INSurVeylor|convert_INSurVeylor_vcf.pl AB.vcf $nh > INSurVeylor.AB.vcf                       |
 
-In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtained at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
+If the data is for non-human species, specify 1 for $nh. If the data is human, specify 0 for $nh or nothing. In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtained at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
 
 ### <a name="user_install"></a>(a) Run user-installed tools using wrapper scripts
 
