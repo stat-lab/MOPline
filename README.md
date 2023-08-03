@@ -70,7 +70,7 @@ The presets customized in this MOPline package are follows:
 
 ## Citation
 
-Please cite the following paper.
+Please cite the following paper when using MOPline for your publication.  
 
 Kosugi et al. Detection of trait-associated structural variations using short-read sequencing. Cell Genomics 3, 100328 (2023). https://doi.org/10.1016/j.xgen.2023.100328
 
