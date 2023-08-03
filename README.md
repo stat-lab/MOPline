@@ -80,7 +80,7 @@ Kosugi et al. Detection of trait-associated structural variations using short-re
 git clone https://github.com/stat-lab/MOPline
 ```
 The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data files for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.  
-
+  
 MOPline and additional 10 SV detection tools (except for MELT and INSurVeylor) can be executed using [Singularity](#singularity).
 
 ### Sample data
