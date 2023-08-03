@@ -116,7 +116,7 @@ foreach my $tool_name (@tools){
 	foreach my $opt (keys %{$tool_opt{$tool_name}}){
 		$opt_str .= "${$tool_opt{$tool_name}}{$opt} ";
 	}
-	$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta/);
+	$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|MATCHCLIP|INSurVeylor/);
 	$opt_str =~ s/\s$//;
 	$opt_str = "-b $bam -p $sample_name " . $opt_str if ($tool_name eq 'CNVnator');
 	$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str if ($tool_name ne 'CNVnator');

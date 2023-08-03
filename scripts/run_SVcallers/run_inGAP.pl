@@ -85,7 +85,17 @@ while (my $line = <FILE>){
     chomp $line;
     if ($line =~ /^>(\S+)/){
         if ($seq ne ''){
-            if ($header =~ /^c*h*r*[\dXY]+$/){
+            if ($non_human == 0){
+                if ($header =~ /^c*h*r*[\dXY]+$/){
+                    my $ref_chr = "$ref_base.$header.fa";
+                    open (OUT, "> $ref_chr");
+                    print OUT ">$header\n";
+                    print OUT $seq, "\n";
+                    close (OUT);
+                    $ref_chr{$header} = $ref_chr;
+                }
+            }
+            else{
                 my $ref_chr = "$ref_base.$header.fa";
                 open (OUT, "> $ref_chr");
                 print OUT ">$header\n";
@@ -103,7 +113,17 @@ while (my $line = <FILE>){
 }
 close (FILE);
 if ($seq ne ''){
-    if ($header =~ /^c*h*r*[\dXY]+$/){
+    if ($non_human == 0){
+        if ($header =~ /^c*h*r*[\dXY]+$/){
+            my $ref_chr = "$ref_base.$header.fa";
+            open (OUT, "> $ref_chr");
+            print OUT ">$header\n";
+            print OUT $seq, "\n";
+            close (OUT);
+            $ref_chr{$header} = $ref_chr;
+        }
+    }
+    else{
         my $ref_chr = "$ref_base.$header.fa";
         open (OUT, "> $ref_chr");
         print OUT ">$header\n";

@@ -3,6 +3,7 @@ use strict;
 use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
+use File::Spec;
 
 my $sif_file = '';
 my $bam_list = '';
@@ -118,12 +119,20 @@ while (my $line = <FILE>){
 }
 close (FILE);
 
+my $abs_ref = File::Spec->rel2abs($ref);
+$abs_ref = readlink ($abs_ref) if (-l $abs_ref);
+$ref = $abs_ref;
+
+my $ref_dir = '';
+$ref_dir = $1 if ($ref =~ /(.+)\//);
+
 my $cur_dir = `pwd`;
 chomp $cur_dir;
 
 my $bind_dir2 = $temp_dir;
 $bind_dir2 .= ",$cur_dir";
 $bind_dir2 .= ",$bind_dir" if ($bind_dir ne '');
+$bind_dir2 .= ",$ref_dir" if ($ref_dir ne '') and ($ref_dir ne $cur_dir);
 
 my $bam_path = '';
 
@@ -154,19 +163,27 @@ while (my $line = <FILE>){
 		$bam_base = "$ID.bam";
 		$bam .= '.bam';
 	}
+	if ((!-f $bam) and ($bam_path ne '')){
+		$bam = "$bam_path/$bam";
+	}
+	my $abs_bam = File::Spec->rel2abs($bam);
+	$abs_bam = readlink ($abs_bam) if (-l $abs_bam);
+	$bam = $abs_bam;
+	if (!-f $bam){
+		die "input bam file: $bam is not present\n";
+	}
+
 	system ("mkdir $ID") if (!-d $ID);
 	chdir $ID;
-	if (!-f $bam_base){
-		$bam = "$bam_path/$bam" if ($bam_path ne '');
-		system ("ln -s $bam");
-		system ("ln -s $bam.bai");
-		$bam = $bam_base;
-	}
 	print STDERR "Sample: $ID\n";
 	foreach my $tool_name (@tools){
 		next if ($tool_name eq 'general');
 		system ("mkdir $tool_name") if (!-d $tool_name);
 		chdir $tool_name;
+		my $bind_dir = $bind_dir2;
+		my $bam_dir = '';
+		$bam_dir = $1 if ($bam =~ /(.+)\//);
+		$bind_dir .= ",$bam_dir" if ($bam_dir ne '') and ($bam_dir ne $cur_dir) and ($bam_dir ne $ref_dir));
 		my $run_script = $tool_script{$tool_name};
 		my $opt_str = '';
 		my $thread = 1;
@@ -176,12 +193,13 @@ while (my $line = <FILE>){
 				$thread = $1 if (${$tool_opt{$tool_name}}{$opt} =~ /\s(\d+)/);
 			}
 		}
-#print STDERR "$tool_name\t$run_script $opt_str\n";
-		$bam = "../$bam" if ($bam !~ /\//);
-		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|GRIDSS/);
+		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|GRIDSS|MATCHCLIP/);
 		$opt_str =~ s/\s$//;
 		if (($tool_name eq 'CNVnator') and ($opt_str =~ /-r\s/)){
 			$opt_str = "-b $bam -p $ID " . $opt_str;
+			my $ref_dir2 = '';
+			$ref_dir2 = $1 if ($opt_str =~ /-r\s+(\S+)/);
+			$bind_dir .= ",$ref_dir2" if ($ref_dir2 ne '');
 		}
 		else{
 			$opt_str = "-b $bam -p $ID -r $ref " . $opt_str;
@@ -193,8 +211,8 @@ while (my $line = <FILE>){
 		$bsub_opt2 .= " -n $thread";
 		my $error_log = "$ID.error.log";
 		my $out_log = "$ID.out.log";
-		my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
-		$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
+		my $command = "singularity exec --bind $bind_dir $sif_file $run_script $opt_str";
+		$command = "singularity exec --bind $bind_dir --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 		if ($tool_name =~ /MELT/){
 			$command = "$run_script $opt_str";
 		}

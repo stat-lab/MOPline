@@ -82,10 +82,14 @@ else{
     if (-d $ref){
         my @files = <$ref/*>;
         my @chr;
-        foreach (sort @files){
-            my $fasta = basename ($_);
-            if ($fasta =~ /(.+)\.fas*t*a*$/){
-                push @chr, $1;
+        foreach my $fasta (sort @files){
+            open (FILE, $fasta) or die "$fasta is not found:$!\n";
+            while (my $line = <FILE>){
+                chomp $line;
+                if ($line =~ /^>(\S+)/){
+                    push @chr, $1;
+                    last;
+                }
             }
         }
         $chr_list = join (' ', @chr);

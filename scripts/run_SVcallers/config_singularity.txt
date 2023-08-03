@@ -2,7 +2,7 @@
 # This config temp file is specific to singularity executable. Do not change the path of command for each tool.
 
 <general>
-ref = ;			[-r]	# reference fasta file path on the host
+ref = ;			[-r]	# reference fasta file path on the host (must be absolute path)
 target = ALL;		[-c]	# target chromosome(s), commma-separated
 non_human = 0;		[-nh]	# specify 1 if samples is non-human species
 run_svcaller_dir = /opt/local/tools/MOPline/scripts/run_SVcallers;	# run_SVcallers directory path of MOPline package unless this directory is set in $PATH [Do not change]

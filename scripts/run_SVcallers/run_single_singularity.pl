@@ -52,6 +52,7 @@ my $sample_name = $sample_dir_name if ($sample_dir_name ne '');
 $sample_name = $1 if ($sample_dir_name eq '') and ($bam_base =~ /(.+?)\./);
 
 my $abs_bam = File::Spec->rel2abs($bam);
+$abs_bam = readlink ($abs_bam) if (-l $abs_bam);
 $bam = $abs_bam;
 
 my $ref = '';
@@ -119,6 +120,18 @@ while (my $line = <FILE>){
 }
 close (FILE);
 
+my $abs_ref = File::Spec->rel2abs($ref);
+$abs_ref = readlink ($abs_ref) if (-l $abs_ref);
+$ref = $abs_ref;
+
+my $bam_dir = '';
+my $ref_dir = '';
+$bam_dir = $1 if ($bam =~ /(.+)\//);
+$ref_dir = $1 if ($ref =~ /(.+)\//);
+
+$bind_dir2 .= ",$bam_dir" if ($bam_dir ne '') and ($bam_dir ne $bind_dir3);
+$bind_dir2 .= ",$ref_dir" if ($ref_dir ne '') and ($ref_dir ne $bind_dir3) and ($ref_dir ne $bam_dir);
+
 if ($sample_dir_name ne ''){
 	system ("mkdir $sample_dir_name") if (!-d $sample_dir_name);
 	chdir $sample_dir_name;
@@ -133,16 +146,24 @@ foreach my $tool_name (@tools){
 	foreach my $opt (keys %{$tool_opt{$tool_name}}){
 		$opt_str .= "${$tool_opt{$tool_name}}{$opt} ";
 	}
-	$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta/);
+	$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|MATCHCLIP/);
 	$opt_str =~ s/\s$//;
-	$opt_str = "-b $bam -p $sample_name " . $opt_str if ($tool_name eq 'CNVnator');
-	$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str if ($tool_name ne 'CNVnator');
+	my $bind_dir = $bind_dir2;
+	if ($tool_name eq 'CNVnator'){
+		$opt_str = "-b $bam -p $sample_name " . $opt_str ;
+		my $ref_dir2 = '';
+		$ref_dir2 = $1 if ($opt_str =~ /-r\s+(\S+)/);
+		$bind_dir .= ",$ref_dir2" if ($ref_dir2 ne '');
+	}
+	else{
+		$opt_str = "-b $bam -p $sample_name -r $ref " . $opt_str;
+	}
 	if ($target_chr ne 'ALL'){
 		$opt_str .= " -c $target_chr";
 	}
 	print STDERR "$tool_name\n";
-	my $command = "singularity exec --bind $bind_dir2 $sif_file $run_script $opt_str";
-	$command = "singularity exec --bind $bind_dir2 --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
+	my $command = "singularity exec --bind $bind_dir $sif_file $run_script $opt_str";
+	$command = "singularity exec --bind $bind_dir --no-home $sif_file $run_script $opt_str" if ($no_home == 1);
 	if ($tool_name =~ /MELT/){
 		$command = "$run_script $opt_str";
 	}

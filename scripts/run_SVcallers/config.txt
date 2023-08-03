@@ -52,6 +52,7 @@ threads = 1;				[run_Wham.pl -n]		# number of threads
 
 #<INSurVeylor>
 insurveyor_sif_path = ... /INSurVeyor-1.1.1/insurveyor.sif;	[run_INSurVeylor.pl -cp]	# full path of INSurVeyor singularity sif file (insurveyor.sif)
+temp_dir = ... /tmp; [run_INSurVeylor.pl -td]      # absolute path of tmp directory for singularity exec
 threads = 6;							[run_INSurVeylor.pl -n]
 
 #<DELLY>

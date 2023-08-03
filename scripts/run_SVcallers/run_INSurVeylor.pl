@@ -4,6 +4,7 @@ use File::Basename;
 use Getopt::Long;
 use Pod::Usage;
 use FindBin qw($Bin);
+use File::Spec;
 
 # run INSurVeylor using singularity image file
 
@@ -56,6 +57,14 @@ pod2usage(-verbose => 0) if $help;
 
 my $work_dir = `pwd`;
 chomp $work_dir;
+
+my $abs_bam = File::Spec->rel2abs($input_bam);
+$abs_bam = readlink ($abs_bam) if (-l $abs_bam);
+$input_bam = $abs_bam;
+
+my $abs_ref = File::Spec->rel2abs($ref);
+$abs_ref = readlink ($abs_ref) if (-l $abs_ref);
+$ref = $abs_ref;
 
 my $bam_dir = '';
 my $ref_dir = '';
