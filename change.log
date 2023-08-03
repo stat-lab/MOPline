@@ -1,1 +1,4 @@
-(1) Three presets (MOPline-8t, MOPline-7t-1, MOPline-7t-2) and the run_INSurVeylor.pl script have been added to allow the use of INS calls from INSurVeylor (Rajaby et al., Nat. Commun. 14, 3243 2023; https://github.com/kensung-lab/INSurVeyor). See README for details. However, we assume that you will run the tool using the singularity sif file provided on INSurVeylor's github site, so our singularity def file (mopline.def) does not include INSurVeylor's installation description.
+(1) Scripts for creating gap bed and STR/SimpleRepeat files were added.
+(2) The codes for run_CNVnator.pl, run_inGAP.pl, run_single.pl, run_batch_slurm.pl, run_batch_LSF.pl, run_single_singularity.pl, run_batch_slurm_singularity.pl, and run_batch_LSF_singularity.pl were fixed to fit a wide range of non-human species.
+(3) Singularity definition file was corrected to decrease the file size of created sif file.
+(4) A direct download method for the Singularity sif file was provided.

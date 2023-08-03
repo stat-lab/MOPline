@@ -14,6 +14,7 @@ my $args = join (' ', @ARGV);
 print STDERR "command: $command Args: $args\n";
 
 my $help;
+my $version = 'v1.8.2';
 
 my $script_dir = "$Bin/scripts";
 $script_dir = "$ENV{MOPLINE_DIR}/scripts" if (exists $ENV{MOPLINE_DIR});
@@ -102,8 +103,11 @@ elsif ($command eq 'annotate'){
 elsif ($command eq 'create_cov'){
     $script = "$script_dir/create_coverage_file_bam.pl";
 }
-elsif (($command eq '--help') or ($command eq '-help') or ($command eq '-h')){
+elsif (($command eq '--help') or ($command eq '-help') or ($command eq '-h') or ($command eq 'help')){
     pod2usage(-verbose => 0);
+}
+elsif (($command eq '--version') or ($command eq '-version') or ($command eq '-v') or ($command eq 'version')){
+    print STDERR "$version\n";
 }
 else{
     die "the 1st argument of MOP: $command, which is not defined in MOPline.\n";
@@ -132,6 +136,7 @@ else{
    filter                 Filter SVs mainly based on DPR and SR values, which had been added to the input vcf file with the 'add_cov' command
    annotate               Add the annotation of the genes that overlap SVs to a vcf file. The annotation includes gene ID, gene name, and gene region overlapping the SV.
    create_cov             Create coverage files for each sample, which record read coverage and clipped read number at 50-bp window size in bam file
+   version                Output MOPline version
    help                   Output help message
    
 =cut
