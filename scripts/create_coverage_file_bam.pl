@@ -45,7 +45,7 @@ pod2usage(-verbose => 0) if $help;
   Options:
    --bam_list or -b <STR>   sample-bam/cram table file. Table file contains sample directory and bam file name in the 1st and 2nd columns, respectively.
                             or a sample (bam) list file if the working directory contains ${sample_name}/${sample_name}.bam [mandatory]
-   --ref or -r <STR>        reference fasta file used for creating cram (only needed for cram files as input) [mandatory]
+   --ref or -r <STR>        reference fasta file used for creating bam/cram [mandatory]
    --read_len or -rl <INT>  read length [mandatory]
    --non_human or -nh <INT> samples are non-human species (0: human, 1: non-human) [default: 0]
    --bin_size or -bs <INT>  bin size (bp) for calculating coverage [default: 50]
