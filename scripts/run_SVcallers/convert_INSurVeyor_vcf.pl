@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-# covert INSurVeylor vcf
+# covert INSurVeyor vcf
 
 my $vcf = shift @ARGV;
 
