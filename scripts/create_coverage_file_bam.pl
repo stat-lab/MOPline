@@ -131,10 +131,10 @@ foreach my $bam (@bam_files){
     my $count = 0;
     my $sample_dir = '.';
     my $sample_name = '';
-    $sample_dir = $1 if ($bam =~ /(.+)\//);
     $sample_name = basename ($bam);
     $sample_name = $1 if ($sample_name =~ /(.+?)\./);
     $sample_name = $out_prefix if ($sample_name eq '');
+    $sample_dir = $sample_name if (-d $sample_name);
 #    system ("rm -r $cov_dir") if (-d $cov_dir) and ($sample_dir eq '');
 #    system ("rm -r $sample_dir/$cov_dir") if (-d "$sample_dir/$cov_dir") and ($sample_dir ne '');
     system ("mkdir $cov_dir") if (!-d $cov_dir) and ($sample_dir eq '');
