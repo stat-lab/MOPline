@@ -21,15 +21,7 @@ $script_dir = "$ENV{MOPLINE_DIR}/scripts" if (exists $ENV{MOPLINE_DIR});
 
 my $script = '';
 
-if ($command =~ /merge_7tools/){
-    if ($command =~ /_lc/){
-        $script = "$script_dir/merge_SV_vcf.7tools.20x.pl";
-    }
-    else{
-        $script = "$script_dir/merge_SV_vcf.7tools.pl";
-    }
-}
-elsif ($command =~ /merge_7tools_1/){
+if ($command =~ /merge_7tools_1/){
     if ($command =~ /_lc/){
         $script = "$script_dir/merge_SV_vcf.7tools_1.20x.pl";
     }
@@ -43,6 +35,14 @@ elsif ($command =~ /merge_7tools_2/){
     }
     else{
         $script = "$script_dir/merge_SV_vcf.7tools_2.pl";
+    }
+}
+elsif ($command =~ /merge_7tools/){
+    if ($command =~ /_lc/){
+        $script = "$script_dir/merge_SV_vcf.7tools.20x.pl";
+    }
+    else{
+        $script = "$script_dir/merge_SV_vcf.7tools.pl";
     }
 }
 elsif ($command =~ /merge_6tools_1/){
