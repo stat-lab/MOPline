@@ -67,7 +67,7 @@ pod2usage(-verbose => 0) if $help;
    --help or -h             output help message
 
    ## Options for adding SV genotype from SV callers to vcf ##
-   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 7tools_2, 8tools, 9tools, or 11tools) 
+   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 7tools_1, 7tools_2, 8tools, 9tools, or 11tools) 
                              or a list file describing tool names in each line [default: 7tools]
    --min_score or -ms <INT> minimum score to accept SV genotype (if multiple tools call the same genotype at a site, 
                             a summed score from these tools is considered) [default: 85]
