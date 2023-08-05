@@ -6,7 +6,7 @@ use Pod::Usage;
 use FindBin qw($Bin);
 use File::Spec;
 
-# run INSurVeylor using singularity image file
+# run INSurVeyor using singularity image file
 
 my $input_bam = '';
 my $ref = '';
@@ -38,7 +38,7 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  run_INSurVeylor.pl -cp <singularity sif file path> -b <full path of input bam file> -r <full path of reference fasta> -p <output prefix> -td <full path of temp directory> -n <threads>
+  run_INSurVeyor.pl -cp <singularity sif file path> -b <full path of input bam file> -r <full path of reference fasta> -p <output prefix> -td <full path of temp directory> -n <threads>
 
   Options:
    --bam or -b <STR>          absolute path of input bam file, index file (*.bam.bai) should be present in the same directory [mandatory]
@@ -85,16 +85,16 @@ my $command = "singularity run --bind $bind_dir $sif_path --threads $cores $inpu
 $command = "singularity run --bind $bind_dir $sif_path --no-home --threads $cores $input_bam . $ref 2>$out_prefix.insurveyor.log" if ($no_home == 1);
     
 open (OUT, ">> $out_prefix.command.log");
-print OUT "INSurVeylor command: $command\n";
+print OUT "INSurVeyor command: $command\n";
 close (OUT);
 
 system ("$command");
 
 if ($MOP_dir ne ''){
-    system ("$MOP_dir/scripts/run_SVcallers/convert_INSurVeylor_vcf.pl out.pass.vcf.gz $non_human > INSurVeylor.$out_prefix.vcf");
+    system ("$MOP_dir/scripts/run_SVcallers/convert_INSurVeyor_vcf.pl out.pass.vcf.gz $non_human > INSurVeyor.$out_prefix.vcf");
 }
 else{
-  system ("$Bin/convert_INSurVeylor_vcf.pl out.pass.vcf.gz $non_human > INSurVeylor.$out_prefix.vcf");
+  system ("$Bin/convert_INSurVeyor_vcf.pl out.pass.vcf.gz $non_human > INSurVeyor.$out_prefix.vcf");
 }
 
 print STDERR "INSurVeylor run was completed\n";
