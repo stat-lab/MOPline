@@ -56,7 +56,7 @@ The presets customized in this MOPline package are follows:
 	- [Wham](https://github.com/zeeev/wham)
  	- [INSurVeyor](https://github.com/kensung-lab/INSurVeyor)  
 - **Preset: 7tools (MOPline-7t)**  
-        - INSurVeylor is excluded from 8tools
+	- INSurVeylor is excluded from 8tools
 - **Preset: 7tools_1 (MOPline-7t-1)**  
 	- GRIDSS is excluded from 8tools  
 - **Preset: 7tools_2 (MOPline-7t-2)**  
