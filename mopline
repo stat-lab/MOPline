@@ -120,11 +120,11 @@ else{
   commands:
    merge_7tools           Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, and MELT, followed by MOP-based selection of overlap calls (high coverage version: > 25x)
    merge_7tools_lc        Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, and MELT, followed by MOP-based selection of overlap calls (low coverage version: 15x~25x)
-   merge_7tools_1 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, INSurVeylor, and MELT, followed by MOP-based selection of overlap calls
-   merge_7tools_2 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, INSurVeylor, and GRIDSS2, followed by MOP-based selection of overlap calls
+   merge_7tools_1 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, INSurVeyor, and MELT, followed by MOP-based selection of overlap calls
+   merge_7tools_2 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, INSurVeyor, and GRIDSS2, followed by MOP-based selection of overlap calls
    merge_6tools_1 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, and MELT, followed by MOP-based selection of overlap calls
    merge_6tools_2 (_lc)   Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, and GRIDSS2, followed by MOP-based selection of overlap calls
-   merge_8tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, INSurVeylor, and MELT, followed by MOP-based selection of overlap calls
+   merge_8tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, INSurVeyor, and MELT, followed by MOP-based selection of overlap calls
    merge_9tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, and SoftSV, followed by MOP-based selection of overlap calls
    merge_11tools (_lc)    Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, SoftSV, DELLY, and Mobster, followed by MOP-based selection of overlap calls
    add_cov                Add read coverage and clipped alignment read number at 50-bp window size to input SV vcf. 
