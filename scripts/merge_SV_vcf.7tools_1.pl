@@ -111,7 +111,7 @@ foreach my $ID (@ID_list){
         system ("rm -f $merge_dir/*.vcf");
     }
 
-    my $ins_tools = 'inGAP Manta Wham MELT INSurVeylor';
+    my $ins_tools = 'inGAP Manta Wham MELT INSurVeyor';
         
     system ("$script_dir/merge_SV_calls_multi_tools.pl -st INS -rl $read_length -s $ID -d $IDdir -t $ins_tools -nh $non_human > $IDdir/$merge_dir/Merge.INS.5tools.simple.vcf");
     
