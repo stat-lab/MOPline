@@ -123,7 +123,7 @@ pod2usage(-verbose => 0) if $help;
    --out_prefix pr -p <STR>  prefix name of an output vcf file [default: MOPline]
    --target_chr or -c <STR>  target chromosome [default: ALL]
    --target_type or -tt <STR> target SV type [default: ALL]
-   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 9tools, or 11tools) 
+   --toolset or -ts <STR>    a preset toolset of SV detection tools used (6tools_1, 6tools_2, 7tools, 7tools_1, 7tools_2, 8tools, 9tools, or 11tools) 
                              or a list file describing tool names in each line if using a custum toolset [default: 7tools]
    --toolset_all or -ta <STR> consider all the SVs calls (except for < 100 bp DEL/DUP) from the original single tools to execute SMC 
                               (if FLASE, consider minimum supporting reads indicated in a tool parameter file, specified with -ts or -ct option) [default: TRUE]
@@ -175,6 +175,9 @@ my @tools = ();
 @tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'MELT') if ($tool_set =~ /6tools_1/);
 @tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS') if ($tool_set =~ /6tools_2/);
 @tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS', 'MELT') if ($tool_set =~ /7tools/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'INSurVeyor', 'MELT') if ($tool_set =~ /7tools_1/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS', 'INSurVeyor') if ($tool_set =~ /7tools_2/);
+@tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'GRIDSS', 'MELT', 'INSurVeyor') if ($tool_set =~ /8tools/);
 @tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'DELLY', 'MELT', 'Lumpy', 'SoftSV') if ($tool_set =~ /9tools/);
 @tools = ('CNVnator', 'inGAP', 'Manta', 'Wham', 'MATCHCLIP', 'DELLY', 'MELT', 'Lumpy', 'SoftSV', 'forestSV', 'Mobster') if ($tool_set =~ /11tools/);
 if ((@tools == 0) and (-f $tool_set)){
