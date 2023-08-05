@@ -50,10 +50,10 @@ samtool_path = ;			[run_Wham.pl -sp]		# directory path containing samtools execu
 picard_jar = ;				[run_Wham.pl -pj]		# picard jar path, to use AddOrReplaceReadGroups function, if the input bam has no RG tag
 threads = 1;				[run_Wham.pl -n]		# number of threads
 
-#<INSurVeylor>
+#<INSurVeyor>
 insurveyor_sif_path = ... /INSurVeyor-1.1.1/insurveyor.sif;	[run_INSurVeylor.pl -cp]	# full path of INSurVeyor singularity sif file (insurveyor.sif)
-temp_dir = ... /tmp; [run_INSurVeylor.pl -td]      # absolute path of tmp directory for singularity exec
-threads = 6;							[run_INSurVeylor.pl -n]
+temp_dir = ... /tmp; [run_INSurVeyor.pl -td]      # absolute path of tmp directory for singularity exec
+threads = 6;							[run_INSurVeyor.pl -n]
 
 #<DELLY>
 delly_path = ... /delly-0.8.7/delly;	[run_DELLY.pl -cp]		# file path of DELLY executable
