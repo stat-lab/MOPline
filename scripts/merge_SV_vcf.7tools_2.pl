@@ -60,7 +60,7 @@ my @ID_list;
 my $work_dir = `pwd`;
 chomp $work_dir;
 
-my @tools = ('GRIDSS', 'MATCHCLIP', 'inGAP', 'CNVnator', 'Manta', 'Wham', 'INSurVeylor');
+my @tools = ('GRIDSS', 'MATCHCLIP', 'inGAP', 'CNVnator', 'Manta', 'Wham', 'INSurVeyor');
 
 my $genome_size = 1;
 
@@ -111,7 +111,7 @@ foreach my $ID (@ID_list){
         system ("rm -f $merge_dir/*.vcf");
     }
 
-    my $ins_tools = 'inGAP Manta Wham INSurVeylor';
+    my $ins_tools = 'inGAP Manta Wham INSurVeyor';
         
     system ("$script_dir/merge_SV_calls_multi_tools.pl -st INS -rl $read_length -s $ID -d $IDdir -t $ins_tools -nh $non_human > $IDdir/$merge_dir/Merge.INS.4tools.simple.vcf");
     
@@ -163,7 +163,7 @@ foreach my $ID (@ID_list){
         $inGAP_del_mr1 = 14;
     }
     
-    my $ins_set = "Manta:3=inGAP:$inGAP_ins_mr1 Wham:3=inGAP:$inGAP_ins_mr1 Manta:3=Wham:3 INSurVeylor:3=Manta:3 INSurVeylor:3=Wham:3 INSurVeylor:3=inGAP:$inGAP_ins_mr1 inGAP:$inGAP_ins_mr2 Manta:28 INSurVeylor:12";
+    my $ins_set = "Manta:3=inGAP:$inGAP_ins_mr1 Wham:3=inGAP:$inGAP_ins_mr1 Manta:3=Wham:3 INSurVeyor:3=Manta:3 INSurVeyor:3=Wham:3 INSurVeyor:3=inGAP:$inGAP_ins_mr1 inGAP:$inGAP_ins_mr2 Manta:28 INSurVeyor:12";
    
     system ("$script_dir/merge_SV_calls_multi_tools_filter.pl -t INS -ins $ins_set -v $IDdir/$merge_dir/Merge.INS.4tools.simple.vcf > $IDdir/$merge_dir/MOP.Merge.INS.4tools.vcf");
     
