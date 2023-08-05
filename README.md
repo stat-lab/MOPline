@@ -54,7 +54,7 @@ The presets customized in this MOPline package are follows:
 	- [MATCHCLIP](https://github.com/yhwu/matchclips2)  
 	- [MELT](https://melt.igs.umaryland.edu)  
 	- [Wham](https://github.com/zeeev/wham)
- 	- [INSurVeylor](https://github.com/kensung-lab/INSurVeyor)  
+ 	- [INSurVeyor](https://github.com/kensung-lab/INSurVeyor)  
 - **Preset: 7tools (MOPline-7t)**  
         - INSurVeylor is excluded from 8tools
 - **Preset: 7tools_1 (MOPline-7t-1)**  
@@ -116,7 +116,7 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 |MELT     |convert_MELT_vcf.pl ALU.final_comp.vcf LINE1.final_comp.vcf SVA.final_comp.vcf <br>HERVK.final_comp.vcf > MELT.AB.vcf|
 |SoftSV   |convert_SoftSV_vcf.pl deletions_small.txt insertion_small.txt tandems_small.txt<br> inversions_small.txt deletions.txt tandems.txt inversions.txt $nh > SoftSV.AB.vcf
 |Wham     |convert_Wham_vcf.pl AB.vcf $nh > Wham.AB.vcf                                       |
-|INSurVeylor|convert_INSurVeylor_vcf.pl AB.vcf $nh > INSurVeylor.AB.vcf                       |
+|INSurVeyor|convert_INSurVeyor_vcf.pl AB.vcf $nh > INSurVeyor.AB.vcf                       |
 
 If the data is for non-human species, specify 1 for $nh. If the data is human, specify 0 for $nh or nothing. In the case of CNVnator, the second argument of the convert_CNVnator_vcf.pl script must be a gap bed file that indicates the gap regions (a stretch of ‘N’ bases) in the reference genome. The gap.bed file for human is located in the Data folder in the package. For non-human species, a gap file can be obtained at [UCSC](https://hgdownload.soe.ucsc.edu/downloads) for some species or created manually, but this file can be omitted.
 
