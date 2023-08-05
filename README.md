@@ -56,15 +56,15 @@ The presets customized in this MOPline package are follows:
 	- [Wham](https://github.com/zeeev/wham)
  	- [INSurVeyor](https://github.com/kensung-lab/INSurVeyor)  
 - **Preset: 7tools (MOPline-7t)**  
-	- INSurVeylor is excluded from 8tools
+	- INSurVeyor is excluded from 8tools
 - **Preset: 7tools_1 (MOPline-7t-1)**  
 	- GRIDSS is excluded from 8tools  
 - **Preset: 7tools_2 (MOPline-7t-2)**  
 	- MELT is excluded from 8tools  
 - **Preset: 6tools_1 (MOPline-6t-1)**  
-	- GRIDSS and INSurVeylor are excluded from 8tools  
+	- GRIDSS and INSurVeyor are excluded from 8tools  
 - **Preset: 6tools_2 (MOPline-6t-2)**  
-	- MELT and INSurVeylor are excluded from 8tools  
+	- MELT and INSurVeyor are excluded from 8tools  
 - **Preset: 9tools (MOPline-9t)**  
 	- DELLY, Lumpy, SoftSV are added to 6tools_1
 
@@ -81,7 +81,7 @@ git clone https://github.com/stat-lab/MOPline
 ```
 The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data files for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.  
   
-MOPline and additional 10 SV detection tools (except for MELT and INSurVeylor) can be executed using [Singularity](#singularity).
+MOPline and additional 10 SV detection tools (except for MELT and INSurVeyor) can be executed using [Singularity](#singularity).
 
 ### Sample data
 [Sample datasets](http://jenger.riken.jp/static/SVs_bykosugisensei_20220329/Sample_data.tar.gz) (or available from https://drive.google.com/drive/folders/1bIEtaaM3xx8POIAf96kV-ImNXTHWPwQQ?usp=sharing) include human SV call sets from 6 individuals and yeast 10 WGS data. The datasets also include output data created with MOPline.
