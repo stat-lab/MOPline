@@ -115,9 +115,9 @@ DELLY:10	inGAP:5,Wham:5
 Manta:3		inGAP:10,Wham:3
 inGAP:10	Manta:3,Wham:3
 Wham:3		Manta:3,inGAP:10
-INSurVeylor:3	Manta:3,inGAP:10,Wham:3
+INSurVeyor:3	Manta:3,inGAP:10,Wham:3
 Manta:28	SINGLE
 inGAP:18	SINGLE
 MELT:4		SINGLE
 Mobster:5	SINGLE
-INSurVeylor:12	SINGLE
+INSurVeyor:12	SINGLE
