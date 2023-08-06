@@ -129,7 +129,7 @@ INS	Tangram	1	788	L	L
 INS	TEA	0	959	L	L
 INS	VirusFinder	1	1	L	L
 INS	Wham	6	0	L	L
-INS	INSurVeylor	10	0	M	LL
+INS	INSurVeyor	10	0	M	LL
 INV	123SV	42	250	M	L
 INV	BreakDancer	428	452	L	L
 INV	CREST	2	0	L	L
