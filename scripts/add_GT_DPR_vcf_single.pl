@@ -108,8 +108,8 @@ my $cov_dir_path = '';
 $cov_dir_path = "$sample_name/$cov_dir" if ($sample_name ne '');
 $cov_dir_path = "$sample_dir/$cov_dir" if ($sample_dir ne '');
 die "$cov_dir_path directory is not found:\n" if (!-d $cov_dir_path);
-my @cov_files = <$cov_dir_path/$sample_name.chr*>;
-die "$cov_dir_path/$sample_name.chr\*\.cov.gz files not found:\n" if (@cov_files == 0);
+my @cov_files = <$cov_dir_path/$sample_name.*.cov.gz>;
+die "$cov_dir_path/$sample_name.\*\.cov.gz files not found:\n" if (@cov_files == 0);
 
 system ("cp $vcf $vcf2");
 if ($disable_genotype == 0){
