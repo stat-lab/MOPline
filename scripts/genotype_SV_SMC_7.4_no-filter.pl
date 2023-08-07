@@ -165,7 +165,7 @@ pod2usage(-verbose => 0) if $help;
 =cut
 
 die "input vcf file is not specified: \n" if ($sv_vcf eq '');
-die "inappropriate toolset option:\n" if ($tool_set !~ /^[479]tools|^11tools|^6tools_[12]/);
+die "inappropriate toolset option:\n" if ($tool_set !~ /^[4789]tools|^11tools|^6tools_[12]/);
 
 my $tool_set_list = "$data_dir/SVtool_param.txt";
 
