@@ -460,6 +460,7 @@ foreach my $id (keys %tool_sv){
                 next if ($len < $min_sv_len) and ($len > 0) and ($type ne 'INS') and ($type ne 'TRA');
                 next if ($len > $max_sv_len);
                 my $subtype = $line[2];
+                $subtype = 'INS' if ($subtype =~ /INS/);
                 if ((!exists ${${$call{$type}}{$chr}}{$pos}) or ($type eq 'INS')){
                     push @{${${$call{$type}}{$chr}}{$pos}}, "$id=$pos=$len=$reads" if ($type ne 'INS');
                     push @{${${$call{$type}}{$chr}}{$pos}}, "$id=$pos=$len=$reads=$subtype" if ($type eq 'INS');
