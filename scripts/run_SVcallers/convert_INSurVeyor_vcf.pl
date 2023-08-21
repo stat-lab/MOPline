@@ -34,6 +34,7 @@ while (my $line = <FILE>){
         $read = $1;
     }
     $line[7] = "SVTYPE=INS;SVLEN=$len;READS=$read";
+    $line[2] = 'INS';
     splice (@line, 8, 2);
     print join ("\t", @line), "\n";
 }
