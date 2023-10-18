@@ -179,14 +179,14 @@ while (my $line = <FILE>){
 	if ($group ne ''){
 		$vcf = "$group/$sample_dir/$merge_dir/$vcf_name";
 		$vcf = "$group/$sample_dir/$merge_dir/$group.$vcf_name" if (!-f $vcf);
-		$vcf = "$sample_dir/$merge_dir/$vcf_name";
-		$vcf = "$sample_dir/$merge_dir/$group.$vcf_name";
+		$vcf = "$sample_dir/$merge_dir/$vcf_name" if (!-f $vcf);
+		$vcf = "$sample_dir/$merge_dir/$group.$vcf_name" if (!-f $vcf);
 	}
 	if (!-f $vcf){
 		print STDERR "Group-directory: $group\tSample-directory: $sample_dir\tMerge-directory: $merge_dir\tvcf-name: $vcf_name\n" if ($group ne '');
 		print STDERR "Sample-directory: $sample_dir\tMergedirectory: $merge_dir\tvcf-name: $vcf_name\n" if ($group eq '');
 		print STDERR "Expected vcf path: $vcf\n";
-		die "The specified vcf file is not found: Check the folders/files under your working directory and the specified options (-s and -id)\n";
+		die "The specified vcf file ($vcf) is not found: Check the folders/files under your working directory and the specified options (-s and -md)\n";
 	}
 	push @sample_id, $ID;
 	push @var_file, $vcf;
