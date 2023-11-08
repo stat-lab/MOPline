@@ -22,6 +22,7 @@ Detection and Genotyping of Structural Variants
 	- [\[Step-5\] Annotate](#step5)
 	- [\[Step-6\] Filter](#step6)
 - [Data Required for Non-Human Species](#nhdata)
+- [Foe single sample](#single)
 - [Quick Start with Sample Data](#quick)
 	- [A: Human SV datasets of 6 samples](#hsample)
 	- [B: Yeast WGS bam files of 10 samples](#ysample)
@@ -314,6 +315,9 @@ trf409.linux64 [input genome.fasta] 2 7 7 80 10 50 500 -d -l 1
 ```
 convert_TRF_data_to_simpleRepeat.pl [TRF output *.data file] > [output SimpleRepeat-like file]
 ```
+## <a name="single"></a>For single sample
+
+For MOPline with a single sample, all the steps can be performed, but the required directory structure (sample and tool directories) is required for completion. If SV genotyping is not needed, the steps-3 and -4 can be omitted.
 
 ## <a name="quick"></a>Quick Start with Sample Data
 
