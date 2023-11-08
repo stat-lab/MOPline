@@ -2952,7 +2952,8 @@ if ($DP_filter == 1){
 
 #system ("rm -r $temp_dir");
 
-my $correct_rate = int ($SMC_call / $Missed_calls * 1000) / 10;
+my $correct_rate = 0;
+$correct_rate = int ($SMC_call / $Missed_calls * 1000) / 10 if ($Missed_calls > 0);
 print STDERR "Total Sample Calls:    $total_calls\n";
 print STDERR "Total Ref alleles:   $Missed_calls\n";
 print STDERR "Total SMC calls recovered from reference alleles: $SMC_call ($correct_rate%)\n";
