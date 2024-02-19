@@ -250,7 +250,13 @@ The above command outputs `${out_prefix}.vcf` under `${out_dir}` directory.
 
 ### <a name="step4"></a>[Step-4]  Genotype and SMC
 
-In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/simpleRepeat.txt.gz, Data/genomicSuperDups.txt.gz) and are automatically selected. The command using the genotype_SV_SMC_7.4.pl script is as follows:
+In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/simpleRepeat.txt.gz, Data/genomicSuperDups.txt.gz) and are automatically selected.  
+Before the run of this step, confirm whether R nnet package has been installed as follows:  
+```
+R
+>library(nnet)
+```
+The command using the genotype_SV_SMC_7.4.pl script is as follows:
 ```
 mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_threads>
 ```
@@ -260,7 +266,8 @@ mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_
 **out_dir:** Name of the directory where the output vcf file will be generated  
 **out_prefix:** Prefix name of the output vcf file  
 **STR_file:** A simple/short tandem repeat file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) or [Tandem Repeats Finder](https://tandem.bu.edu/trf/trf.html) output (only for non-human species, can be unspecified)  
-**SD_file:** A segmental duplication file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) (only for non-human species, can be unspecified)
+**SD_file:** A segmental duplication file from [UCSC](https://hgdownload.soe.ucsc.edu/downloads) (only for non-human species, can be unspecified)  
+**ref_index:** A reference fasta index file (mandatory for non-human species)  
 
 The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to the FORMAT/SAMPLE fields of the output vcf file. The MC tag represents the level of SMC; the lower the MC value, the higher the confidence level. The genotyping step requires a parameter file indicating the minimum SRR for each SV type and algorithm. MOPline provides a default parameter file for 14 pre-selected algorithms, which is automatically selected during this step. If additional algorithms are to be used that are not listed in this parameter file, the user can edit the parameter file by adding parameters of those algorithms (if not edited, all algorithms not present in the parameter file will have a minimum RSS of 3).
 
@@ -425,7 +432,7 @@ This generates a MOPline.All-samples.vcf in the JointCall directory.
 
 #### [Step-4] Genotype and SMC
 ```
-mopline smc -v JointCall/MOPline.All-samples.vcf -ts 7tools -od MOPline_SMC -p MOPline.smc -n 4 -nh 1 -sr Sc_simpleRepeat.txt
+mopline smc -v JointCall/MOPline.All-samples.vcf -ts 7tools -r S288C.fa.fai -od MOPline_SMC -p MOPline.smc -n 4 -nh 1 -sr Sc_simpleRepeat.txt
 ```
 A vcf file named MOPline.smc.vcf has been created in the MOPline_SMC directory, with new MC tags in the FORMAT/SAMPLE fields and AF, AC, DPR, SR, and DPS keys in the INFO field. For non-human species, the -sr option specifies a simple repeat file.
 
