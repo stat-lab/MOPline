@@ -207,6 +207,9 @@ if ($non_human == 0){
     $ref_index = "$data_dir/hs38.fa.fai" if ($build eq '38');
     $ref_index = "$data_dir/chm13v2.0.fa.fai" if ($build eq 'T2T');
 }
+else{
+    die "--ref_index option not specified:\n" if ($ref_index eq '');
+}
 
 my $Gid = '';
 $Gid = $1 if ($sv_vcf =~ /^([WZ]\d+)/);
