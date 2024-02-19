@@ -251,7 +251,7 @@ The above command outputs `${out_prefix}.vcf` under `${out_dir}` directory.
 ### <a name="step4"></a>[Step-4]  Genotype and SMC
 
 In this step, all SV alleles are genotyped based on multinominal logistic regression (model data are in the Data/R.nnet.models folder) and reference alleles are re-genotyped to recover missing SV calls by SMC. This step requires files showing repeat regions in the reference, which are provided for human (Data/simpleRepeat.txt.gz, Data/genomicSuperDups.txt.gz) and are automatically selected.  
-Before the run of this step, confirm whether R nnet package has been installed as follows:  
+Before the run of this step, confirm whether the R nnet package has been installed as follows:  
 ```
 R
 >library(nnet)
