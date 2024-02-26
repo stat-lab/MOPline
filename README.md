@@ -224,7 +224,7 @@ Using the coverage files you created, add alignment statistics to each SV site i
 ```
 mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
 ```
-(--build 38 for human build38, -nh 1 -ri <ref.index> -gap <gap_bed> for non-human species)  
+(--build 38 for human build38, -nh 1 -r <ref.index> -gap <gap_bed> for non-human species)  
 **sample_list:** A sample list file showing sample names per line. A sample directory with the same names as the specified sample list must exist under the working directory.  
 **tool_set:** Algorithm preset or list file showing algorithm names per line [default: 7tools]  
 **vcf_directory:** The name of the directory containing the input vcf files in the sample directories [default: Merge_7tools]
