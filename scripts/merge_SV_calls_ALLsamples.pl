@@ -70,7 +70,7 @@ pod2usage(-verbose => 0) if $help;
                             If sample directories are located under a group directory and/or sample name has a group name at the head (e.g., ${Group}.${sample_name}), 
                             the group name # tag (i.e., #GROUP:${Group}) should be added at the lines before a group of sample lines.
 							
-   --merge_dir or -md <STR> directory name containing merged vcf files from multiple SV callers for every sample [default: Merge_7tools]
+   --merge_dir or -md <STR> directory name containing merged vcf files from multiple SV callers for every sample from step-1 [default: Merge_7tools]
    --outdir or -od <STR>    output directory [default: directory name specified with -md]
    --prefix or -p <STR>     prefix name of an output joint called vcf file [default: MOPline]
    --target or -t <STR>     target chromosome(s) (comma-separated chromosome name(s)) [default: ALL]
