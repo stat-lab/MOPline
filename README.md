@@ -353,7 +353,7 @@ The command adds alignment statistics and genotype data to `${sample}.Merge.ALL.
 
 #### [Step-3] Merge vcf files from multiple samples
 ```
-mopline joint_call -s sample_list.txt -id Merge_7tools -od JointCall -p MOPline
+mopline joint_call -s sample_list.txt -md Merge_7tools -od JointCall -p MOPline
 ```
 The command generates a MOPline.All-samples.vcf in the JointCall directory.
 
@@ -426,7 +426,7 @@ The command adds alignment statistics and genotype data to `${sample}.Merge.ALL.
 
 #### [Step-3] Merge vcf files from multiple samples
 ```
-mopline joint_call -s bam_list.txt -id Merge_7tools -od JointCall -p MOPline -nh 1
+mopline joint_call -s bam_list.txt -md Merge_7tools -od JointCall -p MOPline -nh 1
 ```
 This generates a MOPline.All-samples.vcf in the JointCall directory.
 
