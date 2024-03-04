@@ -146,7 +146,7 @@ foreach my $tool_name (@tools){
 	foreach my $opt (keys %{$tool_opt{$tool_name}}){
 		$opt_str .= "${$tool_opt{$tool_name}}{$opt} ";
 	}
-	$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|MATCHCLIP/);
+	$opt_str .= "-nh $non_human ";
 	$opt_str =~ s/\s$//;
 	my $bind_dir = $bind_dir2;
 	if ($tool_name eq 'CNVnator'){

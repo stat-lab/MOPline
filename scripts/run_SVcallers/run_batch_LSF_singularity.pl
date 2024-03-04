@@ -193,7 +193,7 @@ while (my $line = <FILE>){
 				$thread = $1 if (${$tool_opt{$tool_name}}{$opt} =~ /\s(\d+)/);
 			}
 		}
-		$opt_str .= "-nh $non_human " if ($tool_name =~ /CNVnator|inGAP|MELT|Wham|DELLY|Lumpy|SoftSV|Manta|GRIDSS|MATCHCLIP/);
+		$opt_str .= "-nh $non_human ";
 		$opt_str =~ s/\s$//;
 		if (($tool_name eq 'CNVnator') and ($opt_str =~ /-r\s/)){
 			$opt_str = "-b $bam -p $ID " . $opt_str;
