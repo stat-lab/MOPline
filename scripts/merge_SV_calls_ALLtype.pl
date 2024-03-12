@@ -425,6 +425,7 @@ print "##source=MOPline-$version\n";
 print "##reference=\n";
 print "##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variation (SV)\">\n";
 print "##INFO=<ID=SVLEN,Number=1,Type=Integer,Description=\"Difference in length between REF and ALT alleles (0 when undefined)\">\n";
+print "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of SV\">\n";
 print "##INFO=<ID=READS,Number=1,Type=Integer,Description=\"Number of reads supporting the SV allele\">\n";
 print "##INFO=<ID=TOOLS,Number=A,Type=String,Description=\"SV calling tool-called position\">\n";
 print "##ALT=<ID=DEL,Description=\"Deletion\">\n";

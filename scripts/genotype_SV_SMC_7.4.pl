@@ -2817,6 +2817,69 @@ open (OUT, "> $out_vcf");
 my $alt_flag = 0;
 my $contig_flag = 0;
 my $SMC_call = 0;
+my $header_flag = 0;
+my @contigs;
+my $sample_header = '';
+foreach (@header){
+    if ($_ =~ /ID=SVTYPE/){
+        $header_flag ++;
+    }
+    elsif ($_ =~ /ID=END/){
+        $header_flag ++;
+    }
+    elsif ($_ =~ /ID=AF/){
+        $header_flag ++;
+    }
+    elsif ($_ =~ /ID=DPR/){
+        $header_flag ++;
+    }
+    elsif (($_ =~ /FORMAT/) and ($_ =~ /ID=GT/)){
+        $header_flag ++;
+    }
+    elsif ($_ =~ /^#CHROM/){
+        $sample_header = $_;
+    }
+    push @contigs, $_ if ($_ =~ /contig=/);
+}
+if ($header_flag < 5){
+    @header = ();
+    push @header, '##fileformat=VCFv4.0';
+    push @header, '##fileDate=';
+    push @header, '##source=MOPlineV1.8.2';
+    push @header, "##reference=GRCh37" if ($non_human == 0) and ($build eq '37');
+    push @header, "##reference=GRCh38" if ($non_human == 0) and ($build eq '38');
+    push @header, "##reference=T2T-CHM13" if ($non_human == 0) and ($build eq 'T2T');
+    push @header, "##reference=" if ($non_human == 1);
+    push @header, '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variation (SV)">';
+    push @header, '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles (0 when undefined)">';
+    push @header, '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of SV">';
+    push @header, '##INFO=<ID=AF,Number=1,Type=Float,Description="Allele frequency">';
+    push @header, '##INFO=<ID=AC,Number=1,Type=Integer,Description="Allele count">';
+    push @header, '##INFO=<ID=AN,Number=1,Type=Integer,Description="Allele number">';
+    push @header, '##INFO=<ID=SC,Number=1,Type=Integer,Description="Number of samples carrying the SV allele">';
+    push @header, '##INFO=<ID=DPR,Number=1,Type=Float,Description="Mean ratio of read depth in CNV region to that in its flanking regions">';
+    push @header, '##INFO=<ID=SR,Number=1,Type=Float,Description="Mean ratio of breakpoints from soft-clipped reads in the read depth at the window">';
+    push @header, '##INFO=<ID=DPS,Number=1,Type=Float,Description="Mean ratio of 50-bp-window-fractions with inconsistent DPR">';
+    push @header, '##ALT=<ID=DEL,Description="Deletion">';
+    push @header, '##ALT=<ID=DUP,Description="Duplication">';
+    push @header, '##ALT=<ID=INS,Description="Insertion of novel sequence">';
+    push @header, '##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">';
+    push @header, '##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">';
+    push @header, '##ALT=<ID=INS:ME:SVA,Description="Insertion of SVA element">';
+    push @header, '##ALT=<ID=INS:ME:HERVK,Description="Insertion of HERVK element">';
+    push @header, '##ALT=<ID=INV:Description="Inversion">';
+    push @header, '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">';
+    push @header, '##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">';
+    push @header, '##FORMAT=<ID=VP,Number=1,Type=Integer,Description="Position of SV for a sample">';
+    push @header, '##FORMAT=<ID=VL,Number=1,Type=Integer,Description="Length of SV for a sample">';
+    push @header, '##FORMAT=<ID=DR,Number=1,Type=Float,Description="Ratio of read depth in CNV region to that in its flanking regions for a sample">';
+    push @header, '##FORMAT=<ID=DS,Number=1,Type=Float,Description="Ratio of inconsistent DR segments (> 0.8 for DEL, < 1.1 for DUP) in DEL and DUP">';
+    push @header, '##FORMAT=<ID=SR,Number=1,Type=Float,Description="Ratio of breakpoints of soft-clipped reads in the read depth at the 50- or 100-bp window">';
+    push @header, '##FORMAT=<ID=MC,Number=1,Type=Integer,Description="Site corrected for missing calls">';
+    push @header, @contigs;
+    push @header, $sample_header;
+}
+
 foreach (@header){
 	if ($_ =~ /##fileDate=/){
 		print OUT "##fileDate=$time\n";
