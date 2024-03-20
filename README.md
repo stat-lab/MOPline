@@ -108,7 +108,7 @@ The preset algorithms are a combination of tools that have been evaluated for pr
 |Algorithm|Command using a conversion script (for a sample name, AB)                      |
 | :------ | :---------------------------------------------------------------------------- |
 |CNVnator |convert_CNVnator_vcf.pl AB.out gap.bed > CNVnator.AB.vcf                       |
-|DELLY    |convert_CNVnator_vcf.pl AB.out $nh > CNVnator.AB.vcf                               |
+|DELLY    |convert_DELLY_vcf.pl AB.out $nh > DELLY.AB.vcf                               |
 |GRIDSS   |convert_GRIDSS_vcf.pl AB.vcf.gz $nh > GRIDSS.AB.vcf                                |
 |inGAP    |convert_inGAP_vcf.pl AB.chr1.out .... AB.chrY.out > inGAP.AB.vcf               |
 |Lumpy    |convert_Lumpy_vcf.pl AB.vcf $nh > Lumpy.AB.vcf                                     |
