@@ -13,7 +13,7 @@ Detection and Genotyping of Structural Variants
 		- [(1) Run SV detection tools](#run_sv)
 			- [(a) Run user-installed tools using wrapper scripts](#user_install)
 			- [(b) Run using Singularity](#singularity)
-   			- [(c) Batch runs of SV callers with multiple samples] (#batch)
+   			- [(c) Batch runs of SV callers with multiple samples](#batch)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
