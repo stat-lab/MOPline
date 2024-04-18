@@ -13,6 +13,7 @@ Detection and Genotyping of Structural Variants
 		- [(1) Run SV detection tools](#run_sv)
 			- [(a) Run user-installed tools using wrapper scripts](#user_install)
 			- [(b) Run using Singularity](#singularity)
+   			- [(c) Batch runs of SV callers with multiple samples (#batch)
 			- [Notes on SV calling and input bam](#notes)
 		- [(2) Create coverage files](#create_cov)
 	- [\[Step-1\] Select overlap calls \(high-confidence calls\) from SV call sets](#step1)
@@ -153,6 +154,16 @@ To run the run_single_singularity.pl script for a single sample, install this MO
 ```
 The sif file must be specified as an absolute path. The config_singularity.txt provided in this package can be used for the template, but the lines 'Do not change' indicating the path in the singularity container, must not be changed. Input files (reference.fasta, alignment bam) on the host must be specified with the absolute path. The temp directory corresponds to /tmp on the host or a temporary directory specified with the environmental variable TMPDIR. The bind directories are the paths on the host to add to the singularity container. If the input files used by run_single_singularity.pl are located in a directory other than the working directory, the path to the corresponding directory must be specified with the -bd option (multiple paths separated by commas).
 
+### <a name="batch"></a>(c) Batch runs of SV callers with multiple samples
+
+Users who have access to a job management system that includes Slurm and LSF Job Manager can use batch scripts (run_batch_slurm.pl, run_batch_LSF.pl) for multiple samples.  
+If you do not use the job management system, the script run_SVcallers_batch.pl can be used for multiple samples. To use this script, split multiple samples into several batches (e.g., 10 samples x 10 batches for 100 samples), depending on the CPU cores and memory capacity of the computational environment. For each batch、create sample list files showing the sample name and the corresponding bam/cram file path in each line. If the input alignment files are in cram format, the script automatically converts cram files to bam files because some SV callers only accept bam format as input. The --add_MC (-am) option can be used to add MC/MQ tags to bam files, which may be useful for reducing the runtime of the MELT tool. In these cases, a new bam file will be created under the sample directory. A typical usage of this script is as follows:
+```
+run_SVcallers_batch.pl -sl <sample list file> -r <reference fasta> -sf <mopline.sif singularity file if -c is specified> -c <config file for singularity-based run> -td <temp direcory> -bd <bind directories> -c2 <config file for MELT and/or INSurVeyor> (-am if adding MC/MQ tag in bam file)
+(Sample directories must exist under the working directory.)
+```
+This command executes the SV callers for each sample sequentially. Multiple parallel executions of this command with the split sample list files will reduce the overall runtime.
+
 ### <a name="notes"></a>Notes on SV calling and input bam
 
 #### inGAP-sv
@@ -195,7 +206,12 @@ mopline create_cov -b <bam_list> -r <reference_fasta> -rl <read_length> -n <num_
 
 The above command creates a Cov directory under the sample directory, which contains the coverage files for each chromosome (`${sample_name}.chr*.cov.gz`).
 
-For batch jobs, we provide a create_coverage_file_bam_single.pl script, that can be used to submit a single bam file job using a job manager such as Slurm and LSF.
+For batch jobs, we provide create_coverage_file_bam_single.pl and run_create_cov_batch.pl scripts, the former of which can be used to submit a single bam file job using a job manager such as Slurm and LSF. The run_create_cov_batch.pl script can be used with sample list files, which were split into several batches (e.g., 10 samples x 10 batches for 100 samples), depending on the CPU cores and memory capacity of the computational environment. A sample list file describes sample name in each line. A typical usage of this script is as follows:
+```
+run_create_cov_batch.pl -s <sample list file> -r <reference fasta file> -rl <read length (bp)>
+(Sample directories must exist under the working directory and each sample directory must have a bam file, named ${sample_name}.bam.)
+```
+This command executes the script create_coverage_file_bam_single.pl sequentially for each sample with a single thread. Multiple parallel executions of this command with the split sample list files will reduce the overall runtime.
 
 ### <a name="step1"></a>[Step-1]  Select overlap calls (high-confidence calls) from SV call sets
 
