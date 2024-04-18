@@ -14,7 +14,7 @@ my $args = join (' ', @ARGV);
 print STDERR "command: $command Args: $args\n";
 
 my $help;
-my $version = 'v1.8.2';
+my $version = 'v1.8.3';
 
 my $script_dir = "$Bin/scripts";
 $script_dir = "$ENV{MOPLINE_DIR}/scripts" if (exists $ENV{MOPLINE_DIR});
