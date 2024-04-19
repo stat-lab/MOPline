@@ -18,7 +18,7 @@ my $add_MCMQ_tag = 0;
 my $help;
  
 GetOptions(
-		'sif_file|sf=s' => \$sif_file,
+    'sif_file|sf=s' => \$sif_file,
     'ref|r=s' => \$ref,
     'sample_list|sl=s' => \$sample_list,
     'config|c=s' => \$config,
@@ -33,14 +33,14 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  run_SVcallers_batch.pl -sl <sample list file> -r <reference fasta> -c <config file> -sf <mopline.sif file> -td <temp directory> -c2 <config file for MELT and/or INSurVeyor> (-am)
+  run_SVcallers_batch.pl -sl <sample list file> -r <reference fasta> -c <config file> -sf <mopline.sif file> -td <temp directory> -c2 <config file for MELT, INSurVeyor, and/or others> (-am)
 
   Options:
    --sample_list or -sl <STR> sample list file, which must indicate sample name and the path of the corresponding bam/cram file seprated with tab in each line [mandatory]
    --sif_file or -sf <STR>  absolute path of mopline.sif singularity image file [mandatory if the -c option is specified]
    --ref or -r <STR>        reference fasta
    --config or -c <STR>     config file for singularity run
-   --config2 or -c2 <STR>   config file for MELT and/or INSurVeyor
+   --config2 or -c2 <STR>   config file for MELT, INSurVeyor, and/or others
    --temp_dir or -td <STR>  absolute path of tmp directory on the host [mandatory]
    --bind_dir or -bd <STR>  comma-separated list of absolute path (except for the working directory) on the host to be added to singularity container (optional)
    --no_home or -noh <BOOLEAN>  do not add $HOME on the host to singularity container [default: false]
