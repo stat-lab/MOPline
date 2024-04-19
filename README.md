@@ -162,7 +162,7 @@ If you do not use the job management system, the script run_SVcallers_batch.pl c
 run_SVcallers_batch.pl -sl <sample list file> -r <reference fasta> -sf <mopline.sif singularity file if -c is specified> -c <config file for singularity-based run> -td <temp direcory> -bd <bind directories> -c2 <config file for MELT and/or INSurVeyor> (-am if adding MC/MQ tag in bam file)
 (Sample directories must exist under the working directory.)
 ```
-This command executes the SV callers for each sample sequentially. Multiple parallel executions of this command with the split sample list files will reduce the overall runtime.
+This command executes the SV callers for each sample sequentially. Multiple parallel executions of this command with the split sample list files will reduce the overall runtime. Both the -c and -c2 options can be specified, or just one of them. If the mopline.sif singularity container is not used and a user-installed SV caller is used, define the SV caller parameters in the configuration file specified with -c2.
 
 ### <a name="notes"></a>Notes on SV calling and input bam
 
