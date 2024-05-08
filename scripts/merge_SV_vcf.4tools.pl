@@ -32,7 +32,7 @@ pod2usage(-verbose => 0) if $help;
 
 =head1 SYNOPSIS
 
-  merge_SV_vcf.7tools.pl -s <sample-list-file or a sample name> -rl <read_length> (-nh 1 if sample is a non-human species)
+  merge_SV_vcf.4tools.pl -s <sample-list-file or a sample name> -rl <read_length> (-nh 1 if sample is a non-human species)
   output vcf file name: ${sample_name}.Merge.ALL.vcf
   Tools used: inGAP, CNVnator, Manta, Wham
 
