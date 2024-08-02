@@ -107,6 +107,7 @@ my %SRR;
 my %SDlen;
 my %SDbp;
 my %tool_preci;
+my %INS_highconf_tool;
 
 #die "var_files should be < 4:\n" if (@var_file > 4) or (@var_id > 4);
 my $data_dir = "$Bin/../Data";
@@ -622,6 +623,18 @@ foreach my $type (keys %call){
         foreach my $pos (sort {$a <=> $b} keys %{${$call{$type}}{$chr}}){
             if (@{${${$call{$type}}{$chr}}{$pos}} == 1){
                 my ($tool1, $tpos, $tlen, $tread, $subtype) = split (/=/, ${${${$call{$type}}{$chr}}{$pos}}[0]);
+                if ($type eq 'INS'){
+                    my $tool2 = $tool1;
+                    $tool2 =~ s/\.MEI$// if ($tool2 =~ /\.MEI$/);
+                    $tool2 =~ s/\.VEI$// if ($tool2 =~ /\.VEI$/);
+                    $tool2 =~ s/\.NUMT$// if ($tool2 =~ /\.NUMT$/);
+                    if (exists ${$SDlen{$type}}{$tool2}){
+                        my $len_rank = ${$SDlen{$type}}{$tool2};
+                        if ($len_rank >= 4){
+                            $INS_highconf_tool{$tool2} = 1;
+                        }
+                    }
+                }
                 ${${$call_merge{$type}}{$chr}}{$pos} = "$tool1:$tread=$tpos=$tlen=$tread" if ($type ne 'INS');
                 ${${$call_merge{$type}}{$chr}}{$pos} = "$tool1:$tread=$tpos=$tlen=$tread=$subtype" if ($type eq 'INS');
             }
@@ -632,6 +645,7 @@ foreach my $type (keys %call){
                 my %preci_rank;
                 my $ins_subtype = '';
                 my @len;
+                my @len2;
                 foreach (@{${${$call{$type}}{$chr}}{$pos}}){
                     my ($tool1, $pos1, $len1, $read1, $subtype) = split (/=/, $_);
                     my $tool2 = $tool1;
@@ -667,7 +681,6 @@ foreach my $type (keys %call){
                     }
                     else{
                         $ins_subtype .= "$subtype,";
-                        push @len, $len1 if ($len1 > 20);
                     }
                     my $read_2 = $read1;
                     $read_2 = 30 if ($read1 > 30);
@@ -681,6 +694,11 @@ print STDERR "Warning No precision data: $tool2\t$type-$size\t$read_2\n" if (!ex
                     $len_rank = ${$SDlen{$type}}{$tool2} if (exists ${$SDlen{$type}}{$tool2});
                     $bp_rank{$tool2} = $bp_rank;
                     $len_rank{$tool2} = $len_rank if ($type ne 'INS');
+                    $INS_highconf_tool{$tool2} = 1 if ($type eq 'INS') and ($len_rank >= 4);
+                    if (($type eq 'INS') and ($len1 > 20)){
+                        push @len2, $len1 if ($len_rank >= 4);
+                        push @len, $len1;
+                    }
                 }
                 $ins_subtype =~ s/,$//;
                 my $top_tool = '';
@@ -729,6 +747,10 @@ print STDERR "Warning No precision data: $tool2\t$type-$size\t$read_2\n" if (!ex
                 $select_pos = $tpos1;
                 $select_len = $tlen2 if ($type ne 'INS');
                 $select_read = $tread1;
+                if (@len2 > 0){
+                    @len = ();
+                    push @len, @len2;
+                }
                 if (@len > 0){
                     my $sumlen = 0;
                     map{$sumlen += $_} @len;
@@ -804,6 +826,7 @@ foreach my $type (keys %call_merge){
                                 my $count = 0;
                                 my %preci_rank;
                                 my @len;
+                                my @len2;
                                 foreach (@{$toolset{$toolnum}}){
                                     my ($toolset1, $pos1, $len1, $read1) = split (/=/, $_);
                                     my @toolset = split (/,/, $toolset1);
@@ -823,7 +846,19 @@ foreach my $type (keys %call_merge){
                                         }
                                     }
                                     else{
-                                        push @len, $len1 if ($len1 > 20);
+                                        if ($len1 > 20){
+                                            my $match_flag = 0;
+                                            if (scalar keys %INS_highconf_tool > 0){
+                                                foreach my $instool (keys %INS_highconf_tool){
+                                                    if ($toolset1 =~ /$instool/){
+                                                        $match_flag = 1;
+                                                        last;
+                                                    }
+                                                }
+                                            }
+                                            push @len2, $len1 if ($match_flag == 1);
+                                            push @len, $len1;
+                                        }
                                     }
                                     foreach my $tool1 (@toolset){
                                         my $tool2 = $tool1;
@@ -855,6 +890,10 @@ foreach my $type (keys %call_merge){
                                     last;
                                 }
                                 my ($stoolset1, $spos1, $slen1, $sread1) = split (/=/, ${$toolset{$toolnum}}[$select_count]);
+                                if (@len2 > 0){
+                                    @len = ();
+                                    push @len, @len2;
+                                }
                                 if (@len > 0){
                                     my $sumlen = 0;
                                     map{$sumlen += $_} @len;
@@ -1135,6 +1174,7 @@ print STDERR "Warning No precision data: $type-$size\t$tool1\t$tool2\t$read_2\n"
                 my $select_read = 0;
                 my @pos2;
                 my @len2;
+                my @len3;
                 my @read2;
                 my $tool_set = '';
                 my $subtype_set = '';
@@ -1144,6 +1184,7 @@ print STDERR "Warning No precision data: $type-$size\t$tool1\t$tool2\t$read_2\n"
                     my @toolset = split (/,/, $toolset1);
                     my $toolnum = scalar @toolset;
                     my $new_toolset = '';
+                    my $match_flag = 0;
                     foreach (@toolset){
                         if ($_ !~ /:\d+:/){
                             my $tool = $1 if ($_ =~ /(.+?):/);
@@ -1151,6 +1192,13 @@ print STDERR "Warning No precision data: $type-$size\t$tool1\t$tool2\t$read_2\n"
                         }
                         else{
                             $new_toolset .= "$_,";
+                        }
+                        if (($type eq 'INS') and (scalar keys %INS_highconf_tool > 0)){
+                            foreach my $instool (keys %INS_highconf_tool){
+                                if ($_ =~ /$instool/){
+                                    $match_flag = 1;
+                                }
+                            }
                         }
                     }
                     $new_toolset =~ s/,$//;
@@ -1161,6 +1209,7 @@ print STDERR "Warning No precision data: $type-$size\t$tool1\t$tool2\t$read_2\n"
                     $total_tools += $toolnum;
                     push @pos2, $tpos1;
                     push @len2, $len1;
+                    push @len3, $len1 if ($match_flag == 1);
                     push @read2, $read1;
                 }
                 $tool_set =~ s/,$//;
@@ -1250,7 +1299,21 @@ print STDERR "Warning No precision data: $type-$size\t$tool1\t$tool2\t$read_2\n"
                     my ($stoolset1, $spos1, $slen1, $sread1) = split (/=/, ${$toolset{$top_tnum}}[$select_count]);
                     $select_pos = $spos1;
                     $select_read = $sread1;
-                    $select_len = $slen1 if ($type ne 'INS');
+                    if ($type ne 'INS'){
+                        $select_len = $slen1;
+                    }
+                    else{
+                        if (@len3 > 0){
+                            @len2 = ();
+                            push @len2, @len3;
+                        }
+                        if (@len2 > 0){
+                            my $sumlen = 0;
+                            map{$sumlen += $_} @len2;
+                            my $avelen = int ($sumlen / @len2 + 0.5);
+                            $select_len = $avelen;
+                        }
+                    }
                 }
                 else{
                     my %len_pos;
@@ -1270,6 +1333,18 @@ print STDERR "Warning No precision data: $type-$size\t$tool1\t$tool2\t$read_2\n"
                             last;
                         }
                         $count1 ++;
+                    }
+                    if ($type eq 'INS'){
+                        if (@len3 > 0){
+                            @len2 = ();
+                            push @len2, @len3;
+                        }
+                        if (@len2 > 0){
+                            my $sumlen = 0;
+                            map{$sumlen += $_} @len2;
+                            my $avelen = int ($sumlen / @len2 + 0.5);
+                            $select_len = $avelen;
+                        }
                     }
                 }
                 foreach my $pos1 (@merge){
