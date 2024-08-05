@@ -104,7 +104,32 @@ if ($non_human == 0){
 	$gap_bed = "$data_dir/gap.b38.bed" if ($build eq '38');
 }
 
+my $SDlen_rank_file = "$data_dir/SV_SDlen_rank_list.txt";   # file showing breakpoint accuracy for existing SV detection algorithms
+
+my %INS_highconf;
 my %gap;
+
+open (FILE, $SDlen_rank_file) or die ("$SDlen_rank_file is not found: $!\n");
+while (my $line = <FILE>){
+    chomp $line;
+    next if ($line =~ /^#/);
+    my @line = split (/\s+/, $line);
+    my $tool = $line[1];
+    my $type = $line[0];
+    my $sd_len_rank = $line[5];
+    my $lenrank = 1;
+    if ($sd_len_rank eq 'M'){
+        $lenrank = 2;
+    }
+    elsif ($sd_len_rank eq 'L'){
+        $lenrank = 3;
+    }
+    elsif ($sd_len_rank eq 'LL'){
+        $lenrank = 4;
+    }
+    $INS_highconf{$tool} = 1 if ($lenrank >= 4);
+}
+close (FILE);
 
 if ($gap_bed ne ''){
 	my $pre_gchr = '';
@@ -271,7 +296,15 @@ foreach my $id (@sample_id){
 		    $len = 0;
 		}
 		my $tools = '';
+		my $ins_highconf_flag = 0;
 		$tools = $1 if ($line[7] =~ /TOOLS=(.+)/);
+		if (scalar keys %INS_highconf > 0){
+			foreach my $instool (keys %INS_highconf){
+				if ($tools =~ /$instool/){
+					$ins_highconf_flag = 1;
+				}
+			}
+		}
 		$tools = '' if ($tools =~ /,/);
 		my $gt_gq = './.:0';
 		$gt_gq = $1 if (@line > 9) and ($line[8] =~ /GT:GQ/) and ($line[9] =~ /([^:]+:[^:]+)/);
@@ -301,7 +334,7 @@ foreach my $id (@sample_id){
 		    }
 		}
 		${${${$call{$type}}{$chr}}{$pos}}{$id} = $len;
-		${${${$call_subtype{$type}}{$chr}}{$pos}}{$id} = "$subtype==$gt_gq==$dr==$ds==$sr";
+		${${${$call_subtype{$type}}{$chr}}{$pos}}{$id} = "$subtype==$gt_gq==$dr==$ds==$sr==$ins_highconf_flag";
     }
     close (FILE);
 }
@@ -313,7 +346,14 @@ foreach my $type (keys %call){			# clustering DEL/DUP/INV with 0.5- to 2.0-fold 
 		    foreach my $id (keys %{${${$call{$type}}{$chr}}{$pos}}){
 				my $len = ${${${$call{$type}}{$chr}}{$pos}}{$id};
 				push @len, $len if ($type ne 'INS');
-				push @{${${$call_cons{$type}}{$chr}}{$pos}}, "$id=$pos=$len";
+				my $ins_highconf_flag = 0;
+				if ($type eq 'INS'){
+					my @info = split (/==/, ${${${$call_subtype{$type}}{$chr}}{$pos}}{$id});
+					if ($info[5] == 1){
+						$ins_highconf_flag = 1;
+					}
+				}
+				push @{${${$call_cons{$type}}{$chr}}{$pos}}, "$id=$pos=$len=$ins_highconf_flag";
 			}
 			if (@len == 1){
 				${${$call_ave_len{$type}}{$chr}}{$pos} = $len[0];
@@ -654,12 +694,13 @@ foreach my $type (keys %call_cons){		# assign median SV length for each consensu
 		foreach my $pos (sort {$a <=> $b} keys %{${$call_cons{$type}}{$chr}}){
 		    next if (exists ${${$used_pos{$type}}{$chr}}{$pos});
 		    my @len;
+		    my @inslen_high;
 		    my $sum_len = 0;
 		    my $new_len = 0;
 	        my $maxlen = 0;
 		    my $num = scalar @{${${$call_cons{$type}}{$chr}}{$pos}};
 		    foreach (@{${${$call_cons{$type}}{$chr}}{$pos}}){
-				my $len = $1 if ($_ =~ /=(\d+)$/);
+		    	my ($id, $pos1, $len, $flag) = split (/=/, $_);
 				if (($len == 0) or ($len == 1)){
 				    $num --;
 				    next;
@@ -667,14 +708,24 @@ foreach my $type (keys %call_cons){		# assign median SV length for each consensu
 				$sum_len += $len;
 				push @len, $len;
 	            $maxlen = $len if ($maxlen < $len);
+	            if ($type eq 'INS'){
+		            push @inslen_high, $len if ($flag == 1);
+		        }
 		    }
 		    if ($type eq 'INS'){
-                if ($maxlen >= $min_sv_len){
-                    $new_len = $maxlen;
-                }
-                else{
-                    $new_len = 0;
-                }
+		    	if (@inslen_high > 0){
+		    		my $sum_inslen = 0;
+		    		map{$sum_inslen += $_} @inslen_high;
+		    		$new_len = int ($sum_inslen / @inslen_high + 0.5);
+		    	}
+		    	else{
+	                if ($maxlen >= $min_sv_len){
+	                    $new_len = $maxlen;
+	                }
+	                else{
+	                    $new_len = 0;
+	                }
+	            }
             }
 		    else{
 				if ($num == 1){
@@ -902,19 +953,19 @@ foreach my $type (keys %call_cons){		# merge neighboring consensus pos with < 20
 						foreach my $item (@item){
 						    my ($id, $pos1, $len1) = split (/=/, $item);
 						    if (abs ($pos1 - $ave_overlap_pos) <= abs ($pos1 - $ave_overlap_pre_pos)){
-							push @overlap_item, $item;
+								push @overlap_item, $item;
 						    }
 						    else{
-							push @overlap_pre_item, $item;
+								push @overlap_pre_item, $item;
 						    }
 						}
 						foreach my $item (@pre_item){
 						    my ($id, $pos1, $len1) = split (/=/, $item);
 						    if (abs ($pos1 - $ave_overlap_pos) <= abs ($pos1 - $ave_overlap_pre_pos)){
-							push @overlap_item, $item;
+								push @overlap_item, $item;
 						    }
 						    else{
-							push @overlap_pre_item, $item;
+								push @overlap_pre_item, $item;
 						    }
 						}
 						my $median_pos = 0;
@@ -1554,6 +1605,7 @@ foreach my $hline (@header){
 		print OUT "##INFO=<ID=SC,Number=1,Type=Integer,Description=\"Number of samples carrying the SV allele\">\n";
 		print OUT "##INFO=<ID=DPR,Number=1,Type=Float,Description=\"Mean ratio of read depth in CNV region to that in its flanking regions\">\n";
 		print OUT "##INFO=<ID=SR,Number=1,Type=Float,Description=\"Mean ratio of breakpoints from soft-clipped reads in the read depth at the window\">\n";
+		print OUT "##INFO=<ID=INSHC,Number=1,Type=BOOLEAN,Description=\"INS site called with high confidence INS length definition tool (e.g., INSurVeyor)\">\n";
 	}
 }
 print OUT "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t$GID_str\n";
@@ -1571,17 +1623,21 @@ foreach my $chr (sort keys %vcf_cons){
             my @DR = ();
             my @SR = ();
             my @len;
+            my @ins_len;
             my $ac = 0;
             foreach (@id_set){
                 my ($gid, $ipos, $ilen) = split (/==/, $_);
                 my $id = $gid;
                 $id = $1 if ($gid =~ /[^:]+:(.+)/);
 print STDERR "$chr2\t$type\t$pos\t$ipos\t$id\n" if (!exists ${${${$call_subtype{$type}}{$chr2}}{$ipos}}{$id});
-                my ($subtype, $gt_gq, $dr, $ds, $sr) = split (/==/, ${${${$call_subtype{$type}}{$chr2}}{$ipos}}{$id});
+                my ($subtype, $gt_gq, $dr, $ds, $sr, $ins_highconf_flag) = split (/==/, ${${${$call_subtype{$type}}{$chr2}}{$ipos}}{$id});
                 $id_info{$gid} = "$gt_gq:$ipos:$ilen:$dr:$ds:$sr";
                 push @DR, $dr;
                 push @SR, $sr;
                 push @len, $ilen;
+                if (($type eq 'INS') and ($ins_highconf_flag == 1)){
+                	push @ins_len, $ilen;
+                }
             }
             foreach my $gid (sort keys %Gid){
                 if (exists $id_info{$gid}){
@@ -1610,6 +1666,12 @@ print STDERR "$chr2\t$type\t$pos\t$ipos\t$id\n" if (!exists ${${${$call_subtype{
                 my ($new_len) = &cons_len (\@len, $len);
                 $new_len = 1 - $new_len if ($type eq 'DEL');
                 $line =~ s/SVLEN=-\d+/SVLEN=$new_len/;
+            }
+            elsif (($type eq 'INS') and (@ins_len > 0)){
+            	my $sumlen = 0;
+            	map{$sumlen += $_} @ins_len;
+            	my $new_len = int ($sumlen / @ins_len + 0.5);
+            	$line =~ s/SVLEN=-\d+/SVLEN=$new_len;INSHC/;
             }
             if ($line !~ /END=/){
                 my $len = $1 if ($line =~ /SVLEN=-*(\d+)/);

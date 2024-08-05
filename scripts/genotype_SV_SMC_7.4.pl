@@ -1547,10 +1547,10 @@ foreach my $chr (sort keys %vcf){
 						$GQ2 = $sec_gl - $third_gl;
 						$GQ2 = 99 if ($GQ2 > 99);
 				    }
-$GQ = 999;
-$GQ = int (-10 * (log ($prob{0}) / log(10)) + 0.7) if ($prob{0} > 0);
-$GQ = 999 if ($GQ > 999);
-$GQ2 = $GQ;
+                    $GQ = 999;
+                    $GQ = int (-10 * (log ($prob{0}) / log(10)) + 0.7) if ($prob{0} > 0);
+                    $GQ = 999 if ($GQ > 999);
+                    $GQ2 = $GQ;
 				    my ($test_pos, $test_order) = split (/=/, $test_order{$num});
 				    ${${$pred{$test_pos}}{$type3}}{$test_order} = "$top_gt=$top_prob=$sec_gt=$GQ=$GQ2";
 				}
@@ -1605,10 +1605,10 @@ $GQ2 = $GQ;
 				    $GQ2 = $sec_gl - $third_gl;
 				    $GQ2 = 99 if ($GQ2 > 99);
 				}
-$GQ = 999;
-$GQ = int (-10 * (log ($prob{0}) / log(10)) + 0.7) if ($prob{0} > 0);
-$GQ = 999 if ($GQ > 999);
-$GQ2 = $GQ;
+                $GQ = 999;
+                $GQ = int (-10 * (log ($prob{0}) / log(10)) + 0.7) if ($prob{0} > 0);
+                $GQ = 999 if ($GQ > 999);
+                $GQ2 = $GQ;
 				my ($test_pos, $test_order) = split (/=/, $test_order{1});
 				${${$pred{$test_pos}}{$type3}}{$test_order} = "$top_gt=$top_prob=$sec_gt=$GQ=$GQ2";
 		    }
@@ -2937,6 +2937,16 @@ foreach my $chr (@chr){
                 $ac ++ if ($gt eq '1/1');
                 $sc ++;
                 push @len, $vl;
+                if ($line[7] =~ /INSHC/){
+                    if (($mc > 0) and ($len > 0)){
+                        my $lenrate = 0;
+                        $lenrate = int ($vl / $len * 100 + 0.5) / 100;
+                        if (($lenrate < 0.8) or ($lenrate > 1.2)){
+                            my $info = "$gt:$gq:$vp:$len:$dr:$ds:$sr:$mc";
+                            $line[$count - 1] = $info;
+                        }
+                    }
+                }
                 $sum_dpr += $dr;
                 $sum_dps += $ds;
                 $sum_sr += $sr;
@@ -2992,6 +3002,9 @@ foreach my $chr (@chr){
             @len = sort {$a <=> $b} @len;
             my $med_len = $len[$half];
             $med_len = 0 - $med_len if ($type eq 'DEL');
+            if ($line[7] =~ /INSHC/){
+                $med_len = $len;
+            }
             $line[7] =~ s/SVLEN=-*\d+/SVLEN=$med_len/ if ($med_len > 0);
             $line[7] =~ s/SC=\d+/SC=$sc/ if ($line[7] =~ /SC=/);
             $line[7] =~ s/AC=\d+/AC=$ac/ if ($line[7] =~ /AC=/);
