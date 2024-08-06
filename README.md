@@ -253,7 +253,7 @@ For batch jobs, we provide a add_GT_DPR_vcf_single.pl script to submit a single 
 
 Joint calling is performed with the merge_SV_calls_ALLtype.pl script as follows:
 ```
-mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix>
+mopline joint_call -s <sample_list> -md <merge_dir> -od <out_dir> -p <out_prefix> --build 37
 ```
 (--build 38 for human build 38, -nh 1 -gap <gap_bed> for non-human species)  
 **sample_list:** A sample list file showing sample names per line. A sample directory with the same name as the specified sample list must exist under the working directory. If the sample directory name and the sample name are different, specify them by separating each line with a comma, such as `${sample_directory_name},${sample_name}`. It is assumed that the input vcf files (`${sample_name}.Merge.ALL.vcf`) exist in `${sample_directory}/${merge_dir}`.  
@@ -274,7 +274,7 @@ R
 ```
 The command using the genotype_SV_SMC_7.4.pl script is as follows:
 ```
-mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> -n <num_threads>
+mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> --build 37 -n <num_threads>
 ```
 (--build 38 for human build 38, -nh 1 -sr <STR_file> -sd <SD_file> -r <ref_index> for non-human species)  
 **input_vcf:** An input vcf file from Step-3  
@@ -293,7 +293,7 @@ This step takes longer to perform as the sample size increases and the genome si
 
 Step-5 adds gene name/ID and gene region that overlap the SV to the INFO filed (with SVANN key) of the vcf file. The gene region includes exon/CDS (All-exons if the SV completely overlaps all exons), 5’-/3’-UTR, intron, 5’-/3’-flanking regions. Two ranges of the flanking regions are specified by default (5 Kb and 50 Kb); these lengths can be changed with the options, -c5, -c3, -f5, and -f3. These annotations are also added to the FORMAT AN subfield for each sample in an additional output vcf file. For human, the gff3 gene annotation files (Homo_sapiens.GRCh37.87.gff3.gz, Homo_sapiens.GRCh38.104.gff3.gz, or Homo_sapience.T2T-chm13v2.0.ensemble.gff3.gz), downloaded from Ensembl (ftp://ftp.ensembl.org/pub/grch37/release-87/gff3/homo_sapiens9), is selected by default. For non-human species, a gff3 annotation file obtained from the Ensembl site must be specified with the -r option. Any input SV vcf file with SVTYPE and SVLEN keys in the INFO field may be used. As input vcf file, an output vcf file from step2, step3, step4, or step6 can be used. The annotate command can be done as follows:
 ```
-mopline annotate -v <input_vcf> -p <out_prefix> -n <num_threads>
+mopline annotate -v <input_vcf> -p <out_prefix> --build 37 -n <num_threads>
 ```
 (--build 38 for human build 38, -nh 1 -r <gff3_file> for non-human species)  
 This command generates two output vcf files, `${out_prefix}.annot.vcf` and `${out_prefix}.AS.annot.vcf`. The latter contains annotations for each sample in the FORMAT AN subfield.
@@ -302,7 +302,7 @@ This command generates two output vcf files, `${out_prefix}.annot.vcf` and `${ou
 
 This step, using the filter_MOPline.pl script, filters out DEL/DUPs with inconsistent DPRs. DUPs associated with gap regions and DUPs overlapping segmental duplications also filtered out based on several criteria (see our paper for detail). For human samples, gap bed and segmental duplication files are automatically selected from the Data directory. For non-human samples, these files can be specified with the -gap and -segdup options. The -ex option can also be used to specify a bed file that indicates regions to exclude SVs. This package provides bed files for human reference builds 37, 38, and T2T-CHM13 that indicate regions where SVs are always indeterminately called due to low quality alignments of short reads. The total lengths of the excluding regions of build 37 and 38 are 26 Mb and 16 Mb, respectively. In addition, SVs within the centromere regions for the human builds 38 and T2T-CHM13 are removed. By default, the bed files of these regions are automatically selected for human but user-provided files can be specified with the -ex and -ec options. If you do not prefer to use these filtering, specify any letter (e.g., -ex 0 or -ec 0) for the options. The input vcf can be from a single sample or from multiple samples but must have the keys DPR, SR, and DPS in the INFO field. As input vcf file, an output vcf file from step2, step3, step4, or step5 can be used.
 ```
-mopline filter -v <input vcf> > [output vcf]
+mopline filter -v <input vcf> --build 37 > [output vcf]
 ```
 (--build 38 for human build 38, -nh 1 -g <gap_bed> -sd <segmental duplication file> for non-human species)
 
