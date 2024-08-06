@@ -287,7 +287,7 @@ mopline smc -v <input_vcf> -ts <tool_set> -od <out_dir> -p <out_prefix> --build 
 
 The Step-4 corrects the genotypes (given with GT tag) and adds a new tag, MC, to the FORMAT/SAMPLE fields of the output vcf file. The MC tag represents the level of SMC; the lower the MC value, the higher the confidence level. The genotyping step requires a parameter file indicating the minimum SRR for each SV type and algorithm. MOPline provides a default parameter file for 14 pre-selected algorithms, which is automatically selected during this step. If additional algorithms are to be used that are not listed in this parameter file, the user can edit the parameter file by adding parameters of those algorithms (if not edited, all algorithms not present in the parameter file will have a minimum RSS of 3).
 
-This step takes longer to perform as the sample size increases and the genome size increases. For human samples larger than 1,500, it is recommended that this step is performed for each chromosome, which can be done using the -c option (default: ALL).
+This step takes longer to perform and requires more memory as the sample size increases and the genome size increases. For human samples larger than 1,500, it is recommended that this step is performed for each chromosome, which can be done using the -c option (default: ALL).
 
 ### <a name="step5"></a>[Step-5]  Annotate (optional)
 
