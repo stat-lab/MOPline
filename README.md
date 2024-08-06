@@ -238,7 +238,7 @@ In this step, alignment statistics such as DPR, SR, and DPS are added to each SV
 
 Using the coverage files you created, add alignment statistics to each SV site in the `${sample_name}.Merge.ALL.vcf` file created in Step-1. This step also adds reliable genotypes from the genotypes called from several algorithms in Step-0 to some of the SV sites. The command with the add_GT_DPR_vcf.pl script is as follows:
 ```
-mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> -n <num_threads> 
+mopline add_cov -s <sample_list> -ts <tool_set> -vd <vcf_directory> --build 37 -n <num_threads> 
 ```
 (--build 38 for human build38, -nh 1 -r <ref.index> -gap <gap_bed> for non-human species)  
 **sample_list:** A sample list file showing sample names per line. A sample directory with the same names as the specified sample list must exist under the working directory.  
