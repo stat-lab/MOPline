@@ -103,10 +103,12 @@ else{
             if (-d $sample){
                 $bam = "$sample/$bam_base";
                 $bam = "$sample/$sample.cram" if (!-f $bam);
+                $bam = "$sample/$sample.bam" if (!-f $bam);
             }
             else{
                 $bam = $bam_base;
                 $bam = "$sample.cram" if (!-f $bam);
+                $bam = "$sample.bam" if (!-f $bam);
             }
 
         }
