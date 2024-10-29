@@ -192,6 +192,23 @@ while (my $line = <FILE>){
 			next;
 		}
 		$gene_id = $1 if ($annot =~ /ID=gene:(.+?);/);
+		$gene_id = $1 if ($annot =~ /ID=(.+?);/) and ($gene_id eq '');
+		my $gene_name = 'NA';
+		$gene_name = $1 if ($annot =~ /Name=(.+?);/);
+		$gene_name =~ s/\s+/-/g if ($gene_name =~ /-/);
+		if ($gene_name eq 'NA'){
+			if ($annot =~ /biotype=(.+?);/){
+				$gene_name = $1;
+			}
+		}
+		${$gene{$chr}}{$start} = "$end==$gene_id";
+		$ORF{$gene_id} = "$chr=$start=$end=$strand";
+		$annot{$gene_id} = "$strand==$gene_name";
+		$flag = 0;
+	}
+	elsif (($flag == 1) and ($code eq 'gene') and ($annot =~ /ID=/)){
+		$gene_id = $1 if ($annot =~ /ID=gene:(.+?);/);
+		$gene_id = $1 if ($annot =~ /ID=(.+?);/) and ($gene_id eq '');
 		my $gene_name = 'NA';
 		$gene_name = $1 if ($annot =~ /Name=(.+?);/);
 		$gene_name =~ s/\s+/-/g if ($gene_name =~ /-/);
