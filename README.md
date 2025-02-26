@@ -134,7 +134,7 @@ This command creates SV calling results from the SV detection algorithms specifi
 
 ### <a name="singularity"></a>(b) Run using Singularity
 
-Other than MELT and INSurVeylor (MELT has license restrictions) the above 9 SV detection algorithms can be run using a Singularity image container built using the Definition file (mopline.def) included in the package. We expect to be run INSurVeylor using Singularity image file (https://github.com/kensung-lab/INSurVeyor/releases) specific to INSurVeylor or installed using conda   
+Other than MELT and INSurVeylor (MELT has license restrictions) the above 9 SV detection algorithms can be run using a Singularity image container built using the Definition file (mopline.def or mopline-rkylx89.def.txt) included in the package. We expect to be run INSurVeylor using Singularity image file (https://github.com/kensung-lab/INSurVeyor/releases) specific to INSurVeylor or installed using conda   
 An image file (e.g., mopline.sif) can be obtained using one of the following:  
 ```
 sudo singularity build mopline.sif mopline.def
