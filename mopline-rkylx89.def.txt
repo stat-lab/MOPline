@@ -193,7 +193,7 @@ From: rockylinux:8.9
     unzip SoftSV_1.4.2.zip && rm -f SoftSV_1.4.2.zip
     cd SoftSV_1.4.2
     if [ -f ${TOOLDIR}/MOPline/SoftSV-gcc4.8-patch.txt ]; then
-        patch -b -p0 < ${SRCDIR}/MOPline/SoftSV-gcc4.8-patch.txt
+        patch -b -p0 < ${TOOLDIR}/MOPline/SoftSV-gcc4.8-patch.txt
         make BAMTOOLS=/usr/local SEQAN=${TOOLDIR}/seqan-library-2.1.1
         cp -a SoftSV ${TOOLDIR}/.  && make clean && rm -f ${TOOLDIR}/MOPline/SoftSV-gcc4.8-patch.txt
     else
