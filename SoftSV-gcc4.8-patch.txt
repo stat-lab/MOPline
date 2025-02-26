@@ -1,0 +1,56 @@
+--- makefile	2015-09-09 19:28:26.000000000 +0900
++++ ../SoftSV_1.4.2_fix/makefile	2025-02-25 14:21:57.083474739 +0900
+@@ -22,7 +22,7 @@ SEQAN=/YourPath/seqan
+ src/%.o: src/%.cpp
+ 	@echo 'Building file: $<'
+ 	@echo 'Invoking: GCC C++ Compiler'
+-	$(CC) -I${BAMTOOLS}/include -I${BAMTOOLS}/include/shared -I${SEQAN}/include -O3 -Wall -c -fmessage-length=0 -std=c++0x -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
++	$(CC) -I${BAMTOOLS}/include -I${BAMTOOLS}/include/shared -I${SEQAN}/include -O3 -Wall -c -fmessage-length=0 -std=c++11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+ 	@echo 'Finished building: $<'
+ 	@echo ' '
+
+--- src/Misc.cpp	2015-09-09 19:28:44.000000000 +0900
++++ ../SoftSV_1.4.2_fix/src/Misc.cpp	2025-02-25 14:41:07.487348292 +0900
+@@ -32,6 +32,9 @@
+
+ // Misc. basics
+ #include <algorithm>
++#include <cmath>
++#include <numeric>
++
+
+ /**
+  * @brief Returns the total length of small deletions within the CIGAR string of an alignment.
+--- src/Deletions.cpp	2015-09-09 19:28:44.000000000 +0900
++++ ../SoftSV_1.4.2_fix/src/Deletions.cpp	2025-02-25 14:34:37.473601538 +0900
+@@ -211,7 +211,7 @@ std::string Deletions::generateOutput(co
+ 	uint medianBpPos1 =  medianBp1.first;
+ 	uint medianBpPos2 =  medianBp2.first;
+
+-	uint svSize = abs(medianBpPos2-(medianBpPos1+1))+1;
++	uint svSize = abs(int(medianBpPos2-(medianBpPos1+1)))+1;
+
+ 	std::stringstream output, bpSeq;
+
+--- src/Inversions.cpp	2015-09-09 19:28:44.000000000 +0900
++++ ../SoftSV_1.4.2_fix/src/Inversions.cpp	2025-02-25 14:35:23.534969837 +0900
+@@ -255,7 +255,7 @@ std::string Inversions::generateOutput(c
+ 		bpSeq2 << "";
+ 	}
+
+-	uint svSize = abs(medianBpPos2-(medianBpPos1+1))+1;
++	uint svSize = abs(int(medianBpPos2-(medianBpPos1+1)))+1;
+
+ 	// Outpu format:
+ 	// Chr	Start	End	Support(PE)	Support(SC)	Upstream-breakpoint-sequence	Downstream-breakpoint-sequence
+--- src/Tandems.cpp	2015-09-09 19:28:44.000000000 +0900
++++ ../SoftSV_1.4.2_fix/src/Tandems.cpp	2025-02-25 14:41:46.270371984 +0900
+@@ -174,7 +174,7 @@ std::string Tandems::generateOutput(cons
+ 	uint medianBpPos1 =  medianBp1.first;
+ 	uint medianBpPos2 =  medianBp2.first;
+
+-	uint svSize = abs(medianBpPos2-(medianBpPos1+1))+1;
++	uint svSize = abs(int(medianBpPos2-(medianBpPos1+1)))+1;
+
+ 	std::stringstream output, bpSeq;
+

@@ -1,0 +1,210 @@
+# scripts Definition for MOPline
+# run: singularity build --fakeroot mopline.sif mopline-manifest.txt
+Bootstrap: docker
+From: rockylinux:8.9
+
+%environment
+    export LC_ALL=C
+    export TOOLSPATH=/opt/local/tools:/opt/local/tools/scripts:/opt/local/tools/scripts/run_SVcallers
+    export PATH=${TOOLSPATH}:/opt/local/R/bin:${PATH}
+    export LD_LIBRARY_PATH=/usr/local/lib64:${LD_LIBRARY_PATH}
+    export GRIDSS_JAR=${TOOLSPATH}/gridss-2.13.2-gridss-jar-with-dependencies.jar
+
+%files
+    # MELTv2.2.2.tar.gz        /opt
+
+%post
+    echo "Hello from inside the container"
+    dnf -y update
+    dnf -y install gcc gcc-c++ gcc-gfortran make epel-release time which wget zip cmake cmake3 java-11-openjdk
+    dnf -y install less vim wget curl grep sed fuse git zip  bzip2 tcl mercurial subversion jq patch automake \
+           pkg-config busybox ca-certificates autoconf readline xz-devel libstdc++-devel gperftools gperftools-libs 
+    dnf -y install ncurses-devel bzip2-devel libzstd-devel pcre2-devel libcurl-devel zlib-devel freetype-devel \
+           openssl-devel boost-devel readline-devel glibc-devel.i686 libmpc-devel mpfr-devel gmp-devel gperftools-devel
+    dnf -y install python3.12 python3.12-pip python3.12-libs python3.12-numpy python3.12-numpy-f2py \
+           python3.12-cffi python3.12-wheel
+
+    dnf config-manager --enable powertools
+    dnf -y install gperf python3.12-Cython
+
+    dnf clean all
+
+    pip3 install pandas scipy matplotlib ipython ipdb pysam pyfaidx
+
+    export SRCDIR=/opt/local/src
+    export TOOLDIR=/opt/local/tools
+    mkdir -p ${SRCDIR} ${TOOLDIR}
+
+    # install MOPline -------
+    echo "install MOPline -------"
+    cd ${TOOLDIR}
+    git clone https://github.com/stat-lab/MOPline.git
+    cd MOPline && chmod +x mopline scripts/*.pl scripts/run_SVcallers/*.pl
+    ln -s $(pwd)/mopline /opt/local/tools/mopline
+    ln -s $(pwd)/scripts /opt/local/tools/scripts
+
+    # install HTSLIB, SAMTOOLS & CERN root -------
+    cd ${SRCDIR}
+    wget -O - https://root.cern/download/root_v6.24.06.Linux-centos7-x86_64-gcc4.8.tar.gz | tar -C /opt/local/tools -xzf -
+    wget -O - https://root.cern/download/root_v6.26.14.Linux-centos8-x86_64-gcc8.5.tar.gz | tar xzf -
+    mv root /opt/local/tools/root_v6.26.14
+    mv /opt/local/tools/root/lib /opt/local/tools/root/lib.c7 && ln -s /opt/local/tools/root_v6.26.14/lib /opt/local/tools/root/lib
+    export CERNROOT=/opt/local/tools/root
+    wget --no-check-certificate -O - https://github.com/samtools/htslib/releases/download/1.15/htslib-1.15.tar.bz2 | tar xjf - 
+    cd htslib-1.15
+    ./configure && make install
+    cd ${SRCDIR}
+    wget --no-check-certificate -O - https://github.com/samtools/samtools/releases/download/1.15/samtools-1.15.tar.bz2 | tar xjf -
+    cd samtools-1.15
+    ./configure && make -j 4 install
+
+    # install BAMtools -------
+    wget -O - https://github.com/pezmaster31/bamtools/archive/refs/tags/v2.5.2.tar.gz | tar xzf -
+    cd bamtools-2.5.2 && mkdir build && cd build
+    cmake3 -DBUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="-fPIC" ..
+    make -j 4 install
+    cd /usr/local/include && ln -s bamtools/* .
+
+    # install VCFtools -------
+    cd ${SRCDIR}
+    wget -O - https://github.com/vcftools/vcftools/releases/download/v0.1.16/vcftools-0.1.16.tar.gz | tar xzf -
+    cd vcftools-0.1.16 && ./configure
+    make -j 4 install
+
+    # install bcftools -------
+    cd ${SRCDIR}
+    wget -O - https://github.com/samtools/bcftools/releases/download/1.16/bcftools-1.16.tar.bz2 | tar xjf -
+    cd bcftools-1.16
+    ./configure && make
+    make -j 4 install
+
+    # install SEQAN Library -------
+    cd ${SRCDIR}
+    wget http://packages.seqan.de/seqan-library/seqan-library-2.1.1.zip
+    unzip seqan-library-2.1.1.zip && mv seqan-library-2.1.1 ${TOOLDIR}/. && rm -f seqan-library-2.1.1.zip
+
+    # install R 4.4.2 -------
+    cd ${SRCDIR}
+    wget -O - https://cran.r-project.org/src/base/R-4/R-4.4.2.tar.gz | tar xzf -
+    cd R-4.4.2
+    ./configure --prefix=/opt/local/R --with-x=no
+    make -j 8 && make install && make clean
+
+    # MELT - (need to register and download manually) -------
+    # https://melt.igs.umaryland.edu/downloads.php
+    if [ -f /opt/MELTv2.2.2.tar.gz ]; then
+        cd ${SRCDIR}
+        tar xzf /opt/MELTv2.2.2.tar.gz && rm -f /opt/MELTv2.2.2.tar.gz
+        cp -a MELTv2.2.2/MELT.jar ${TOOLDIR}/.
+        wget --no-check-certificate -O bowtie2-2.5.1-linux-x86_64.zip https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.5.1/bowtie2-2.5.1-linux-x86_64.zip/download
+        unzip bowtie2-2.5.1-linux-x86_64.zip && rm -f bowtie2-2.5.1-linux-x86_64.zip
+        ln -s ${SRCDIR}/bowtie2-2.5.1-linux-x86_64 ${TOOLDIR}/bowtie2
+    fi
+
+    # install CNVnator-------
+    echo "install CNVnator-------"
+    cd ${SRCDIR}
+    wget --no-check-certificate -O - https://github.com/samtools/samtools/releases/download/1.13/samtools-1.13.tar.bz2 | tar xjf - 
+    git clone https://github.com/abyzovlab/CNVnator.git
+    cd samtools-1.13 && ./configure && make && cd ${SRCDIR}
+    cd CNVnator
+    ln -s ../samtools-1.13 samtools
+    make LIBS="-lcrypto -Wl,-rpath=${CERNROOT}/lib" ROOTSYS=${CERNROOT}
+    cp -a cnvnator ${TOOLDIR}/. && make clean
+
+    # install MATCHCLIPS-------
+    echo "install MATCHCLIPS-------"
+    cd ${SRCDIR}
+    wget -O matchclips2.zip https://github.com/yhwu/matchclips2/archive/master.zip
+    unzip matchclips2.zip && rm -f matchclips2.zip
+    cd matchclips2-master
+    make  && cp -a cnvtable matchclips ${TOOLDIR}/. && make clean
+
+    # install bwa -------
+    echo "install bwa -------"
+    cd ${SRCDIR}
+    wget -O - https://github.com/lh3/bwa/releases/download/v0.7.17/bwa-0.7.17.tar.bz2 | tar xjf -
+    cd bwa-0.7.17
+    make && cp -a bwa ${TOOLDIR}/.
+
+    # install inGAP -------
+    echo "install inGAP -------"
+    cd ${SRCDIR}
+    wget --no-check-certificate -O - https://sourceforge.net/projects/ingap/files/ingap/v3.1.1/inGAP_3_1_1.tgz/download | tar xzf -
+    cp -a inGAP_3_1_1/inGAP.jar ${TOOLDIR}/.
+
+    # install GRIDSS -------
+    echo "install GRIDSS -------"
+    cd ${SRCDIR}
+    wget -O - https://github.com/PapenfussLab/gridss/archive/refs/tags/v2.13.2.tar.gz | tar xzf -
+    cd gridss-2.13.2
+    wget -O - https://github.com/PapenfussLab/gridss/releases/download/v2.13.2/gridss-2.13.2.tar.gz | tar xzf -
+    perl -pi -e 's/^ulimit/#ulimit/' gridss
+    ln -s ${SRCDIR}/gridss-2.13.2/gridss ${TOOLDIR}/gridss
+    ln -s ${SRCDIR}/gridss-2.13.2/gridss-2.13.2-gridss-jar-with-dependencies.jar ${TOOLDIR}/gridss-2.13.2-gridss-jar-with-dependencies.jar
+
+    # install Manta --------
+    echo "install Manta --------"
+    cd ${SRCDIR}
+    wget -O - https://github.com/Illumina/manta/releases/download/v1.6.0/manta-1.6.0.centos6_x86_64.tar.bz2 | tar xjf -
+    ln -s ${SRCDIR}/manta-1.6.0.centos6_x86_64 ${TOOLDIR}/manta
+
+    # install DELLY -------
+    echo "install DELLY -------"
+    cd ${SRCDIR}
+    wget https://github.com/dellytools/delly/releases/download/v1.1.5/delly_v1.1.5_linux_x86_64bit
+    cp delly_v1.1.5_linux_x86_64bit ${TOOLDIR}/delly
+    chmod +x ${TOOLDIR}/delly
+
+    # install Picard
+    echo "install Picard -------"
+    cd ${SRCDIR}
+    wget https://github.com/broadinstitute/picard/releases/download/2.27.5/picard.jar
+    ln -s ${SRCDIR}/picard.jar ${TOOLDIR}/picard.jar
+
+    # install WHAM -------
+    echo "install WHAM -------"
+    cd ${SRCDIR}
+    git clone --recursive  https://github.com/zeeev/wham.git
+    cd wham
+    CXXFLAGS="-std=gnu++98" make -j 4 && cp -a bin/* ${TOOLDIR}/. && make clean
+
+    # install INSurVeyor
+    echo "install INSurVeyor -------"
+    cd ${SRCDIR}
+    git clone https://github.com/kensung-lab/INSurVeyor
+    cd INSurVeyor
+    ./build_htslib.sh
+    cmake -DCMAKE_BUILD_TYPE=Release . && make
+    perl -pi -e "s/python/python3/" insurveyor.py
+    cp -a insurveyor.py random_pos_generator.py ${TOOLDIR}/. && chmod +x ${TOOLDIR}/insurveyor.py
+    
+    # install LUMPY -------
+    echo "install LUMPY-SV -------"
+    cd ${SRCDIR}
+    git clone --recursive https://github.com/arq5x/lumpy-sv.git
+    cd lumpy-sv
+    make && cp -a bin/* ${TOOLDIR}/. && make clean
+
+    # install SoftSV -------
+    echo "install SoftSV -------"
+    cd ${SRCDIR}
+    wget --no-check-certificate https://altushost-swe.dl.sourceforge.net/project/softsv/SoftSV_1.4.2.zip
+    unzip SoftSV_1.4.2.zip && rm -f SoftSV_1.4.2.zip
+    cd SoftSV_1.4.2
+    if [ -f ${TOOLDIR}/MOPline/SoftSV-gcc4.8-patch.txt ]; then
+        patch -b -p0 < ${SRCDIR}/MOPline/SoftSV-gcc4.8-patch.txt
+        make BAMTOOLS=/usr/local SEQAN=${TOOLDIR}/seqan-library-2.1.1
+        cp -a SoftSV ${TOOLDIR}/.  && make clean && rm -f ${TOOLDIR}/MOPline/SoftSV-gcc4.8-patch.txt
+    else
+        echo "Error: SoftSV cannot installed due to no patch file for compilation with GCC 4.8"
+    fi
+
+%runscript
+    echo "This is what happens when you run the container..."
+
+%labels
+    Author who@riken.jp
+    Version v1.8.3
+
+
