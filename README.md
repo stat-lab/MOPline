@@ -146,7 +146,7 @@ Alternatively, a mopline.sif (v1.8.3.1: 1.74 GB) can be obtained at [Jenger site
   
 To run CNVnator with singularity  
 ```
-singularity exec <mopline.sif file path> /opt/local/tools/MOPline/scripts/run_SVcallers/run_CNVnator.pl -cp <cnvnator command path> -b <input bam> -r <ref directory> -rd <ROOT install directory> -p <output prefix>   # the path of run_CNVnator.pl is the path in the singularity container.
+singularity exec <mopline.sif file path> run_CNVnator.pl -cp <cnvnator command path> -b <input bam> -r <ref directory> -rd <ROOT install directory> -p <output prefix>   # the path of run_CNVnator.pl is the path in the singularity container.
 ```
 To run the run_single_singularity.pl script for a single sample, install this MOPline package on the appropriate location and run as follows:  
 ```
