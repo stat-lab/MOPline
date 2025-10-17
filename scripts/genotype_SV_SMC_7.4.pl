@@ -3012,6 +3012,13 @@ foreach my $chr (@chr){
             $line[7] =~ s/DPR=[\d\.]+/DPR=$ave_dpr/ if ($line[7] =~ /DPR=/);
             $line[7] =~ s/DPS=[\d\.]+/DPS=$ave_dps/ if ($line[7] =~ /DPS=/);
             $line[7] =~ s/SR=[\d\.]+/SR=$ave_sr/ if ($line[7] =~ /SR=/);
+            $len = $med_len if ($med_len > 0);
+            my $end2 = $pos;
+            $end2 = $pos + $len - 1 if ($type ne 'INS');
+            my $end = $1 if ($line[7] =~ /END=(\d+)/);
+            if ($end != $end2){
+                $line[7] =~ s/END=\d+/END=$end2/;
+            }
             my $new_line = join ("\t", @line);
 		    print OUT $new_line, "\n";
 		}
