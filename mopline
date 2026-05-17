@@ -13,6 +13,13 @@ my $args = join (' ', @ARGV);
 
 print STDERR "command: $command Args: $args\n";
 
+my $custum_merge_script = '';
+    
+if ($args =~ /-ms\s+(\S+)/){
+    $custum_merge_script = $1;
+    $args =~ s/-ms\s+$custum_merge_script//;
+}
+
 my $help;
 my $version = 'v1.8.4';
 
@@ -85,6 +92,9 @@ elsif ($command =~ /merge_11tools/){
         $script = "$script_dir/merge_SV_vcf.11tools.pl";
     }
 }
+elsif ($command =~ /merge_custom/){
+    $script = $custum_merge_script;
+}
 elsif ($command eq 'add_cov'){
     $script = "$script_dir/add_GT_DPR_vcf.pl";
 }
@@ -127,6 +137,7 @@ else{
    merge_8tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, GRIDSS2, INSurVeyor, and MELT, followed by MOP-based selection of overlap calls
    merge_9tools (_lc)     Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, and SoftSV, followed by MOP-based selection of overlap calls
    merge_11tools (_lc)    Merge SV call sets from CNVnator, inGAP-sv, Manta, MATCHCLIP, Wham, MELT, forestSV, Lumpy, SoftSV, DELLY, and Mobster, followed by MOP-based selection of overlap calls
+   merge_custum           Merge SV call sets from a custom combination of tools. Users can create a merge script using make_merge_SV_vcf_script.pl script, and must specify the path of the merge script with the -ms option.
    add_cov                Add read coverage and clipped alignment read number at 50-bp window size to input SV vcf. 
                           These alignment information must be created with 'create_cov' command before this command run.
                           This command also add genotype data from multiple tools used for original SV calling to input SV vcf.
