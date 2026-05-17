@@ -21,7 +21,7 @@ if ($args =~ /-ms\s+(\S+)/){
 }
 
 my $help;
-my $version = 'v1.8.4';
+my $version = 'v1.8.5';
 
 my $script_dir = "$Bin/scripts";
 $script_dir = "$ENV{MOPLINE_DIR}/scripts" if (exists $ENV{MOPLINE_DIR});
