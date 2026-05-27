@@ -81,7 +81,7 @@ Kosugi et al. Detection of trait-associated structural variations using short-re
 ```
 git clone https://github.com/stat-lab/MOPline
 ```
-The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data files for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder.  
+The Data folder in the MOPline folder contains parameter files, multinomial logistic regression-based model files for genotyping (R.nnet.models), and annotated data files for the human build 37/38/T2T reference. Do not change the name of the files/directories (except config.txt) and the directory structure in the MOPline folder. The MOPline installation path may be set in the MOPLINE_DIR environment variable if necessary.  
   
 MOPline and additional 10 SV detection tools (except for MELT and INSurVeyor) can be executed using [Singularity](#singularity).
 
@@ -230,10 +230,11 @@ When using a custom algorithm set instead of the preset, users can create their 
 make_merge_SV_vcf_script.pl -t <algorithm list, comma-separated> -tc <tool-config file> -p <prefix name of output script>
 ```
 (use -h for detailed explanation)  
-If the -tc option is not specified in the above command, the tool configuration file (Data/SVtool_pairs_config.txt) is automatically selected. This file specifies the favorable pairs of tools and minimum RSSs of overlap call selection for each of 14 algorithms we have chosen. If additional algorithms are used, the SVtool_pairs_config.txt file can be modified to specify the preferred pairs minimum RSSs for each newly added algorithm for each SV type and size range. The above script generates ${out_prefix}.merge_sv_vcf.pl.
+If the -tc option is not specified in the above command, the tool configuration file (Data/SVtool_pairs_config.txt) is automatically selected. This file specifies the favorable pairs of tools and minimum RSSs of overlap call selection for each of 14 algorithms we have chosen. If additional algorithms are used, the SVtool_pairs_config.txt file can be modified to specify the preferred pairs minimum RSSs for each newly added algorithm for each SV type and size range. The above script generates ${out_prefix}.merge_sv_vcf.pl. The created script must be placed in the MOPline scripts directory or set the MOPline installation path in the MOPLINE_DIR environment variable.  
 
 To run Step-1 using a user-created merge script:
 ```
+chmod 700 ${out_prefix}.merge_sv_vcf.pl
 mopline merge_custom -ms <the path of user-created merge script: *.merge_sv_vcf.pl> -s <sample-list-file or a sample name> -rl <read length>
 ```
 
